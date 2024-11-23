@@ -6,10 +6,11 @@
 
 import java.util.*;
 
-public class Arrays {
+public class Array {
     public static void main(String[] args) {
 
-
+        int val = 1000000000+1000000000+1000000000+1000000000;
+        System.out.println(val);
     }
 
     // Sorting algorithms ------------------------------------------------------------
@@ -59,7 +60,7 @@ public class Arrays {
         }
     }
 
-    static int partition(int arr[], int low, int high) {
+    static int partition(int[] arr, int low, int high) {
         // your code here
 
         int pivot = arr[low];
@@ -535,9 +536,8 @@ public class Arrays {
     //23. count number of sun arrays with given sum
     public int subarraySum(int[] nums, int k) {
         Map<Integer, Integer> mp = new HashMap<>();
-        int sum =0, n = nums.length;
-        mp.put(0, 1);
-        int count =0;
+        int sum =0, n = nums.length, count = 0;
+        mp.put(sum, 1);
 
         for (int num : nums) {
             sum += num;
@@ -547,7 +547,148 @@ public class Arrays {
         }
         return count;
     }
+    //24. pascals triangle
+    public List<List<Integer>> generate(int numRows) {
+        List<List<Integer>> res = new ArrayList<>();
+        for(int i=0;i<numRows;i++){
+            List<Integer> temp = new ArrayList<>();
+            for(int j=0;j<=i;j++){
 
+                if(j == 0 || j == i){
+                    temp.add(1);
+                }else{
+                    int val = res.get(i-1).get(j-1)+ res.get(i-1).get(j);
+                    temp.add(val);
+                }
+            }
+            res.add(temp);
+        }
+        return res;
+    }
+    //25. Majority element (n/3)
+    public List<Integer> majorityElement2(int[] nums) {
+        int ele1 = Integer.MIN_VALUE, ele2 = Integer.MIN_VALUE;
+        int count1 = 0, count2 = 0, n = nums.length;
+        for(int i=0;i<n;i++){
+
+            if(ele1 == nums[i]){
+                count1++;
+            }else if(ele2 == nums[i]){
+                count2++;
+            }else if(count1 == 0){
+                ele1 = nums[i];
+                count1++;
+            }else if(count2 == 0){
+                ele2 = nums[i];
+                count2++;
+            }else{
+                count1 --;
+                count2 --;
+            }
+        }
+
+        List<Integer> res = new ArrayList<>();
+        count1 = 0;
+        count2 = 0;
+        for(int i=0;i<n;i++){
+            if(nums[i] == ele1)
+                count1++;
+            if(nums[i] == ele2)
+                count2++;
+        }
+
+        if(count1 > n/3)
+            res.add(ele1);
+        if(count2 > n/3)
+            res.add(ele2);
+        return res;
+    }
+    //26. 3 sum (three sum)
+    public List<List<Integer>> threeSum(int[] nums) {
+        int n = nums.length;
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+        for(int i=0;i<n;i++){
+            int j = i+1, k = n-1;
+
+            while(j<k){
+                int sum = nums[i] + nums[j] + nums[k];
+                if(sum == 0){
+                    res.add(List.of(nums[i], nums[j], nums[k]));
+                    while(j + 1 < k && nums[j] == nums[j+1])
+                        j++;
+                    j++;
+                }else if(sum > 0){
+                    k--;
+                }else
+                    j++;
+            }
+            while(i+1 < n && nums[i] == nums[i+1])
+                i++;
+        }
+        return res;
+    }
+    //27. 4 sum ( four sum)
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        int n = nums.length;
+        Arrays.sort(nums);
+        List<List<Integer>> res = new ArrayList<>();
+
+        for(int i=0;i<n;i++){
+            for(int j=i+1;j<n;j++){
+                int l =j+1, h = n-1;
+
+                while(l < h){
+                    long sum = (long) nums[i] + nums[j] + nums[l] + nums[h];
+                    if(sum == target){
+                        res.add(List.of(nums[i], nums[j], nums[l], nums[h]));
+                        while(l+1 < h && nums[l] == nums[l+1])
+                            l++;
+                        l++;
+                    }else if(sum > target){
+                        h --;
+                    }else
+                        l++;
+                }
+                while(j+1 < n && nums[j] == nums[j+1])
+                    j++;
+            }
+            while(i+1 < n && nums[i] == nums[i+1])
+                i++;
+        }
+        return res;
+    }
+    //28. Largest Subarray with 0 Sum
+    int maxLen(int arr[]) {
+        Map<Integer,Integer> mp = new HashMap<>();
+        mp.put(0,-1);
+        int res = 0, sum = 0;
+        for(int i=0;i<arr.length;i++){
+            sum += arr[i];
+            if(mp.containsKey(sum)){
+                res = Math.max(i- mp.get(sum), res);
+            }else
+                mp.put(sum, i);
+        }
+        return res;
+    }
+    //29. Count number of subarrays with given xor equals to K
+    public int solve(int[] A, int B) {
+        Map<Integer,Integer> mp = new HashMap<>();
+        int xor = 0, count = 0;
+        mp.put(xor, 1);
+        for(int i=0;i<A.length;i++){
+            xor ^= A[i];
+
+            if(mp.containsKey(xor ^ B)){
+                count += mp.get(xor ^ B);
+            }
+
+            mp.put(xor, mp.getOrDefault(xor, 0)+1);
+        }
+        return count;
+    }
+    //30.
     //4 Binary Search --------------------------------------------------------------------------------------------------
     
     //Koko eating banana-------
