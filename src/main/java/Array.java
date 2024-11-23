@@ -688,116 +688,200 @@ public class Array {
         }
         return count;
     }
-    //30.
-    //4 Binary Search --------------------------------------------------------------------------------------------------
-    
-    //Koko eating banana-------
-    public int minEatingSpeed(int[] piles, int h) {
+    //30. Merge Intervals
+    public List<List<Integer>> merge(int[][] intervals) {
+        Arrays.sort(intervals, (a, b) -> Integer.compare(a[0], b[0]));
 
-        long low =1, high = java.util.Arrays.stream(piles)
-                .asLongStream().reduce(0, Long::sum);
-        long res = -1;
+        int start = intervals[0][0];
+        int end = intervals[0][1];
+        List<List<Integer>> res = new ArrayList<>();
 
-        while(low <=high){
-            long mid = (low + high)/2;
+        for(int i=0;i<intervals.length;i++){
 
-            if(isPossible(piles, mid, h)){
-                res = mid;
-                high = mid-1;
-            }else
-                low = mid+1;
+            if(intervals[i][0] <= end){
+                end = Math.max(end, intervals[i][1]);
+            }else{
+                res.add(List.of(start, end));
+                start = intervals[i][0];
+                end = intervals[i][1];
+            }
         }
-        return (int)res;
+        res.add(List.of(start, end));
+        return res;
     }
-
-    boolean isPossible(int[] piles, long mid, int h){
-        long count =0;
-        for (int pile : piles) {
-
-            count = count + (long) pile / mid;
-            if (pile % mid != 0)
-                count++;
+    //31. Merge Sorted Array
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        int k = m + n - 1;
+        int i = m-1, j = n-1;
+        while(i>=0 && j>=0){
+            if(nums1[i]>= nums2[j]){
+                nums1[k--] = nums1[i--];
+            }else{
+                nums1[k--] = nums2[j--];
+            }
         }
-        return count<=h;
+
+        while(i>=0){
+            nums1[k--] = nums1[i--];
+        }
+
+        while(j>=0){
+            nums1[k--] = nums2[j--];
+        }
     }
+    // 32. Missing and Repeating number
+    ArrayList<Integer> findTwoElement(int arr[]) {
+        int n = arr.length;
+        int xor = 0;
 
-    //minimum number of days to make m banquets---------
-    public int minDays(int[] bloomDay, int m, int k) {
-        int n = bloomDay.length;
-        if((long) m * k > (long)n)
-            return -1;
+        for(int i=0;i<n;i++){
+            xor = xor ^ arr[i];
+            xor = xor ^ (i+1);
+        }
 
-        int low = 1, high = java.util.Arrays.stream(bloomDay).reduce(0, Integer::max);
+        int bit = xor & ~(xor-1);
+        int val1 =0, val2 =0;
 
-        int res =-1;
-        while(low <= high){
-            int mid = (low+high)/2;
+        for(int i=0;i<n;i++){
+            if((bit & arr[i]) > 0)
+                val1 = val1 ^ arr[i];
+            else
+                val2 = val2 ^ arr[i];
 
-            if(isPossible(bloomDay, m,k,mid)){
-                res = mid;
-                high = mid-1;
-            }else
-                low = mid+1;
+            if((bit & (i+1)) > 0)
+                val1 = val1 ^ (i+1);
+            else
+                val2 = val2 ^ (i+1);
+        }
+
+        int val1Count =0;
+        for(int i=0;i<n;i++){
+            if(val1 == arr[i])
+                val1Count++;
+        }
+        ArrayList<Integer> res = new ArrayList<>();
+        if(val1Count >0){
+            res.add(val1);
+            res.add(val2);
+        }else{
+            res.add(val2);
+            res.add(val1);
         }
         return res;
     }
+    //33. Inversion count in array
+    int inversionCount(int arr[]) {
 
-    boolean isPossible(int[] arr, int m, int k, int mid){
-        int count =0, totalCount =0;
-        int n = arr.length;
+        return mergeSort1(arr, 0, arr.length-1);
+    }
+    int mergeSort1(int[] arr, int l, int h){
+        if(l >= h)
+            return 0;
+        int mid = (l+h)/2;
+        int count = 0;
+        count += mergeSort1(arr, l, mid);
+        count += mergeSort1(arr, mid+1, h);
+        count += merge1(arr, l, mid, h);
+        return count;
+    }
+    int merge1(int[] arr, int l, int m, int h){
 
-        for(int j=0;j<n;j++){
-
-            if(arr[j] <= mid)
-                count++;
-            else
-                count = 0;
-
-            if(count == k){
-                count = 0;
-                totalCount++;
+        int[] temp = new int[h-l+1];
+        int l1 = l, m1 = m+1;
+        int k =0;
+        int count = 0;
+        while(l1 <= m && m1 <= h){
+            if(arr[l1] <= arr[m1]){
+                temp[k++] = arr[l1++];
+            }else{
+                count += m - l1+1;
+                temp[k++] = arr[m1++];
             }
         }
-        return totalCount >= m;
-    }
 
-    //Capacity to ship package withing D days------
-
-    public int shipWithinDays(int[] weights, int days) {
-        long low =1, high = java.util.Arrays.stream(weights)
-                .asLongStream().sum();
-        long res =-1;
-        while(low <=high){
-            long mid = (low+high)/2;
-
-            if(isPossible(weights, days, mid)){
-                res = mid;
-                high = mid-1;
-            }else
-                low = mid+1;
+        while(l1 <= m){
+            temp[k++] = arr[l1++];
         }
-        return (int)res;
+        while(m1 <= h){
+            temp[k++] = arr[m1++];
+        }
+
+        for(int i=l;i<=h;i++){
+            arr[i] = temp[k++];
+        }
+        return count;
     }
+    //34. reverse pairs
+    public int reversePairs(int[] nums) {
+        return mergeSort2(nums, 0, nums.length - 1);
+    }
+    private int mergeSort2(int[] nums, int left, int right) {
+        if (left >= right)
+            return 0;
+        int mid = (left + right) / 2;
+        int count = 0;
+        count += mergeSort2(nums, left, mid);
+        count += mergeSort2(nums, mid + 1, right);
+        count += merge2(nums, left, mid, right);
+        return count;
+    }
+    private int merge2(int[] nums, int left, int mid, int right) {
+        List<Integer> list = new ArrayList<>();
 
-    boolean isPossible(int[] arr, int days, long limit){
-        int count =1;
-        long sum =0;
+        int l = left, r = mid + 1;
+        int count = 0;
 
-        for(int i=0;i<arr.length;i++){
+        while (l <= mid && r <= right) {
+            if (nums[l] > (long) 2 * nums[r]) {
+                count += (mid - l + 1);
+                r++;
+            } else
+                l++;
+        }
 
-            sum += arr[i];
-            if(arr[i] > limit)
-                return false;
-            if(sum > limit){
-                count++;
-                sum = arr[i];
+        l = left;
+        r = mid + 1;
+        while (l <= mid && r <= right) {
+
+            if (nums[l] <= nums[r]){
+                list.add(nums[l++]);
+            }else {
+                list.add(nums[r++]);
             }
         }
-        return count <= days;
+
+        while (l <= mid)
+            list.add(nums[l++]);
+        while (r <= right)
+            list.add(nums[r++]);
+
+        for (int i = left; i <= right; i++) {
+            nums[i] = list.get(i - left);
+        }
+        return count;
     }
+    //35. Maximum Product Subarray
+    public int maxProduct(int[] nums) {
+        int n = nums.length;
+        int res = Integer.MIN_VALUE;
+        int pre = 1;
 
-    
+        for(int i=0;i<n;i++){
+            pre *= nums[i];
+            res = Math.max(res, pre);
+            if(pre == 0)
+                pre = 1;
+        }
 
+        int suf = 1;
+        for(int i= n-1;i>=0;i--){
+            suf *= nums[i];
+            res = Math.max(res, suf);
+            if(suf == 0)
+                suf =1;
+        }
+        return res;
+    }
 }
 
 
