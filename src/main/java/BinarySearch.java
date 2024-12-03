@@ -1,9 +1,97 @@
+import java.util.Arrays;
+
 public class BinarySearch {
     public static void main(String[] args) {
 
     }
 
     //Binary Search --------------------------------------------------------------------------------------------------
+    //1. Binary search
+    public int search(int[] nums, int target) {
+        int low = 0, high = nums.length-1;
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(nums[mid] == target)
+                return mid;
+            else if(nums[mid] < target)
+                low = mid+1;
+            else
+                high = mid-1;
+        }
+        return -1;
+    }
+    //2. lower bound
+    static int findFloor(int[] arr, int k) {
+        int low = 0, high = arr.length-1;
+
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(arr[mid] <= k){
+                low = mid+1;
+            }else{
+                high = mid-1;
+            }
+        }
+        return high;
+    }
+    //3. upper bound
+    int upperBound(int[] arr, int low, int high, int x){
+        while(low <= high){
+            int mid = (low +high)/2;
+            if(arr[mid] >= x)
+                high = mid-1;
+            else
+                low = mid+1;
+        }
+        return low;
+    }
+    //4. Search Insert Position ( upper bound)
+    public int searchInsert(int[] nums, int target) {
+        int low = 0, high = nums.length-1;
+        while(low <= high){
+            int mid = (low +high)/2;
+            if(nums[mid] >= target){
+                high = mid -1;
+            }else
+                low = mid +1;
+        }
+        return low;
+    }
+    //5.floor and ceil in a sorted array
+    public int[] getFloorAndCeil(int x, int[] arr) {
+        Arrays.sort(arr);
+        int n = arr.length;
+
+        int lbI = lowerBound(arr, 0, n-1, x);
+        int ubI = upperBound1(arr, 0, n-1, x);
+
+        int lbV = (lbI >= 0 && lbI < n ? arr[lbI] : -1);
+        int upV = (ubI >= 0 && ubI < n ? arr[ubI] : -1);
+
+        return new int[]{lbV, upV};
+    }
+    int lowerBound(int[] arr, int low, int high, int x){
+        while(low <= high){
+            int mid = (low +high)/2;
+            if(arr[mid] <= x){
+                low = mid+1;
+            }else
+                high = mid-1;
+        }
+        return high;
+    }
+
+    int upperBound1(int[] arr, int low, int high, int x){
+        while(low <= high){
+            int mid = (low +high)/2;
+            if(arr[mid] >= x)
+                high = mid-1;
+            else
+                low = mid+1;
+        }
+        return low;
+    }
+    //6.
 
     //Koko eating banana-------
     public int minEatingSpeed(int[] piles, int h) {
