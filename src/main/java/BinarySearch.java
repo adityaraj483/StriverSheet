@@ -91,7 +91,54 @@ public class BinarySearch {
         }
         return low;
     }
-    //6.
+    //6. Find First and Last Position of Element in Sorted Array
+    public int[] searchRange(int[] nums, int target) {
+        int n = nums.length;
+        int firstIndex = firstOccurance(nums, 0, n-1, target);
+        int lastIndex = lastOccurance(nums, 0, n-1, target);
+
+        if(firstIndex < 0 || firstIndex >= n || nums[firstIndex] != target)
+            firstIndex = -1;
+        if(lastIndex < 0 || lastIndex >= n || nums[lastIndex] != target)
+            lastIndex = -1;
+        return new int[]{firstIndex, lastIndex};
+
+    }
+
+    int firstOccurance(int[] nums, int low, int high, int target){
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(nums[mid] >= target){
+                high = mid - 1;
+            }else
+                low = mid+1;
+        }
+        return low;
+    }
+
+    int lastOccurance(int[] nums, int low, int high, int target){
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(nums[mid] <= target){
+                low = mid +1;
+            }else
+                high = mid -1;
+        }
+        return high;
+    }
+    //7. Count occurrences of a number in a sorted array with duplicates
+
+    int countFreq(int[] arr, int target) {
+        // code here
+        int n = arr.length;
+        int firstIndex = firstOccurance(arr, 0, n-1, target);
+        int lastIndex = lastOccurance(arr, 0, n-1, target);
+        if(lastIndex < firstIndex)
+            return 0;
+        return lastIndex - firstIndex+1;
+    }
+
+    //8.
 
     //Koko eating banana-------
     public int minEatingSpeed(int[] piles, int h) {
