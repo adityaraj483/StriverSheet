@@ -1,4 +1,5 @@
 import java.util.Arrays;
+import java.util.List;
 
 public class BinarySearch {
     public static void main(String[] args) {
@@ -104,7 +105,6 @@ public class BinarySearch {
         return new int[]{firstIndex, lastIndex};
 
     }
-
     int firstOccurance(int[] nums, int low, int high, int target){
         while(low <= high){
             int mid = (low + high)/2;
@@ -115,7 +115,6 @@ public class BinarySearch {
         }
         return low;
     }
-
     int lastOccurance(int[] nums, int low, int high, int target){
         while(low <= high){
             int mid = (low + high)/2;
@@ -127,7 +126,6 @@ public class BinarySearch {
         return high;
     }
     //7. Count occurrences of a number in a sorted array with duplicates
-
     int countFreq(int[] arr, int target) {
         // code here
         int n = arr.length;
@@ -138,7 +136,135 @@ public class BinarySearch {
         return lastIndex - firstIndex+1;
     }
 
-    //8.
+    //8. Search in Rotated Sorted Array
+    public int searchInRotatedSorted(int[] nums, int target) {
+        int low = 0, high = nums.length -1;
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(nums[mid] == target)
+                return mid;
+            else if(nums[low] <= nums[mid]){
+                if(nums[low] <= target && target <= nums[mid])
+                    high = mid-1;
+                else
+                    low = mid+1;
+            }else{
+                if(nums[mid] <= target && target <= nums[high])
+                    low = mid+1;
+                else
+                    high = mid-1;
+            }
+        }
+        return -1;
+    }
+    //9. Search in Rotated Sorted Array II ( with duplicate)
+    public Boolean search2(int[] nums, int target) {
+        int n = nums.length;
+        int low = 0, high = n-1;
+
+        while(low <=high){
+            int mid = (low+high)/2;
+
+            if(nums[mid] == target)
+                return true;
+
+            if(nums[low] == nums[mid] && nums[mid] == nums[high]){
+                low++;
+                high--;
+                continue;
+            }
+
+            if(nums[low] <= nums[mid]){
+                if(nums[low] <= target && target <= nums[mid]){
+                    high = mid-1;
+                }else
+                    low = mid+1;
+            }else{
+                if(nums[mid] <= target && target <= nums[high]){
+                    low = mid+1;
+                }else
+                    high = mid-1;
+            }
+        }
+        return false;
+    }
+    //10. Find Minimum in Rotated Sorted Array
+    public int findMin(int[] nums) {
+        int low = 0, high = nums.length-1;
+
+        while(low < high){
+            int mid = (low + high)/2;
+
+            if(nums[low] <= nums[mid]){
+                if(nums[mid] < nums[high])
+                    high = mid;
+                else
+                    low = mid+1;
+            }else{
+                if(nums[high] < nums[mid])
+                    low = mid+1;
+                else
+                    high = mid;
+            }
+        }
+        return nums[low];
+    }
+    //11. How many times sorted array is rotated
+    public int findKRotation(List<Integer> arr) {
+        int low = 0, high = arr.size()-1;
+
+        while(low < high){
+            int mid = (low + high)/2;
+
+            if(arr.get(low) <= arr.get(mid)){
+                if(arr.get(mid) <= arr.get(high))
+                    high = mid;
+                else
+                    low = mid+1;
+            }else{
+                if(arr.get(high) <= arr.get(mid))
+                    low = mid+1;
+                else
+                    high = mid;
+            }
+        }
+        return low;
+    }
+    //12. Single Element in a Sorted Array . eg [3,3,7,7,10,11,11] -> 10
+    public int singleNonDuplicate(int[] nums) {
+        int low = 0, high = nums.length -1 ;
+        int n = nums.length;
+
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(mid % 2 == 0){
+                if(mid+1 <n && nums[mid] == nums[mid+1])
+                    low = mid+1;
+                else
+                    high = mid-1;
+            }else{
+                if(mid-1 >= 0 && nums[mid] == nums[mid-1])
+                    low = mid+1;
+                else
+                    high = mid-1;
+            }
+        }
+        return nums[low];
+    }
+
+    //13. Find Peak Element
+    public int findPeakElement(int[] nums) {
+        int low = 0, high = nums.length -1;
+
+        while(low < high){
+            int mid = (low + high)/2;
+            if(nums[mid] > nums[mid+1])
+                high = mid;
+            else
+                low = mid+1;
+        }
+        return low;
+    }
 
     //Koko eating banana-------
     public int minEatingSpeed(int[] piles, int h) {
