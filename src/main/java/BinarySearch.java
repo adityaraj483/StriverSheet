@@ -1,3 +1,4 @@
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -433,5 +434,185 @@ public class BinarySearch {
         }
         return k+index+1;
     }
-    //21.
+    //21. Aggressive Cows
+    public int aggressiveCows(int []stalls, int k) {
+        long low = 0, high = Arrays.stream(stalls).asLongStream().sum();
+        long res = -1;
+        Arrays.sort(stalls);
+        while(low <= high){
+            long mid = (low + high)/2;
+            if(isPossible4(stalls, k, mid)){
+                low = mid +1;
+                res = mid;
+            }else
+                high = mid -1;
+        }
+        return (int)res;
+    }
+    boolean isPossible4(int[] stalls, int k, long dis){
+        int count = 1;
+        int prevIndex = 0;
+        for(int i=1;i<stalls.length;i++){
+            if((long)(stalls[i]- stalls[prevIndex]) >= dis){
+                count ++;
+                prevIndex = i;
+            }
+        }
+        return count >=k;
+    }
+    //22.  Allocate Books
+    public int findPages(ArrayList<Integer> arr, int n, int m) {
+        // Write your code here.
+        if(m > n)
+            return -1;
+        long low = 1, high = arr.stream().reduce(0, Integer::sum);
+        long res = -1;
+        while(low <= high){
+            long mid = (low + high)/2;
+            if(isPossible5(arr, m, mid)){
+                res = mid;
+                high = mid -1;
+            }else
+                low = mid + 1;
+        }
+        return (int)res;
+    }
+    boolean isPossible5(ArrayList<Integer> arr, int m, long mid){
+        int count =0;
+        long sum = 0;
+        for(int val : arr){
+            if(val > mid)
+                return false;
+            sum += val;
+            if(sum > mid){
+                count ++;
+                sum = val;
+            }
+        }
+
+        count += sum > 0 ? 1: 0;
+        return count <= m;
+    }
+    //23. Split Array Largest Sum
+    public int splitArray(int[] nums, int k) {
+        int low = 0, high = Arrays.stream(nums).sum();
+        int res = -1;
+        while(low <= high){
+
+            int mid = (low + high)/2;
+            if(isPossible6(nums, k, mid)){
+                res = mid;
+                high = mid -1;
+            }else
+                low = mid +1;
+        }
+        return res;
+    }
+    boolean isPossible6(int[] nums, int k, int mid){
+        int count = 0;
+        int sum = 0;
+        for(int val : nums){
+            if(val > mid)
+                return false;
+
+            sum += val;
+            if(sum >mid){
+                count ++;
+                sum = val;
+            }
+        }
+        count += sum > 0 ? 1: 0;
+        return count <=k;
+    }
+    //24. Painter's Partition Problem
+    public int findLargestMinDistance(ArrayList<Integer> boards, int k) {
+        long low = 1, high = boards.stream().mapToLong(Integer::longValue).sum();
+        long res = -1;
+        while(low <= high){
+            long mid = (low + high)/2;
+            if(isPossible7(boards, k, mid)){
+                res = mid;
+                high = mid -1;
+            }else
+                low = mid +1;
+        }
+        return (int)res;
+    }
+    static boolean isPossible7(ArrayList<Integer> boards, int k, long mid){
+        int count = 0, sum =0;
+        for(int val : boards){
+            if(val > mid)
+                return false;
+            sum += val;
+            if(sum > mid){
+                sum = val;
+                count ++;
+            }
+        }
+        count+= sum > 0 ? 1: 0;
+        return count <=k;
+    }
+    //25. Minimize Max Distance to Gas Station
+    public double MinimiseMaxDistance(int []arr, int K){
+        double low =0, high = 0;
+
+        for(int i=1;i<arr.length;i++){
+            high = Math.max(high, (double)arr[i]-arr[i-1]);
+        }
+        double res = high;
+        double diff = 1e-6;
+        while((high-low)> diff){
+            double mid = (low + high)/2.0;
+            if(isPossible8(arr, K, mid)){
+                high = mid;
+                res = mid;
+            }else
+                low = mid;
+        }
+        return res;
+    }
+    boolean isPossible8(int[] arr, int k, double mid){
+        int count = 0;
+        for(int i=1;i<arr.length;i++){
+            int val = (int) ((arr[i]- arr[i-1])/mid);
+            count += val;
+            if( (val * mid) == (arr[i] - arr[i-1]))
+                count--;
+        }
+        return count <=k;
+    }
+    //26. Median of Two Sorted Arrays
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        int n = nums1.length, m = nums2.length;
+        if(n>m)
+            return findMedianSortedArrays(nums2, nums1);
+
+        int low = 0, high = n;
+
+        while(low <= high) {
+            int cut1 = (low + high) / 2;
+            int cut2 = (n + m + 1) / 2 - cut1;
+
+            int l1 = cut1 > 0 ? nums1[cut1-1] : Integer.MIN_VALUE;
+            int r1 = cut1 < n ? nums1[cut1] : Integer.MAX_VALUE;
+
+            int l2 = cut2 > 0 ? nums2[cut2-1] : Integer.MIN_VALUE;
+            int r2 = cut2 < m ? nums2[cut2] : Integer.MAX_VALUE;
+
+            if(l1 <= r2 && l2 <= r1) {
+                if((n + m) % 2 == 0) {
+                    return (Math.max(l1,l2) + Math.min(r1,r2)) / 2.0;
+                }else {
+                    return Math.max(l1, l2);
+                }
+            }else if(l1 > r2) {
+                high = cut1 - 1;
+            }else {
+                low = cut1 + 1;
+            }
+        }
+        return 0.0;
+
+    }
+
 }
