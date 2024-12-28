@@ -266,49 +266,78 @@ public class BinarySearch {
         return low;
     }
 
-    //Koko eating banana-------
+    //14. Find square root of a number in log n
+    int floorSqrt(int n) {
+        // Your code here
+        int low = 1, high = n;
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(mid * mid == n)
+                return mid;
+            else if(mid * mid > n)
+                high = mid -1;
+            else
+                low = mid + 1;
+        }
+        return high;
+    }
+    //15.Find nth root of m
+    public int nthRoot(int n, int m) {
+        int low = 1, high = m;
+        while(low <= high){
+            int mid = (low +high)/2;
+            long val = nTimesMid(mid, n);
+            if(val == (long) m)
+                return mid;
+            else if(val > (long) m)
+                high = mid -1;
+            else
+                low = mid +1;
+        }
+        return -1;
+    }
+    long nTimesMid(int mid, int n){
+        long res = 1;
+        for(int i=1;i<=n;i++){
+            res *= mid;
+        }
+        return res;
+    }
+    //16. Koko eating bananas
     public int minEatingSpeed(int[] piles, int h) {
-
-        long low =1, high = java.util.Arrays.stream(piles)
-                .asLongStream().reduce(0, Long::sum);
+        long low = 1, high = Arrays.stream(piles).
+                asLongStream().reduce(0, Long::sum);
         long res = -1;
+        while(low <= high){
 
-        while(low <=high){
             long mid = (low + high)/2;
-
-            if(isPossible(piles, mid, h)){
+            if(isPossible1(piles, mid, h)){
                 res = mid;
-                high = mid-1;
+                high = mid - 1;
             }else
                 low = mid+1;
         }
         return (int)res;
     }
-
-    boolean isPossible(int[] piles, long mid, int h){
-        long count =0;
-        for (int pile : piles) {
-
-            count = count + (long) pile / mid;
-            if (pile % mid != 0)
-                count++;
+    boolean isPossible1(int[] piles, long mid, int h){
+        int count = 0;
+        for(int val : piles){
+            count += (int) Math.ceil((double)val/mid);
         }
-        return count<=h;
+        return count <= h;
     }
-
-    //minimum number of days to make m banquets---------
+    //17. Minimum Number of Days to Make m Bouquets
     public int minDays(int[] bloomDay, int m, int k) {
         int n = bloomDay.length;
         if((long) m * k > (long)n)
             return -1;
-
         int low = 1, high = java.util.Arrays.stream(bloomDay).reduce(0, Integer::max);
 
         int res =-1;
         while(low <= high){
             int mid = (low+high)/2;
 
-            if(isPossible(bloomDay, m,k,mid)){
+            if(isPossible2(bloomDay, m,k,mid)){
                 res = mid;
                 high = mid-1;
             }else
@@ -317,12 +346,10 @@ public class BinarySearch {
         return res;
     }
 
-    boolean isPossible(int[] arr, int m, int k, int mid){
+    boolean isPossible2(int[] arr, int m, int k, int mid){
         int count =0, totalCount =0;
         int n = arr.length;
-
         for(int j=0;j<n;j++){
-
             if(arr[j] <= mid)
                 count++;
             else
@@ -335,39 +362,76 @@ public class BinarySearch {
         }
         return totalCount >= m;
     }
+    //18. Find the Smallest Divisor Given a Threshold
+    public int smallestDivisor(int[] nums, int threshold) {
+        int low =1, high = Arrays.stream(nums).reduce(0, Integer::max);
+        int res =-1;
 
-    //Capacity to ship package withing D days------
+        while(low <= high){
 
-    public int shipWithinDays(int[] weights, int days) {
-        long low =1, high = java.util.Arrays.stream(weights)
-                .asLongStream().sum();
-        long res =-1;
-        while(low <=high){
-            long mid = (low+high)/2;
+            int mid = (low+high)/2;
 
-            if(isPossible(weights, days, mid)){
+            if(sum(nums, mid) <= threshold){
                 res = mid;
                 high = mid-1;
             }else
                 low = mid+1;
         }
-        return (int)res;
+        return res;
     }
+    int sum(int[] arr, int div){
 
-    boolean isPossible(int[] arr, int days, long limit){
-        int count =1;
-        long sum =0;
-
+        int count =0;
         for(int i=0;i<arr.length;i++){
 
-            sum += arr[i];
-            if(arr[i] > limit)
+            count += Math.ceil(((double)arr[i]/(double)div));
+        }
+        return count;
+    }
+    //19. Capacity to ship package withing D days
+    public int shipWithinDays(int[] weights, int days) {
+        int low = 0, high = Arrays.stream(weights).sum();
+        int res = -1;
+        while(low <= high){
+            int mid = (low +high)/2;
+            if(isPossible3(weights, days, mid)){
+                res = mid;
+                high = mid -1;
+            }else
+                low = mid+1;
+        }
+        return res;
+    }
+    boolean isPossible3(int[] weights, int days, int weight){
+        int count = 0;
+        int sum = 0;
+        for(int val : weights){
+            if(val > weight)
                 return false;
-            if(sum > limit){
-                count++;
-                sum = arr[i];
+
+            sum += val ;
+            if(sum > weight){
+                count ++;
+                sum = val;
             }
         }
+        if(sum >0)
+            count +=1;
         return count <= days;
     }
+    //20. Kth Missing Positive Number
+    public int findKthPositive(int[] arr, int k) {
+        int low = 0, high = arr.length -1;
+        int index = -1;
+        while(low <= high){
+            int mid = (low +high)/2;
+            if(arr[mid] - mid -1 < k){
+                index = mid;
+                low  = mid +1;
+            }else
+                high = mid -1;
+        }
+        return k+index+1;
+    }
+    //21.
 }
