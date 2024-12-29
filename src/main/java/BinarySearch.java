@@ -612,7 +612,137 @@ public class BinarySearch {
             }
         }
         return 0.0;
+    }
+    //27. Kth element of 2 sorted arrays
+    public int kthElement(int a[], int b[], int k) {
+        // code here
+        int n = a.length, m = b.length;
+        if(n>m)
+            return kthElement(b, a, k);
 
+        int low = Math.max(0, k-m), high = Math.min(n, k);
+        while(low <= high){
+            int cut1 = (low +high)/2;
+            int cut2 = k-cut1;
+
+            int l1 = cut1 == 0 ? Integer.MIN_VALUE: a[cut1-1];
+            int l2 = cut2 ==0 ? Integer.MIN_VALUE: b[cut2-1];
+
+            int r1 = cut1 == n ? Integer.MAX_VALUE: a[cut1];
+            int r2 = cut2 == m ? Integer.MAX_VALUE: b[cut2];
+
+            if(l1 <= r2 && l2<= r1){
+                return Math.max(l1, l2);
+            }else if(l1 > r2)
+                high = cut1-1;
+            else
+                low = cut1+1;
+        }
+        return -1;
+    }
+    //28. Row with max 1s
+    public int rowWithMax1s(int arr[][]) {
+        int n = arr.length, m = arr[0].length;
+        int i = 0, j = m-1;
+        int res = -1;
+        while(i<n && j >= 0){
+            if(arr[i][j] == 1){
+                res = i;
+                j--;
+            }else
+                i++;
+        }
+        return res;
+    }
+    //29. Search in a 2D Matrix
+    public boolean searchMatrix(int[][] matrix, int target) {
+        int n = matrix.length, m = matrix[0].length;
+        int low = 0, high = n * m - 1;
+        while(low <= high){
+            int mid = (low + high)/2;
+            int val = matrix[mid/m][mid%m];
+            if(val == target)
+                return true;
+            else if(val > target)
+                high = mid - 1;
+            else
+                low = mid + 1;
+        }
+        return false;
+    }
+    //30. Search in a 2D Matrix II
+    public boolean searchMatrix2(int[][] matrix, int target) {
+        int n = matrix.length, m = matrix[0].length;
+        int i = 0, j = m-1;
+
+        while(i < n && j >= 0){
+            if(matrix[i][j] == target)
+                return true;
+            else if(matrix[i][j] > target)
+                j--;
+            else
+                i++;
+        }
+        return false;
+    }
+    //31. Find Peak Element (2D Matrix)
+    public int[] findPeakGrid(int[][] mat) {
+        int n = mat.length, m = mat[0].length;
+        int low = 0, high = m-1;
+
+        while(low <= high){
+            int col = (low+high)/2;
+            int row = findMaxEleRow(mat, col, n);
+            if(col+1 < m && mat[row][col]< mat[row][col+1])
+                low = col +1;
+            else if(col-1 >=0 && mat[row][col-1]> mat[row][col])
+                high = col -1;
+            else
+                return new int[]{row, col};
+
+        }
+        return new int[]{-1, -1};
+    }
+    int findMaxEleRow(int[][] mat, int col, int n){
+        int index = 0;
+        int maxValue =0;
+        for(int i=0;i<n;i++){
+            if(mat[i][col] > maxValue){
+                maxValue = mat[i][col];
+                index = i;
+            }
+        }
+        return index;
+    }
+    //32. Matrix Median
+    int median(int mat[][]) {
+        int n = mat.length, m = mat[0].length;
+        int low = 1, high = 2000;
+        while(low <= high){
+            int mid = (low + high)/2;
+            int count = 0;
+            for(int i=0;i<n;i++){
+                count += upperBound(mat[i], m, mid);
+            }
+            if(count <= (n*m)/2)
+                low = mid +1;
+            else
+                high = mid -1;
+        }
+        return low;
+    }
+    int upperBound(int[] arr, int n, int target){
+        int low = 0, high = n-1;
+        int res = 0;
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(arr[mid] <= target){
+                low = mid + 1;
+                res = low;
+            }else
+                high = mid -1;
+        }
+        return res;
     }
 
 }
