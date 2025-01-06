@@ -365,6 +365,247 @@ public class Recursion {
             solve(digits, num, i+1, ds + ch, res);
         }
     }
-    //18.
+    //18. Palindrome Partitioning
+    public List<List<String>> partition(String s) {
+        List<List<String>> res = new ArrayList<>();
+        List<String> ds = new ArrayList<>();
+        solve(s, 0, ds, res);
+        return res;
+    }
+    void solve(String s, int i, List<String> ds, List<List<String>> res){
+        if(i == s.length()){
+            res.add(new ArrayList<>(ds));
+            return;
+        }
+
+        for(int j=i;j<s.length();j++){
+
+            if(isPalindrome(s, i, j)){
+                ds.add(s.substring(i, j+1));
+                solve(s, j+1, ds, res);
+                ds.remove(ds.size()-1);
+            }
+        }
+    }
+    boolean isPalindrome(String s, int i, int j){
+        while(i < j){
+            if(s.charAt(i++) != s.charAt(j--))
+                return false;
+        }
+        return true;
+    }
+    //19. Word Search
+    public boolean exist(char[][] board, String word) {
+        for(int i=0;i<board.length;i++){
+            for(int j=0;j<board[i].length;j++){
+                if(board[i][j] == word.charAt(0) && findWord(board, i, j, word, 1))
+                    return true;
+            }
+        }
+        return false;
+    }
+    boolean findWord(char[][] board, int row, int col,String word, int index){
+        if(index == word.length())
+            return true;
+
+        int n = board.length;
+        int m = board[0].length;
+
+        char currCh = board[row][col];
+        board[row][col] = '1';
+
+        int[] delRow = new int[]{-1, 0, 1, 0};
+        int[] delCol = new int[]{0, 1, 0, -1};
+
+        for(int i=0;i<4;i++){
+            int r = row + delRow[i];
+            int c = col + delCol[i];
+            if(r >=0 && r < n && c >= 0 && c < m && board[r][c] == word.charAt(index)
+                    && findWord(board, r, c, word, index+1)){
+                return true;
+            }
+        }
+        board[row][col] = currCh;
+        return false;
+    }
+    //20. N-Queens
+    public List<List<String>> solveNQueens(int n) {
+        List<List<String>> res = new ArrayList<>();
+        char[][] board = new char[n][n];
+        for(char[] charArr : board)
+            Arrays.fill(charArr, '.');
+
+        solve(0, n, board, res);
+        return res;
+    }
+    void solve(int row, int n, char[][] board, List<List<String>> res){
+        if(row >= n){
+            res.add(boardToList(board, n));
+            return ;
+        }
+        for(int col=0; col<n; col++){
+            board[row][col] = 'Q';
+            if(isValid(board, row, col, n)){
+                solve(row+1, n, board, res);
+            }
+            board[row][col] = '.';
+        }
+    }
+    boolean isValid(char[][] board, int row, int col, int n){
+        for(int i=0;i<row;i++){
+            if(board[i][col] == 'Q')
+                return false;
+        }
+        for(int r= row-1, c= col-1; r>=0 && c>=0 ; r--,c--){
+            if(board[r][c] == 'Q')
+                return false;
+        }
+        for(int r =row-1, c= col+1; r >=0 && c<n; r--,c++){
+            if(board[r][c] == 'Q')
+                return false;
+        }
+        return true;
+    }
+    List<String> boardToList(char[][] board, int n){
+        List<String> res = new ArrayList<>();
+        for(int i=0;i<n;i++){
+            res.add(new String(board[i]));
+        }
+        return res;
+    }
+    //21. Rat in a Maze Problem - I
+    public ArrayList<String> findPath(ArrayList<ArrayList<Integer>> mat) {
+        ArrayList<String> res = new ArrayList<>();
+        int n = mat.size();
+        if(n == 0 || mat.get(0).get(0) == 0 || mat.get(n-1).get(n-1) == 0)
+            return res;
+
+        int[][] vis = new int[n][n];
+        for(int[] arr : vis){
+            Arrays.fill(arr, 1);
+        }
+        solve(mat, 0, 0, n, "", res, vis);
+        return res;
+    }
+
+    void solve(ArrayList<ArrayList<Integer>> mat, int row, int col, int n, String path, ArrayList<String> res, int[][] vis){
+        if( row == n-1 && col == n-1){
+            res.add(path);
+            return;
+        }
+        vis[row][col] = 0;
+        int[] delRow = new int[]{1, 0, 0, -1};
+        int[] delCol = new int[]{0, -1, 1, 0};
+
+        for(int i=0;i<4;i++){
+            int r = row + delRow[i];
+            int c = col + delCol[i];
+            if(r < n && c <n && r >=0 && c >=0 && mat.get(r).get(c) == 1 && vis[r][c] ==1){
+
+                if(i == 0)
+                    solve(mat, r, c, n, path + "D", res, vis);
+                if(i == 1)
+                    solve(mat, r, c, n, path + "L", res, vis);
+                if(i == 2)
+                    solve(mat, r, c, n, path + "R", res, vis);
+                if(i == 3)
+                    solve(mat, r, c, n, path + "U", res, vis);
+            }
+        }
+        vis[row][col] = 1;
+    }
+    // 22. Word Break
+    public boolean wordBreak(String s, List<String> wordDict) {
+        int[] dp = new int[s.length()];
+        Arrays.fill(dp, -1);
+        Set<String> hs = new HashSet<>(wordDict);
+        return solve(s, 0, hs, dp);
+    }
+    boolean solve(String s, int i, Set<String> hs, int[] dp){
+        if(i == s.length())
+            return true;
+        if(dp[i] != -1){
+            return dp[i] == 1;
+        }
+        for(int j=i;j<s.length();j++){
+            if(hs.contains(s.substring(i, j+1)) && solve(s, j+1, hs, dp)){
+                dp[i] = 1;
+                return true;
+            }
+        }
+        dp[i] = 0;
+        return false;
+    }
+    //23. M Coloring Problem
+    boolean graphColoring(int v, List<int[]> edges, int m) {
+        List<List<Integer>> graph = new ArrayList<>();
+        for(int i=0;i<v;i++){
+            graph.add(new ArrayList<>());
+        }
+        for (int[] edge : edges) {
+            int u = edge[0];
+            int v1 = edge[1];
+            graph.get(u).add(v1);
+            graph.get(v1).add(u);
+        }
+
+        int[] color = new int[v];
+
+        return solve(graph, 0, color, m, v);
+    }
+    boolean solve(List<List<Integer>> graph, int node, int[] color, int maxColor, int n){
+        if(node == n)
+            return true;
+        for(int i=1;i<=maxColor;i++){
+            if(isValid(node, i, graph, color)){
+                color[node] = i;
+                if(solve(graph, node+1, color, maxColor, n))
+                    return true;
+                color[node] = 0;
+            }
+        }
+        return false;
+    }
+    boolean isValid(int node, int canColor, List<List<Integer>> graph, int[] color){
+        for(int currNode : graph.get(node)){
+            if(color[currNode] == canColor)
+                return false;
+        }
+        return true;
+    }
+    //24. Sudoku Solver
+    boolean solveSudoku(char[][] board){
+        for(int i=0;i<9;i++){
+            for(int j =0; j<9;j++){
+                if(board[i][j] == '.'){
+
+                    for(char ch = '1';ch <= '9';ch++){
+
+                        if(isValid(board, i, j, ch)){
+                            board[i][j] = ch;
+                            if(solveSudoku(board))
+                                return true;
+                            board[i][j] = '.';
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    boolean isValid(char[][] board, int row, int col, char ch){
+        for(int i=0;i<9;i++){
+            if(board[i][col] == ch)
+                return false;
+            if(board[row][i] == ch)
+                return false;
+            if(board[3 * (row/3) + i/3][3 * (col/3) + i%3] == ch)
+                return false;
+        }
+        return true;
+    }
+    //25. Expression Add Operators
+
 
 }
