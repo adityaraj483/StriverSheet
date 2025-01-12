@@ -1,5 +1,6 @@
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.lang.String;
 
 import DS.*;
 
@@ -564,5 +565,118 @@ public class BinaryTree {
             return 0;
         return 1 + rightHeight(right.right);
     }
-    //25. 
+    //25.Unique Binary Tree Requirements(tree constructed with the help of either of them) (preOrder = 1, inOrder = 2, postOrder = 3)
+    public static boolean isPossible(int a, int b){
+        return a+b == 3 || a+b == 5;
+    }
+    //26. Construct Binary Tree from Inorder and Preorder Traversal
+    int index;
+    public TreeNode buildTree(int[] preorder, int[] inorder) {
+        index = 0;
+        return solve(preorder, inorder, 0, inorder.length-1);
+    }
+    TreeNode solve(int[] preOrder, int[] inOrder, int start, int end){
+        if(start > end || index == preOrder.length)
+            return null;
+        TreeNode node = new TreeNode(preOrder[index]);
+        index ++;
+
+        int i = start;
+        while(i <= end && inOrder[i] != preOrder[index-1])
+            i++;
+
+        node.left = solve(preOrder, inOrder, start, i-1);
+        node.right = solve(preOrder, inOrder, i+1, end);
+        return node;
+    }
+    //27. Construct Binary Tree from Inorder and Postorder Traversal
+    int index1;
+    public TreeNode buildTree1(int[] inorder, int[] postorder) {
+        int n = postorder.length;
+        index1 = n-1;
+        return solve(inorder, 0, n-1, postorder);
+    }
+    TreeNode solve(int[] inOrder, int start, int end, int[] postOrder){
+        if(start > end || index1 < 0)
+            return null;
+        TreeNode node = new TreeNode(postOrder[index1]);
+        index1--;
+
+        int i = start;
+        while(i <= end && inOrder[i] != postOrder[index1+1])
+            i++;
+        node.right = solve(inOrder, i+1, end, postOrder);
+        node.left = solve(inOrder, start, i-1, postOrder);
+        return node;
+    }
+    //28. Serialize and Deserialize Binary Tree
+    public String serialize(TreeNode root) {
+        if(root == null)
+            return "";
+        Queue<TreeNode> q = new LinkedList<>();
+        q.add(root);
+        StringBuilder sb = new StringBuilder();
+
+        while(!q.isEmpty()){
+            int size = q.size();
+            for(int i=0;i<size;i++){
+                root = q.remove();
+                if(root == null)
+                    sb.append("#").append(",");
+                else{
+                    sb.append(root.data).append(",");
+                    q.add(root.left);
+                    q.add(root.right);
+                }
+            }
+        }
+        return sb.substring(0, sb.length()-1).toString();
+    }
+    public TreeNode deserialize(String data) {
+        if(data.trim().isEmpty())
+            return null;
+
+        String[] arr = data.split(",");
+        int index = 1;
+        Queue<TreeNode> q = new LinkedList<>();
+        TreeNode root = new TreeNode(Integer.parseInt(arr[0]));
+        q.add(root);
+        while(!q.isEmpty() && index < arr.length){
+            int size = q.size();
+            for(int i=0;i<size;i++){
+
+                TreeNode node = q.remove();
+                if(arr[index].equals("#"))
+                    node.left = null;
+                else{
+                    node.left = new TreeNode(Integer.parseInt(arr[index]));
+                    q.add(node.left);
+                }
+                index ++;
+                if(arr[index].equals("#"))
+                    node.left = null;
+                else{
+                    node.right = new TreeNode(Integer.parseInt(arr[index]));
+                    q.add(node.right);
+                }
+                index++;
+            }
+        }
+        return root;
+    }
+    //29. Flatten Binary Tree to Linked List
+    public void flatten(TreeNode root) {
+        while(root != null){
+            if(root.left != null){
+                TreeNode node = root.left;
+                while(node.right != null)
+                    node = node.right;
+                node.right = root.right;
+                root.right = root.left;
+                root.left = null;
+            }
+            root = root.right;
+        }
+    }
+    
 }
