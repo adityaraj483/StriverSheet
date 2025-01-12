@@ -292,5 +292,277 @@ public class BinaryTree {
         dfs(root.right, x+1, y+1, list);
     }
     //14. Top View of Binary Tree
+    class DS1{
+        TreeNode node;
+        int x;
+        DS1(TreeNode node, int x){
+            this.node = node;
+            this.x = x;
+        }
+    }
+    ArrayList<Integer> topView(TreeNode root) {
+        Queue<DS1> q = new LinkedList<>();
+        Map<Integer,DS1> mp = new TreeMap<>();
+        q.add(new DS1(root, 0));
 
+        while(!q.isEmpty()){
+            DS1 ds = q.remove();
+            if(ds.node.left != null){
+                q.add(new DS1(ds.node.left, ds.x -1));
+            }
+            if(ds.node.right != null){
+                q.add(new DS1(ds.node.right, ds.x+1));
+            }
+            if(!mp.containsKey(ds.x)){
+                mp.put(ds.x, ds);
+            }
+        }
+        ArrayList<Integer> res = new ArrayList<>();
+        for(Map.Entry<Integer, DS1> entry : mp.entrySet()){
+            int x = entry.getKey();
+            DS1 ds = entry.getValue();
+            res.add(ds.node.data);
+        }
+        return res;
+    }
+    //15. Bottom View of Binary Tree
+    public ArrayList <Integer> bottomView(TreeNode root)
+    {
+        // Code here
+        Queue<DS1> q = new LinkedList<>();
+        Map<Integer, DS1> mp = new TreeMap<>();
+        q.add(new DS1(root, 0));
+
+        while(!q.isEmpty()){
+            DS1 ds = q.remove();
+            if(ds.node.left != null)
+                q.add(new DS1(ds.node.left, ds.x -1));
+            if(ds.node.right != null)
+                q.add(new DS1(ds.node.right, ds.x+1));
+            mp.put(ds.x, ds);
+        }
+        ArrayList<Integer> res = new ArrayList<>();
+        for(Map.Entry<Integer,DS1> entry : mp.entrySet()){
+            res.add(entry.getValue().node.data);
+        }
+        return res;
+    }
+    //16. Right view of binary tree
+    public List<Integer> rightSideView(TreeNode root) {
+        if(root == null)
+            return Collections.emptyList();
+        List<Integer> res= new ArrayList<>();
+        Queue<TreeNode> q = new LinkedList<>();
+        q.add(root);
+
+        while(!q.isEmpty()){
+            int size = q.size();
+            for(int i=0;i<size;i++){
+                root = q.remove();
+                if(root.left != null)
+                    q.add(root.left);
+                if(root.right != null)
+                    q.add(root.right);
+                if(i == size -1)
+                    res.add(root.data);
+            }
+        }
+        return res;
+    }
+    //17. Symmetric Binary Tree
+    public boolean isSymmetric(TreeNode root) {
+        return solve(root.left, root.right);
+    }
+    boolean solve(TreeNode node1, TreeNode node2){
+        if(node1 == null && node2 == null)
+            return true;
+        else if(node1 == null || node2 == null)
+            return false;
+        else
+            return node1.data == node2.data && solve(node1.left, node2.right) &&
+                    solve(node1.right, node2.left);
+    }
+    //18. Root to Leaf Paths
+    ArrayList<ArrayList<Integer>> Paths(TreeNode root) {
+        ArrayList<ArrayList<Integer>> res = new ArrayList<>();
+        ArrayList<Integer> ds = new ArrayList<>();
+        solve2(root, ds,res);
+        return res;
+    }
+    void solve2(TreeNode root, ArrayList<Integer> ds, ArrayList<ArrayList<Integer>> res){
+        if(root == null)
+            return;
+
+        ds.add(root.data);
+        if(isLeaf(root)){
+            res.add(new ArrayList<>(ds));
+        }
+        solve2(root.left, ds, res);
+        solve2(root.right, ds, res);
+        ds.remove(ds.size()-1);
+    }
+    //19. LCA in Binary Tree
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        if(root == null || root == p || root == q)
+            return root;
+        TreeNode left = lowestCommonAncestor(root.left, p, q);
+        TreeNode right = lowestCommonAncestor(root.right, p, q);
+        if(left == null)
+            return right;
+        else if(right == null)
+            return left;
+        else
+            return root;
+    }
+    //20. Maximum Width of Binary Tree
+    public int widthOfBinaryTree(TreeNode root) {
+        Queue<DS1> q = new LinkedList<>();
+        int res = 0;
+        q.add(new DS1(root, 0));
+        while(!q.isEmpty()){
+            int size = q.size();
+            int prev = q.peek().x;
+            int a = 0, b = 0;
+            for(int i=0;i<size;i++){
+                DS1 ds = q.remove();
+                if(i == 0)
+                    a = ds.x;
+                if(i == size -1)
+                    b = ds.x;
+
+                if(ds.node.left != null)
+                    q.add(new DS1(ds.node.left, (ds.x - prev)*2 +1));
+                if(ds.node.right != null)
+                    q.add(new DS1(ds.node.right, (ds.x - prev)*2 + 2));
+            }
+            res = Math.max(res, b - a + 1);
+        }
+        return res;
+    }
+    //21. Check for Children Sum Property
+    int isSumProperty(TreeNode root) {
+        AtomicInteger res = new AtomicInteger(1);
+        solve3(root, res);
+        return res.get();
+    }
+    int solve3(TreeNode root, AtomicInteger res){
+        if(root == null)
+            return 0;
+        if(isLeaf(root))
+            return root.data;
+        int left = solve3(root.left, res);
+        int right = solve3(root.right, res);
+        if(root.data != left + right)
+            res.set(0);
+        return root.data;
+    }
+    //22. Print all the Nodes at a distance of K in a Binary Tree
+    public List<Integer> distanceK(TreeNode root, TreeNode target, int k) {
+        Map<TreeNode, TreeNode> mp = new HashMap<>();
+        populatePC(root, null, mp);
+        List<Integer> res = new ArrayList<>();
+        solve(target, null, k, mp, res);
+        return res;
+    }
+    void populatePC(TreeNode child, TreeNode parent, Map<TreeNode, TreeNode> mp){
+        if(child == null)
+            return;
+        mp.put(child, parent);
+        populatePC(child.left, child, mp);
+        populatePC(child.right, child, mp);
+    }
+
+    void solve(TreeNode curr, TreeNode prev, int k, Map<TreeNode, TreeNode> mp, List<Integer> res){
+        if(curr == null){
+            return;
+        }
+        if(k == 0){
+            res.add(curr.data);
+            return;
+        }
+
+        if(curr.left != prev){
+            solve(curr.left, curr, k-1, mp, res);
+        }
+        if(curr.right != prev){
+            solve(curr.right,curr, k-1, mp, res);
+        }
+
+        if(mp.get(curr) != prev){
+            solve(mp.get(curr), curr, k-1, mp, res);
+        }
+    }
+    //23. Minimum time taken to BURN the Binary Tree from a Node
+    static TreeNode tar;
+    public static int minTime(TreeNode root, int target) {
+        Map<TreeNode, TreeNode> mp = new HashMap<>();
+        populateCPAndTarget(root, null, mp, target);
+        return dfs(tar, null, mp)-1;
+    }
+    static int dfs(TreeNode curr, TreeNode prev, Map<TreeNode,TreeNode> mp){
+        if(curr == null)
+            return 0;
+        int time = 0;
+        if(curr.left != prev)
+            time = Math.max(time, dfs(curr.left, curr, mp));
+        if(curr.right != prev)
+            time = Math.max(time, dfs(curr.right, curr, mp));
+        if(mp.get(curr) != prev)
+            time = Math.max(time, dfs(mp.get(curr), curr, mp));
+        return time + 1;
+    }
+    static void populateCPAndTarget(TreeNode curr, TreeNode parent, Map<TreeNode, TreeNode> mp, int target){
+        if(curr == null)
+            return;
+        mp.put(curr, parent);
+        populateCPAndTarget(curr.left, curr, mp, target);
+        populateCPAndTarget(curr.right, curr, mp, target);
+        if(curr.data == target)
+            tar = curr;
+    }
+    //24. Count total Nodes in a COMPLETE Binary Tree
+    public int countNodes(TreeNode root) {
+        int height = findHeight(root);
+        int count = 0;
+
+        while(root != null){
+            if(findHeight(root.right) == height -1){
+                count += (int) Math.pow(2, height-1); // adding left subtree Height and going right
+                root = root.right;
+            }else{
+                count += (int) Math.pow(2, height-2);// adding right subtree height -1  ka nodes
+                root = root.left;
+            }
+            height --;
+        }
+        return count;
+    }
+    int findHeight(TreeNode root){
+        if(root == null)
+            return 0;
+        return findHeight(root.left) + 1;
+    }
+    //----------------------------------------------OR-------------------------
+    public int countNodes1(TreeNode root) {
+        if(root == null)
+            return 0;
+
+        int left = leftHeight(root.left);
+        int right = rightHeight(root.right);
+        if(left == right)
+            return ((2<<left) -1);
+        else
+            return 1 + countNodes1(root.left)+countNodes1(root.right);
+    }
+    int leftHeight(TreeNode left){
+        if(left == null)
+            return 0;
+        return 1 + leftHeight(left.left);
+    }
+    int rightHeight(TreeNode right){
+        if(right == null)
+            return 0;
+        return 1 + rightHeight(right.right);
+    }
+    //25. 
 }
