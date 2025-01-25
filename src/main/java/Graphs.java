@@ -1,8 +1,6 @@
 import DS.Pair;
 import java.lang.String;
-import DS.TreeNode;
-
-import java.security.KeyPair;
+import DS.*;
 import java.util.*;
 
 public class Graphs {
@@ -875,6 +873,750 @@ public class Graphs {
         }
         return pq.size();
     }
-    //27.
+    //27. Shortest Path in Undirected Graph with unit weights
+    public int[] shortestPath(ArrayList<ArrayList<Integer>> adj, int src) {
+        int v = adj.size();
+        Queue<Pair> q = new LinkedList<>();
+        q.add(new Pair(src, 0));
+        int[] res = new int[v];
+        Arrays.fill(res, -1);
+
+        while(!q.isEmpty()){
+            Pair<Integer, Integer> p = q.remove();
+            int node = p.first;
+            int cost = p.second;
+            if(res[node] == -1)
+                res[node] = cost;
+            else
+                continue;
+            for(int curr : adj.get(node)){
+                q.add(new Pair(curr, cost+1));
+            }
+        }
+        return res;
+    }
+    //28. Shortest Path in DAG
+    public int[] shortestPath(int V, int E, int[][] edges) {
+        List<List<Pair>> adj = new ArrayList<>();
+        for(int i=0;i<V;i++)
+            adj.add(new ArrayList<>());
+        for(int[] edge : edges){
+            int u = edge[0];
+            int v = edge[1];
+            int weight = edge[2];
+            adj.get(u).add(new Pair(v, weight));
+        }
+
+        Queue<Pair<Integer, Integer>> pq = new PriorityQueue<>((a, b) -> a.second - b.second);
+
+        int[] res = new int[V];
+        Arrays.fill(res, -1);
+        pq.add(new Pair(0, 0));
+
+        while(!pq.isEmpty()){
+
+            Pair p = pq.remove();
+            int node = (int) p.first;
+            int weight = (int) p.second;
+
+            if(res[node] == -1){
+                res[node] = weight;
+            }else
+                continue;
+
+            for(Pair curr : adj.get(node)){
+                pq.add(new Pair(curr.first, (int)curr.second + weight));
+            }
+        }
+        return res;
+    }
+    //29. Djisktra's Algorithm
+    ArrayList<Integer> dijkstra(ArrayList<ArrayList<Pair>> adj, int src) {
+        int v = adj.size();
+        Queue<Pair<Integer, Integer>> pq = new PriorityQueue<>((a, b)-> a.second - b.second);
+        ArrayList<Integer> dist = new ArrayList<>(Collections.nCopies(v, Integer.MAX_VALUE));
+
+        pq.add(new Pair(src, 0));
+        dist.set(src, 0);
+
+        while(!pq.isEmpty()){
+            Pair<Integer, Integer> p = pq.remove();
+            int node = p.first;
+            int weight = p.second;
+
+            for(Pair<Integer, Integer> curr : adj.get(node)){
+
+                int adjNode = curr.first;
+                int adjWeight = curr.second;
+                if(weight + adjWeight < dist.get(adjNode)){
+                    dist.set(adjNode, weight + adjWeight);
+                    pq.add(new Pair(adjNode, weight + adjWeight));
+                }
+            }
+        }
+        return dist;
+    }
+    //30. Shortest Path in Binary Matrix
+    public int shortestPathBinaryMatrix(int[][] grid) {
+        int n = grid.length;
+        if(grid[0][0] == 1 || grid[n-1][n-1] == 1)
+            return -1;
+        Queue<Pair<Integer, Pair<Integer, Integer>>> pq = new PriorityQueue<>((a, b) -> a.first - b.first);
+        int[][] vis = new int[n][n];
+        int[] delRow = new int[]{-1, 0, 1};
+        int[] delCol = new int[]{-1, 0, 1};
+
+        pq.add(new Pair<>(1, new Pair<>(0, 0)));
+        vis[0][0] = 1;
+
+        while(!pq.isEmpty()){
+            Pair<Integer, Pair<Integer, Integer>> p = pq.remove();
+            int cost = p.first;
+            int row = p.second.first;
+            int col = p.second.second;
+            if(row == n-1 && col == n-1)
+                return cost;
+
+            for(int i=0;i<3;i++){
+                for(int j=0;j<3;j++){
+                    int r = delRow[i] + row;
+                    int c = delCol[j] + col;
+
+                    if(r >=0 && r < n && c>=0 && c <n && grid[r][c] == 0 && vis[r][c] == 0){
+                        pq.add(new Pair<>(cost+1, new Pair<>(r, c)));
+                        vis[r][c] = 1;
+                    }
+                }
+            }
+        }
+        return -1;
+    }
+    //31. Path With Minimum Effort
+    public int minimumEffortPath(int[][] heights) {
+        int n = heights.length;
+        int m = heights[0].length;
+        int[][] vis = new int[n][m];
+        Queue<Pair<Integer, Pair<Integer, Integer>>> pq = new PriorityQueue<>((a, b) -> a.first - b.first);
+        int[] delRow = new int[]{-1, 0, 1, 0};
+        int[] delCol = new int[]{0, 1, 0, -1};
+
+        pq.add(new Pair<>(0, new Pair<>(0, 0)));
+
+        while(!pq.isEmpty()){
+            Pair<Integer, Pair<Integer, Integer>> p = pq.remove();
+            int effort = p.first;
+            int row = p.second.first;
+            int col = p.second.second;
+            vis[row][col] = 1;
+            if(row == n-1 && col == m-1)
+                return effort;
+
+            for(int i=0;i<4;i++){
+                int r = row + delRow[i];
+                int c = col + delCol[i];
+                if(r >=0 && r <n && c >=0 && c < m && vis[r][c] == 0){
+                    int newEffort = Math.max(effort, Math.abs(heights[r][c] - heights[row][col]));
+                    pq.add(new Pair<>(newEffort, new Pair<>(r, c)));
+                }
+            }
+        }
+        return -1;
+    }
+    //32. Cheapest Flights Within K Stops
+    public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+        List<List<Pair>> adj = new ArrayList<>();
+        int[] res = new int[n];
+
+        for(int i=0;i<n;i++){
+            adj.add(new ArrayList<>());
+            res[i] = Integer.MAX_VALUE;
+        }
+        for(int[] flight: flights){
+            int u = flight[0];
+            int v = flight[1];
+            int cost = flight[2];
+            adj.get(u).add(new Pair<>(v, cost));
+        }
+
+        Queue<Pair<Integer, Pair<Integer,Integer>>> q = new LinkedList<>();
+        q.add(new Pair<>(src, new Pair<>(0, 0)));
+        res[src] = 0;
+
+        while(!q.isEmpty()){
+
+            Pair<Integer, Pair<Integer,Integer>> p = q.remove();
+            int node = p.first;
+            int cost = p.second.first;
+            int k1 = p.second.second;
+            if(k1 > k || node == dst)
+                continue;
+
+            for(Pair<Integer,Integer> curr : adj.get(node)){
+                int currNode = curr.first;
+                int currCost = curr.second + cost;
+                if(k1 <= k && res[currNode] > currCost){
+                    q.add(new Pair<>(currNode, new Pair<>(currCost, k1+1)));
+                    res[currNode] =  currCost;
+                }
+            }
+        }
+        return res[dst] == Integer.MAX_VALUE ? -1 : res[dst];
+    }
+    //33. Network Delay Time
+    public int networkDelayTime(int[][] times, int n, int k) {
+        List<List<Pair>> adj = new ArrayList<>();
+        for(int i=0;i<=n;i++)
+            adj.add(new ArrayList<>());
+
+        for(int[] time : times){
+            int u = time[0];
+            int v = time[1];
+            int tm = time[2];
+            adj.get(u).add(new Pair<>(v, tm));
+        }
+
+        Queue<Pair> q = new LinkedList<>();
+        int[] dist = new int[n+1];
+
+        Arrays.fill(dist, Integer.MAX_VALUE);
+        q.add(new Pair<>(k, 0));
+        dist[k] = 0;
+
+        while(!q.isEmpty()){
+            Pair<Integer, Integer> p = q.remove();
+            int node = p.first;
+            int time = p.second;
+            for(Pair<Integer, Integer> curr : adj.get(node)){
+                int currNode = curr.first;
+                int currTime = curr.second + time;
+                if(currTime < dist[currNode]){
+                    dist[currNode] = currTime;
+                    q.add(new Pair<>(currNode, currTime));
+                }
+            }
+        }
+        int ans = 0;
+        for(int i=1;i<=n;i++){
+            if(dist[i] == Integer.MAX_VALUE)
+                return -1;
+            else
+                ans = Math.max(ans, dist[i]);
+        }
+        return ans;
+    }
+    //34. Number of Ways to Arrive at Destination
+    public int countPaths(int n, int[][] roads) {
+        int mod = (int) (1e9 + 7);
+        List<List<Pair>> adj = new ArrayList<>();
+        for(int i=0;i<n;i++)
+            adj.add(new ArrayList<>());
+
+        for(int[] road : roads){
+            int u = road[0];
+            int v = road[1];
+            long cost = road[2];
+            adj.get(u).add(new Pair<>(v, cost));
+            adj.get(v).add(new Pair<>(u, cost));
+        }
+
+        int[] ways = new int[n];
+        long[] dist = new long[n];
+
+        Arrays.fill(dist, Long.MAX_VALUE);
+        dist[0] = 0;
+        ways[0] = 1;
+
+        Queue<Pair<Integer, Long>> pq = new PriorityQueue<>((a, b) -> Long.compare(a.second, b.second));
+        pq.add(new Pair<>(0, 0L));
+
+        while(!pq.isEmpty()){
+            Pair<Integer, Long> p = pq.remove();
+            int node = p.first;
+            long cost = p.second;
+
+            for(Pair<Integer, Long> curr : adj.get(node)){
+                int currNode = curr.first;
+                long currCost = curr.second + cost;
+                if(currCost < dist[currNode]){
+                    dist[currNode] = currCost;
+                    pq.add(new Pair<>(currNode, currCost));
+                    ways[currNode] = ways[node];
+                }else if(currCost == dist[currNode]){
+                    ways[currNode] = (ways[currNode] + ways[node]) % mod;
+                }
+            }
+        }
+        return ways[n-1] % mod;
+    }
+    //35. Minimum Multiplications to reach End
+    int minimumMultiplications(int[] arr, int start, int end) {
+        int mod = (int)(1e5);
+        int[] steps = new int[mod];
+        Queue<Pair<Integer, Integer>> pq = new LinkedList<>();
+
+        Arrays.fill(steps, Integer.MAX_VALUE);
+        pq.add(new Pair<>(0, start));
+        steps[start] = 0;
+        while(!pq.isEmpty()){
+            Pair<Integer, Integer> p = pq.remove();
+            int step = p.first;
+            int val = p.second;
+
+            for (int j : arr) {
+                int newVal = (val * j) % mod;
+
+                if (steps[newVal] > step + 1) {
+                    steps[newVal] = step + 1;
+                    pq.add(new Pair<>(step + 1, newVal));
+                }
+
+            }
+        }
+        return steps[end] == Integer.MAX_VALUE ? -1 : steps[end];
+    }
+
+    //36. Bellman-Ford
+    int[] bellmanFord(int V, int[][] edges, int src) {
+        int[] dist = new int[V];
+        Arrays.fill(dist, (int) 1e8);
+        dist[src] = 0;
+
+        for(int i=0;i<V-1;i++){
+            for(int[] edge : edges){
+                int u = edge[0];
+                int v = edge[1];
+                int cost = edge[2];
+                if(dist[u] != 1e8 && dist[u] + cost < dist[v])
+                    dist[v] = dist[u]+cost;
+            }
+        }
+
+        for(int[] edge : edges){
+            int u = edge[0];
+            int v = edge[1];
+            int cost = edge[2];
+            if(dist[u] != 1e8 && dist[u] + cost < dist[v]){
+                return new int[]{-1};
+            }
+        }
+        return dist;
+    }
+    //37. Floyd Warshal Algorithm -> when weight can be negative
+    public void shortestDistance(int[][] mat) {
+        int n = mat.length;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(mat[i][j] == -1){
+                    mat[i][j] = (int) 1e9;
+                }
+                if(i == j)
+                    mat[i][j] = 0;
+            }
+        }
+
+        for(int k=0;k<n;k++){
+            for(int i=0;i<n;i++){
+                for(int j=0;j<n;j++){
+                    mat[i][j] = Math.min(mat[i][j], mat[i][k] + mat[k][j]);
+                }
+            }
+        }
+
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(mat[i][j] == 1e9){
+                    mat[i][j] = -1;
+                }
+            }
+        }
+    }
+    //-------------- using dikstra's algorithm -> when weight is positive-------------------
+    public void shortestDistance1(int[][] mat) {
+        int n = mat.length;
+        List<List<Pair>> adj = new ArrayList<>();
+        for(int i=0;i<n;i++)
+            adj.add(new ArrayList<>());
+        for(int node =0;node<n;node++){
+            for(int curr =0;curr<n;curr++){
+                if(node == curr || mat[node][curr] == -1)
+                    continue;
+                adj.get(node).add(new Pair<>(curr, mat[node][curr]));
+            }
+        }
+
+        for(int i=0;i<n;i++){
+            mat[i] = dijkstra(adj, i, n);
+        }
+    }
+    int[] dijkstra(List<List<Pair>> adj, int src, int v){
+        int[] dist = new int[v];
+        Queue<Pair<Integer, Integer>> pq = new PriorityQueue<>((a, b) -> a.second - b.second);
+
+        Arrays.fill(dist, (int)1e9);
+        dist[src] = 0;
+        pq.add(new Pair<>(src, 0));
+
+        while(! pq.isEmpty()){
+            Pair<Integer, Integer> p = pq.remove();
+            int node = p.first;
+            int cost = p.second;
+
+            for(Pair<Integer, Integer> curr : adj.get(node)){
+                int currNode = curr.first;
+                int currCost = curr.second + cost;
+                if(currCost < dist[currNode]){
+                    dist[currNode] = currCost;
+                    pq.add(new Pair<>(currNode, currCost));
+                }
+            }
+        }
+        for(int i=0;i<v;i++){
+            if(dist[i] == 1e9)
+                dist[i] = -1;
+        }
+        return dist;
+    }
+    //38.  Find the City With the Smallest Number of Neighbors at a Threshold Distance
+    public int findTheCity(int n, int[][] edges, int distanceThreshold) {
+        List<List<Pair>> adj = new ArrayList<>();
+        for(int i=0;i<n;i++)
+            adj.add(new ArrayList<>());
+
+        for(int[] edge : edges){
+            int u = edge[0];
+            int v = edge[1];
+            int cost = edge[2];
+            adj.get(u).add(new Pair(v, cost));
+            adj.get(v).add(new Pair(u, cost));
+        }
+        int minCount = n+1;
+        int index = 0;
+        for(int i=0;i<n;i++){
+            int count = dijkstra(adj, i, n, distanceThreshold);
+            if(count <= minCount){
+                minCount = count;
+                index = i;
+            }
+        }
+        return index;
+    }
+    int dijkstra(List<List<Pair>> adj, int src, int v, int th){
+        int[] dist = new int[v];
+        Queue<Pair> q = new LinkedList<>();
+
+        Arrays.fill(dist, (int)1e9);
+        q.add(new Pair<>(src, 0));
+        dist[src] = 0;
+
+        while(!q.isEmpty()){
+            Pair<Integer, Integer> p = q.remove();
+            int node = p.first;
+            int cost = p.second;
+
+            for(Pair<Integer, Integer> curr : adj.get(node)){
+                int currNode = curr.first;
+                int currCost = curr.second + cost;
+
+                if(currCost <= th && currCost < dist[currNode]){
+                    dist[currNode] = currCost;
+                    q.add(new Pair<>(currNode, currCost));
+                }
+            }
+        }
+        int count = 0;
+        for(int i=0;i<v;i++){
+            if(dist[i] != 1e9)
+                count++;
+        }
+        return count;
+    }
+    //39. Minimum Spanning Tree
+    static int spanningTree(int V, int E, List<List<int[]>> adj) {
+        Queue<Pair<Integer,Pair<Integer, Integer>>> pq = new PriorityQueue<>((a, b)-> a.first - b.first);
+        int[] vis = new int[V];
+
+        pq.add(new Pair<>(0, new Pair<>(0, -1)));
+        int weight = 0;
+
+        while(!pq.isEmpty()){
+            Pair<Integer, Pair<Integer, Integer>> p = pq.remove();
+            int cost = p.first;
+            int node = p.second.first;
+            int parent = p.second.second;
+            if(vis[node] == 1)
+                continue;
+
+            if(parent != -1 && vis[node] == 0){
+                System.out.println(parent + " - "+ node); //used to print spanning tree
+            }
+            vis[node] = 1;
+            weight += cost;
+
+            for(int[] child : adj.get(node)){
+                int childNode = child[0];
+                int childCost = child[1];
+                if(vis[childNode] == 0){
+                    pq.add(new Pair<>(childCost, new Pair<>(childNode, node)));
+                }
+            }
+        }
+        return weight;
+    }
+    //------------------- Minimum spanning tree using Disjoint set (krunkal's algorithm) -------------------------------
+    class DS{
+        int node, adjNode, cost;
+        DS(int n, int a, int c){
+            node = n;
+            adjNode = a;
+            cost = c;
+        }
+    }
+    int spanningTree1(int V, int E, List<List<int[]>> adj) {
+        DisjointSet set = new DisjointSet(V);
+        List<DS> mat = new ArrayList<>();
+        for(int i=0;i<adj.size();i++){
+            for(int j=0;j<adj.get(i).size();j++){
+                int node = i;
+                int adjNode = adj.get(i).get(j)[0];
+                int cost = adj.get(i).get(j)[1];
+                mat.add(new DS(node, adjNode, cost));
+            }
+        }
+        mat.sort((a, b) -> a.cost - b.cost);
+
+        int wt = 0;
+        for (DS ds : mat) {
+            int u = ds.node;
+            int v = ds.adjNode;
+            int cost = ds.cost;
+            if (set.findUParent(u) == set.findUParent(v)) {
+                continue;
+            }
+            wt += cost;
+            set.unionBySize(u, v);
+        }
+        return wt;
+    }
+    //40. Number of operations to make network connected
+    public int makeConnected(int n, int[][] connections) {
+        DisjointSet set = new DisjointSet(n);
+        int extraEdge = 0;
+
+        for(int[] conn : connections){
+            int u = conn[0];
+            int v = conn[1];
+            if(set.findUParent(u) != set.findUParent(v)){
+                set.unionBySize(u, v);
+            }else
+                extraEdge ++;
+        }
+
+        int totalComponent =0;
+        for(int i=0;i<n;i++){
+            if(set.parent.get(i) == i)
+                totalComponent ++;
+        }
+        if(totalComponent-1 <= extraEdge)
+            return totalComponent -1;
+        return -1;
+    }
+    //41. Most stones removed with same row or column
+    public int removeStones(int[][] stones) {
+        int n =0, m =0;
+        int totalStones = stones.length;
+        for(int[] stone : stones){
+            int r = stone[0];
+            int c = stone[1];
+            n = Math.max(r, n);
+            m = Math.max(c, m);
+        }
+        DisjointSet set = new DisjointSet(n+m+1);
+        Set<Integer> hs = new HashSet<>();
+
+        for(int[] stone : stones){
+            int nodeRow = stone[0];
+            int nodeCol = stone[1] + n + 1; // to differentiate between row and column (colume in between n+1 to n+m)
+            set.unionBySize(nodeRow, nodeCol);
+            hs.add(nodeRow);
+            hs.add(nodeCol);
+        }
+        int count = 0;
+        for(int node : hs){
+            if(set.findUParent(node) == node)
+                count++;
+        }
+        return (totalStones - count);
+    }
+    //42. Accounts Merge
+    public List<List<String>> accountsMerge(List<List<String>> accounts) {
+        int n = accounts.size();
+        Map<String, Integer> mailIndex = new HashMap<>();
+        DisjointSet set = new DisjointSet(n);
+        for(int i=0;i<n;i++){
+            for(int j=1;j<accounts.get(i).size();j++){
+
+                int node = i;
+                String email = accounts.get(i).get(j);
+
+                if(mailIndex.containsKey(email)){
+                    set.unionBySize(mailIndex.get(email), node);
+                }else
+                    mailIndex.put(email, node);
+            }
+        }
+        Map<Integer, Set<String>> mp = new HashMap<>();
+        List<List<String>> res = new ArrayList<>();
+
+
+        for(Map.Entry<String, Integer> entry : mailIndex.entrySet()){
+            String email = entry.getKey();
+            int index = set.findUParent(entry.getValue());
+            if(mp.containsKey(index))
+                mp.get(index).add(email);
+            else
+                mp.put(index, new TreeSet<>(List.of(email)));
+        }
+
+        for(Map.Entry<Integer, Set<String>> entry : mp.entrySet()){
+            int index = entry.getKey();
+            Set<String> st = entry.getValue();
+            List<String> currList = new ArrayList<>(st);
+            currList.add(0, accounts.get(index).get(0));
+            res.add(currList);
+        }
+        return res;
+    }
+    //43. Number of Islands 2
+    public static int[] numOfIslandsII(int n, int m, int[][] q) {
+        int N = n * m;
+        int[][] mat = new int[n][m];
+
+        DisjointSet set = new DisjointSet(N);
+        int[] res = new int[q.length];
+        int count = 0;
+        int[] delRow = new int[]{-1, 0, 1, 0};
+        int[] delCol = new int[]{0, 1, 0, -1};
+        for(int i=0;i<q.length;i++){
+
+            int row = q[i][0];
+            int col = q[i][1];
+            mat[row][col] = 1;
+            count++;
+
+            int node = row * m + col;
+
+            for(int j=0;j<4;j++){
+                int r = row + delRow[j];
+                int c = col + delCol[j];
+                if(r >=0 && r <n && c>=0 && c <m){
+                    if(mat[r][c] == 0)
+                        continue;
+                    int adjNode = r * m + c;
+
+                    if(set.findUParent(node) != set.findUParent(adjNode)){
+                        set.unionBySize(node, adjNode);
+                        count--;
+                    }
+                }
+            }
+            res[i] = count;
+        }
+        return res;
+    }
+    //44. Making a Large Island
+    public int largestIsland(int[][] grid) {
+        int n = grid.length;
+        int res = 0;
+        DisjointSet set = new DisjointSet(n*n);
+        int[][] vis = new int[n][n];
+
+        //Adding all connected items to disjoint set
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(grid[i][j] == 1 && vis[i][j] == 0)
+                    res = Math.max(res, dfs(i, j, grid, vis, set));
+            }
+        }
+
+        int[] delRow = new int[]{-1, 0, 1, 0};
+        int[] delCol = new int[]{0, 1, 0, -1};
+        // Calculating the the max size of any component
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+
+                if(grid[i][j] == 1)
+                    continue;
+
+                int count = 0;
+
+                Set<Integer> up = new HashSet<>();
+                for(int k =0;k<4;k++){
+                    int r = i + delRow[k];
+                    int c = j + delCol[k];
+                    int adjNode = r * n + c;
+
+                    if( r>= 0 && r < n && c >= 0 && c < n && grid[r][c] == 1){
+                        int upAdj = set.findUParent(adjNode);
+                        if(!up.contains(upAdj))
+                            count += set.size[upAdj];
+                        up.add(upAdj);
+                    }
+                }
+                res = Math.max(res, count+1);
+            }
+        }
+        return res;
+    }
+    int dfs(int row, int col, int[][] grid, int[][] vis, DisjointSet set){
+        int n = grid.length;
+        vis[row][col] = 1;
+        int[] delRow = new int[]{-1, 0, 1, 0};
+        int[] delCol = new int[]{0, 1, 0, -1};
+        int node = row *n + col;
+        int count = 0;
+
+        for(int i=0;i<4;i++){
+            int r = row + delRow[i];
+            int c = col + delCol[i];
+            int adjNode = r * n + c;
+            if( r>= 0 && r < n && c >= 0 && c < n && vis[r][c] == 0 && grid[r][c] == 1){
+                set.unionBySize(node, adjNode);
+                count += dfs(r,c, grid, vis, set);
+            }
+        }
+        return count +1;
+    }
+    //45. Swim in rising water
+    public int swimInWater(int[][] grid) {
+        Queue<Pair<Integer, Pair<Integer, Integer>>> pq = new PriorityQueue<>((a, b) -> a.first - b.first);
+        int n = grid.length;
+        pq.add(new Pair<>(grid[0][0], new Pair(0, 0)));
+        int[][] vis = new int[n][n];
+        int[] delRow = new int[]{-1, 0, 1, 0};
+        int[] delCol = new int[]{0, 1, 0, -1};
+        int res = grid[0][0];
+        while(!pq.isEmpty()){
+
+            Pair<Integer, Pair<Integer, Integer>> p = pq.remove();
+            int cost = p.first;
+            int row = p.second.first;
+            int col = p.second.second;
+            vis[row][col] = 1;
+            res = Math.max(res, cost);
+            if(row == n-1 && col == n-1)
+                return res;
+
+            for(int i=0;i<4;i++){
+                int r = row + delRow[i];
+                int c = col + delCol[i];
+                if(r >=0 && r <n && c >=0 && c < n && vis[r][c] == 0){
+                    int currCost = Math.max(cost, grid[r][c]);
+                    pq.add(new Pair<>(currCost, new Pair<>(r, c)));
+                }
+            }
+        }
+        return 0;
+    }
+
 
 }
