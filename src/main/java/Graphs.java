@@ -1558,7 +1558,7 @@ public class Graphs {
                     if( r>= 0 && r < n && c >= 0 && c < n && grid[r][c] == 1){
                         int upAdj = set.findUParent(adjNode);
                         if(!up.contains(upAdj))
-                            count += set.size[upAdj];
+                            count += set.size.get(upAdj);
                         up.add(upAdj);
                     }
                 }
@@ -1617,6 +1617,5 @@ public class Graphs {
         }
         return 0;
     }
-
 
 }
