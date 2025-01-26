@@ -1617,5 +1617,129 @@ public class Graphs {
         }
         return 0;
     }
+    //46. Bridges in Graph (Tarjan's Algorithm) or Critical Connections in a network
+    int time = 0;
+    public List<List<Integer>> criticalConnections(int n, List<List<Integer>> conn) {
+        List<List<Integer>> adj = new ArrayList<>();
+        for(int i=0;i<n;i++)
+            adj.add(new ArrayList<>());
+        for(int i=0;i<conn.size();i++){
+            int u = conn.get(i).get(0);
+            int v = conn.get(i).get(1);
+            adj.get(u).add(v);
+            adj.get(v).add(u);
+        }
+
+        int[] vis = new int[n];
+        int[] toin = new int[n];
+        int[] low = new int[n];
+        List<List<Integer>> bridge = new ArrayList<>();
+        dfs(0, -1, adj, vis, toin, low, bridge);
+        return bridge;
+    }
+    void dfs(int node, int parent, List<List<Integer>> adj, int[] vis, int[] toin, int[] low, List<List<Integer>> bridge){
+        vis[node] = 1;
+        toin[node] = time;
+        low[node] = time;
+        time ++;
+        for(int child : adj.get(node)){
+            if(child == parent) continue;
+
+            if(vis[child] == 0){
+                dfs(child, node, adj, vis, toin, low, bridge);
+                low[node] = Math.min(low[child], low[node]);
+
+                if(low[child] > toin[node]){
+                    bridge.add(new ArrayList<>(List.of(node, child)));
+                }
+            }else{
+                low[node] = Math.min(low[child], low[node]);
+            }
+        }
+    }
+    //47. Articulation Points 1
+    public ArrayList<Integer> articulationPoints(int V,ArrayList<ArrayList<Integer>> adj){
+        int[] vis = new int[V];
+        int[] min = new int[V];
+        int[] toin = new int[V];
+        int[] ans = new int[V];
+        ArrayList<Integer> res = new ArrayList<>();
+        dfs(0, -1, adj, vis, min, toin, ans);
+        for(int i=0;i<V;i++){
+            if(ans[i] == 1)
+                res.add(i);
+        }
+        if(res.isEmpty())
+            res.add(-1);
+        return res;
+    }
+    void dfs(int node, int parent, ArrayList<ArrayList<Integer>> adj, int[] vis, int[] min, int[] toin, int[] ans){
+        vis[node] = 1;
+        min[node] = toin[node] = time;
+        time ++;
+        int noOfChildren = 0;
+        for(int child : adj.get(node)){
+            if(child == parent) continue;
+            if(vis[child] == 0){
+                noOfChildren++;
+                dfs(child, node, adj, vis, min, toin, ans);
+
+                min[node] = Math.min(min[node], min[child]);
+                if(min[child] >= toin[node] && parent != -1)
+                    ans[node] = 1;
+            }else{
+                min[node] = Math.min(min[node], toin[child]);
+            }
+        }
+        if(noOfChildren > 1 && parent == -1){
+            ans[0] = 1;
+        }
+    }
+    //48. Kosaraju's Algorithm
+    public int kosaraju(ArrayList<ArrayList<Integer>> adj) {
+        int n = adj.size();
+        Stack<Integer> st = new Stack<>();
+
+        int[] vis = new int[n];
+        for(int i=0;i<n;i++){
+            if(vis[i] == 0)
+                dfs(i, adj, st, vis);
+        }
+        //Reversing the adj
+        ArrayList<ArrayList<Integer>> newAdj = new ArrayList<>();
+        for(int i=0;i<n;i++)
+            newAdj.add(new ArrayList<>());
+        for(int i=0;i<n;i++){
+            for(int child : adj.get(i)){
+                newAdj.get(child).add(i);
+            }
+        }
+        // count total scc
+        Arrays.fill(vis, 0);
+        int res = 0;
+        while(!st.isEmpty()){
+            int node = st.pop();
+            if(vis[node] == 1) continue;
+            dfs(node, newAdj, vis);
+            res++;
+        }
+        return res;
+    }
+    void dfs(int node, ArrayList<ArrayList<Integer>> adj, Stack<Integer> st, int[] vis){
+        vis[node] = 1;
+        for(int child : adj.get(node)){
+            if(vis[child] == 0)
+                dfs(child, adj, st, vis);
+        }
+        st.add(node);
+    }
+
+    void dfs(int node, ArrayList<ArrayList<Integer>> adj, int[] vis){
+        vis[node] = 1;
+        for(int child : adj.get(node)){
+            if(vis[child] == 0)
+                dfs(child, adj, vis);
+        }
+    }
 
 }
