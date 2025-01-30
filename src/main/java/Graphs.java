@@ -105,7 +105,6 @@ public class Graphs {
     }
     //6. Number of Provinces
     public int numProvinces(int[][] isConnected) {
-
         int v = isConnected.length;
         int count = 0;
         int[] vis = new int[v];
@@ -136,7 +135,7 @@ public class Graphs {
                 if(grid[i][j] == 1)
                     freshOrange++;
                 if(grid[i][j] == 2)
-                    q.add(new Pair(i, j));
+                    q.add(new Pair<>(i, j));
             }
         }
 
@@ -154,7 +153,7 @@ public class Graphs {
                     int c = p.second + delCol[j];
                     if(r < n && r >=0 && c <m && c >= 0 && grid[r][c] == 1){
                         grid[r][c] = 2;
-                        q.add(new Pair(r, c));
+                        q.add(new Pair<>(r, c));
                         freshOrange--;
                     }
 
@@ -229,7 +228,7 @@ public class Graphs {
     boolean bfs1(int node, ArrayList<ArrayList<Integer>> adj, int[] vis){
 
         Queue<Pair> q = new LinkedList<>();
-        q.add(new Pair(node, -1));
+        q.add(new Pair<>(node, -1));
         while(!q.isEmpty()){
             Pair<Integer, Integer> p = q.remove();
             int curr = p.first;
@@ -241,7 +240,7 @@ public class Graphs {
                         return true;
                     continue;
                 }
-                q.add(new Pair(child, curr));
+                q.add(new Pair<>(child, curr));
             }
         }
         return false;
@@ -254,7 +253,7 @@ public class Graphs {
         for(int i=0;i<n;i++){
             for(int j=0;j<m;j++){
                 if(mat[i][j] == 0)
-                    q.add(new Pair(i, j));
+                    q.add(new Pair<>(i, j));
                 else
                     mat[i][j] = -1;
             }
@@ -275,7 +274,7 @@ public class Graphs {
                     int c = col + delCol[j];
                     if(r >=0 && r < n && c >=0 && c <m && mat[r][c] == -1){
                         mat[r][c] = mat[row][col] + 1;
-                        q.add(new Pair(r, c));
+                        q.add(new Pair<>(r, c));
                     }
                 }
             }
