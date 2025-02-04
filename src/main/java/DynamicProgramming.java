@@ -1,5 +1,6 @@
-import java.util.Arrays;
-import java.util.List;
+import java.lang.String;
+import java.util.*;
+import java.lang.*;
 
 public class DynamicProgramming {
     public static void main(String[] args) {
@@ -1270,5 +1271,203 @@ public class DynamicProgramming {
             }
         }
         return dp[n-1][n];
+    }
+    //24. Longest Common Subsequence | (DP - 25)
+    public int longestCommonSubsequence(String text1, String text2) {
+        int n = text1.length(), m = text2.length();
+        int[][] dp = new int[n+1][m+1];
+        for(int[] a: dp)
+            Arrays.fill(a, -1);
+        return solve(text1, text2, n, m, dp);
+    }
+    int solve(String s1, String s2, int index1, int index2, int[][] dp){
+        if(index1 == 0 || index2 == 0){
+            return 0;
+        }
+        if(dp[index1][index2] != -1) return dp[index1][index2];
+        int ans = 0;
+        if(s1.charAt(index1-1) == s2.charAt(index2-1)){
+            ans = 1 + solve(s1, s2, index1-1, index2-1, dp);
+        }else{
+            int a = solve(s1, s2, index1-1, index2, dp);
+            int b = solve(s1, s2, index1, index2-1, dp);
+            ans = Math.max(a, b);
+        }
+        return dp[index1][index2] = ans;
+    }
+    //---------------------------or--------------------------------
+
+    public int longestCommonSubsequence2(String text1, String text2) {
+        int n = text1.length(), m = text2.length();
+        int[] prev = new int[m+1];
+        int[] curr = new int[m+1];
+
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                int ans = 0;
+                if(text1.charAt(i-1) == text2.charAt(j-1))
+                    ans = 1 + prev[j-1];
+                else
+                    ans = Math.max(prev[j], curr[j-1]);
+                curr[j] = ans;
+            }
+            prev = Arrays.copyOf(curr, curr.length);
+        }
+        return prev[m];
+    }
+    //25. Print ALL Longest Common Subsequence | (DP - 26)
+    class Pair{
+        int len;
+        String path;
+        int row, col;
+        Pair(int row, int col, String path, int len){
+            this.row = row;
+            this.col = col;
+            this.path = path;
+            this.len = len;
+        }
+    }
+    public List<String> all_longest_common_subsequences(String s, String t) {
+        // Code here
+        int n = s.length(), m = t.length();
+
+        //creating dp array to store the length of longest common subsequence
+        int[][] dp = new int[n+1][m+1];
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                int ans = 0;
+                if(s.charAt(i-1) == t.charAt(j-1))
+                    ans = 1 + dp[i-1][j-1];
+                else
+                    ans = Math.max(dp[i-1][j], dp[i][j-1]);
+                dp[i][j] = ans;
+            }
+        }
+
+        int maxLen = dp[n][m];
+        Set<String> res = new TreeSet<>();
+        Queue<Pair> q = new LinkedList<>();
+        q.add(new Pair(n, m, "", 0));
+        Set<String> memo = new HashSet<>(); // to avoid duplicate paths
+        // doing bfs to get all the longest common subsequences
+        while(!q.isEmpty()){
+            Pair p = q.remove();
+
+            int row = p.row;
+            int col = p.col;
+            int len = p.len;
+            String path = p.path;
+
+            if(len == maxLen){
+                res.add(new StringBuilder(path).reverse().toString());
+                continue;
+            }
+            if(row == 0 || col == 0)
+                continue;
+
+            String key = row +", "+col+", "+path;
+            if(memo.contains(key))
+                continue;
+            else
+                memo.add(key);
+
+
+            if(s.charAt(row-1) == t.charAt(col-1)){
+                Pair p1 = new Pair(row-1, col-1, path + s.charAt(row-1), len+1);
+                q.add(p1);
+            }else{
+                if(dp[row-1][col] > dp[row][col-1]){
+                    Pair p1 = new Pair(row-1, col, path, len);
+                    q.add(p1);
+                }else if(dp[row][col-1]> dp[row-1][col]){
+                    Pair p1 = new Pair(row, col-1, path, len);
+                    q.add(p1);
+                }else{
+                    Pair p1 = new Pair(row, col-1, path, len);
+                    Pair p2 = new Pair(row-1, col, path, len);
+                    q.add(p1);
+                    q.add(p2);
+                }
+            }
+        }
+        return new ArrayList<>(res);
+    }
+    //26. Longest Common Substring | (DP - 27)
+    public int longestCommonSubstr(String s1, String s2) {
+        int n = s1.length(), m = s2.length();
+        int[] prev = new int[m+1];
+        int[] curr = new int[m+1];
+        int res = 0;
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+
+                if(s1.charAt(i-1) == s2.charAt(j-1))
+                    curr[j] = 1 + prev[j-1];
+                else
+                    curr[j] = 0;
+                res = Math.max(res, curr[j]);
+            }
+            prev = Arrays.copyOf(curr, m+1);
+        }
+        return res;
+    }
+    //27. Longest Palindromic Subsequence | (DP - 28)
+    public int longestPalindromeSubseq(String s1) {
+        String s2 = new StringBuilder(s1).reverse().toString();
+        int n = s1.length();
+        int[] prev = new int[n+1];
+        int[] curr = new int[n+1];
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=n;j++){
+                if(s1.charAt(i-1) == s2.charAt(j-1)){
+                    curr[j] = 1 + prev[j-1];
+                }else{
+                    curr[j] = Math.max(prev[j], curr[j-1]);
+                }
+            }
+            prev = Arrays.copyOf(curr, n+1);
+        }
+        return prev[n];
+    }
+    //28. Minimum insertions to make string palindrome | DP-29
+    public int minInsertions(String s1) {
+        String s2 = new StringBuilder(s1).reverse().toString();
+        int n = s1.length();
+        int[] prev = new int[n+1];
+        int[] curr = new int[n+1];
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=n;j++){
+                if(s1.charAt(i-1) == s2.charAt(j-1)){
+                    curr[j] = 1 + prev[j-1];
+                }else{
+                    curr[j] = Math.max(prev[j], curr[j-1]);
+                }
+            }
+            prev = Arrays.copyOf(curr, n+1);
+        }
+        return n - prev[n];
+    }
+    //29. Minimum Insertions/Deletions to Convert two String identical | (DP- 30)
+    public int minDistance(String s1, String s2) {
+        int n = s1.length(), m = s2.length();
+        int[] prev = new int[m+1];
+        int[] curr = new int[m+1];
+        int res = 0;
+        for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+
+                if(s1.charAt(i-1) == s2.charAt(j-1))
+                    curr[j] = 1 + prev[j-1];
+                else
+                    curr[j] = Math.max(curr[j-1], prev[j]);
+                res = Math.max(res, curr[j]);
+            }
+            prev = Arrays.copyOf(curr, m+1);
+        }
+        if(res == Math.min(n, m))
+            return Math.max(n, m) - res;
+        else{
+            return n+m -2*res;
+        }
     }
 }
