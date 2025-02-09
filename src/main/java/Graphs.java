@@ -37,9 +37,9 @@ public class Graphs {
             adj.add(new ArrayList<>());
         }
         //filling adj list
-        for(int i=0;i<edges.length;i++){
-            int u1 = edges[i][0];
-            int v1 = edges[i][1];
+        for (int[] edge : edges) {
+            int u1 = edge[0];
+            int v1 = edge[1];
             adj.get(u1).add(v1);
             adj.get(v1).add(u1);
         }
@@ -281,7 +281,7 @@ public class Graphs {
         }
         return mat;
     }
-    //12. Surrounded Regions
+    //12. Surrounded Regions -> https://leetcode.com/problems/surrounded-regions/description/
     public void solve(char[][] board) {
         int n = board.length;
         int m = board[0].length;
@@ -319,7 +319,7 @@ public class Graphs {
             }
         }
     }
-    //13. Number of Enclaves
+    //13. Number of Enclaves -> https://leetcode.com/problems/number-of-enclaves/description/
     public int numEnclaves(int[][] grid) {
 
         int n = grid.length;
@@ -370,8 +370,7 @@ public class Graphs {
 
     int bfs(String beginWord, String endWord, Set<String> hs){
         Queue<Pair> q = new LinkedList<>();
-        List<String> res = new ArrayList<>(new HashSet<>(List.of("a", "b", "c")));
-        q.add(new Pair(beginWord, 1));
+        q.add(new Pair<>(beginWord, 1));
         int count = 0;
 
         while(!q.isEmpty()){
@@ -389,7 +388,7 @@ public class Graphs {
                     word[j]= ch;
                     String newWord = new String(word);
                     if(hs.contains(newWord)){
-                        q.add(new Pair(newWord, count+1));
+                        q.add(new Pair<>(newWord, count+1));
                         hs.remove(newWord);
                     }
                 }
@@ -573,17 +572,17 @@ public class Graphs {
         int[] vis = new int[numCourses];
         int[] pathVis = new int[numCourses];
         for(int i=0;i<numCourses;i++){
-            if(vis[i] == 0 && dfs(i, adj, vis, pathVis) == true)
+            if(vis[i] == 0 && isCyclic1(i, adj, vis, pathVis) == true)
                 return false;
         }
         return true;
     }
-    boolean dfs(int node, List<List<Integer>> adj, int[] vis, int[] pathVis){
+    boolean isCyclic1(int node, List<List<Integer>> adj, int[] vis, int[] pathVis){
         vis[node] = 1;
         pathVis[node] = 1;
         for(int curr : adj.get(node)){
             if(vis[curr] == 0){
-                if(dfs(curr, adj, vis, pathVis))
+                if(isCyclic(curr, adj, vis, pathVis))
                     return true;
             }else if(pathVis[curr] == 1)
                 return true;
@@ -591,7 +590,7 @@ public class Graphs {
         pathVis[node] = 0;
         return false;
     }
-    //19. Topological Sort
+    //19. Topological Sort -> https://www.geeksforgeeks.org/problems/topological-sort/1
     static ArrayList<Integer> topologicalSort(ArrayList<ArrayList<Integer>> adj) {
         int v = adj.size();
         int[] vis = new int[v];
@@ -785,6 +784,7 @@ public class Graphs {
         List<List<Integer>> adj = new ArrayList<>();
         for(int i=0;i<v;i++)
             adj.add(new ArrayList<>());
+
         for(int i=0;i<v;i++){
             for(int node : graph[i])
                 adj.get(node).add(i);
@@ -874,43 +874,47 @@ public class Graphs {
     }
     //27. Shortest Path in Undirected Graph with unit weights
     public int[] shortestPath(ArrayList<ArrayList<Integer>> adj, int src) {
+        // code here
         int v = adj.size();
-        Queue<Pair> q = new LinkedList<>();
-        q.add(new Pair(src, 0));
+        Queue<int[]> q = new LinkedList<>();
+        q.add(new int[]{src, 0});
         int[] res = new int[v];
         Arrays.fill(res, -1);
 
         while(!q.isEmpty()){
-            Pair<Integer, Integer> p = q.remove();
-            int node = p.first;
-            int cost = p.second;
+            int[] p = q.remove();
+            int node = p[0];
+            int cost = p[1];
             if(res[node] == -1)
                 res[node] = cost;
             else
                 continue;
+
             for(int curr : adj.get(node)){
-                q.add(new Pair(curr, cost+1));
+                if(res[curr] == -1)
+                    q.add(new int[]{curr, cost+1});
             }
         }
         return res;
     }
-    //28. Shortest Path in DAG
+    //28. Shortest weight Path in DAG
     public int[] shortestPath(int V, int E, int[][] edges) {
         List<List<Pair>> adj = new ArrayList<>();
         for(int i=0;i<V;i++)
             adj.add(new ArrayList<>());
+
         for(int[] edge : edges){
             int u = edge[0];
             int v = edge[1];
             int weight = edge[2];
-            adj.get(u).add(new Pair(v, weight));
+            adj.get(u).add(new Pair<>(v, weight));
         }
 
         Queue<Pair<Integer, Integer>> pq = new PriorityQueue<>((a, b) -> a.second - b.second);
 
         int[] res = new int[V];
         Arrays.fill(res, -1);
-        pq.add(new Pair(0, 0));
+        pq.add(new Pair<>(0, 0));
 
         while(!pq.isEmpty()){
 
@@ -935,7 +939,7 @@ public class Graphs {
         Queue<Pair<Integer, Integer>> pq = new PriorityQueue<>((a, b)-> a.second - b.second);
         ArrayList<Integer> dist = new ArrayList<>(Collections.nCopies(v, Integer.MAX_VALUE));
 
-        pq.add(new Pair(src, 0));
+        pq.add(new Pair<>(src, 0));
         dist.set(src, 0);
 
         while(!pq.isEmpty()){
@@ -949,27 +953,27 @@ public class Graphs {
                 int adjWeight = curr.second;
                 if(weight + adjWeight < dist.get(adjNode)){
                     dist.set(adjNode, weight + adjWeight);
-                    pq.add(new Pair(adjNode, weight + adjWeight));
+                    pq.add(new Pair<>(adjNode, weight + adjWeight));
                 }
             }
         }
         return dist;
     }
-    //30. Shortest Path in Binary Matrix
+    //30. Shortest path in a binary maze
     public int shortestPathBinaryMatrix(int[][] grid) {
         int n = grid.length;
         if(grid[0][0] == 1 || grid[n-1][n-1] == 1)
             return -1;
-        Queue<Pair<Integer, Pair<Integer, Integer>>> pq = new PriorityQueue<>((a, b) -> a.first - b.first);
+        Queue<Pair<Integer, Pair<Integer, Integer>>> q = new LinkedList<>();
         int[][] vis = new int[n][n];
         int[] delRow = new int[]{-1, 0, 1};
         int[] delCol = new int[]{-1, 0, 1};
 
-        pq.add(new Pair<>(1, new Pair<>(0, 0)));
+        q.add(new Pair<>(1, new Pair<>(0, 0)));
         vis[0][0] = 1;
 
-        while(!pq.isEmpty()){
-            Pair<Integer, Pair<Integer, Integer>> p = pq.remove();
+        while(!q.isEmpty()){
+            Pair<Integer, Pair<Integer, Integer>> p = q.remove();
             int cost = p.first;
             int row = p.second.first;
             int col = p.second.second;
@@ -982,7 +986,7 @@ public class Graphs {
                     int c = delCol[j] + col;
 
                     if(r >=0 && r < n && c>=0 && c <n && grid[r][c] == 0 && vis[r][c] == 0){
-                        pq.add(new Pair<>(cost+1, new Pair<>(r, c)));
+                        q.add(new Pair<>(cost+1, new Pair<>(r, c)));
                         vis[r][c] = 1;
                     }
                 }
@@ -1030,6 +1034,7 @@ public class Graphs {
             adj.add(new ArrayList<>());
             res[i] = Integer.MAX_VALUE;
         }
+
         for(int[] flight: flights){
             int u = flight[0];
             int v = flight[1];
@@ -1061,7 +1066,7 @@ public class Graphs {
         }
         return res[dst] == Integer.MAX_VALUE ? -1 : res[dst];
     }
-    //33. Network Delay Time
+    //33. Network Delay Time -> http://leetcode.com/problems/network-delay-time/description/
     public int networkDelayTime(int[][] times, int n, int k) {
         List<List<Pair>> adj = new ArrayList<>();
         for(int i=0;i<=n;i++)
@@ -1147,34 +1152,37 @@ public class Graphs {
         }
         return ways[n-1] % mod;
     }
-    //35. Minimum Multiplications to reach End
+    //35. Minimum Multiplications to reach End -> https://www.geeksforgeeks.org/problems/minimum-multiplications-to-reach-end/1?utm_source=youtube&utm_medium=collab_striver_ytdescription&utm_campaign=minimum-multiplications-to-reach-end
     int minimumMultiplications(int[] arr, int start, int end) {
         int mod = (int)(1e5);
         int[] steps = new int[mod];
-        Queue<Pair<Integer, Integer>> pq = new LinkedList<>();
+        Queue<Pair<Integer, Integer>> q = new LinkedList<>();
 
         Arrays.fill(steps, Integer.MAX_VALUE);
-        pq.add(new Pair<>(0, start));
+        q.add(new Pair<>(0, start));
         steps[start] = 0;
-        while(!pq.isEmpty()){
-            Pair<Integer, Integer> p = pq.remove();
+
+        while(!q.isEmpty()){
+            Pair<Integer, Integer> p = q.remove();
             int step = p.first;
             int val = p.second;
+
+            if(val == end)
+                return step;
 
             for (int j : arr) {
                 int newVal = (val * j) % mod;
 
                 if (steps[newVal] > step + 1) {
                     steps[newVal] = step + 1;
-                    pq.add(new Pair<>(step + 1, newVal));
+                    q.add(new Pair<>(step + 1, newVal));
                 }
-
             }
         }
-        return steps[end] == Integer.MAX_VALUE ? -1 : steps[end];
+        return -1;
     }
 
-    //36. Bellman-Ford
+    //36. Bellman-Ford to find shortest distance from src to every node in graph with negative weights
     int[] bellmanFord(int V, int[][] edges, int src) {
         int[] dist = new int[V];
         Arrays.fill(dist, (int) 1e8);
@@ -1189,7 +1197,7 @@ public class Graphs {
                     dist[v] = dist[u]+cost;
             }
         }
-
+        // this line is ued to check if it has negative cycle
         for(int[] edge : edges){
             int u = edge[0];
             int v = edge[1];
@@ -1200,7 +1208,7 @@ public class Graphs {
         }
         return dist;
     }
-    //37. Floyd Warshal Algorithm -> when weight can be negative
+    //37. Floyd Warshal Algorithm -> when weight can be negative -> https://www.geeksforgeeks.org/problems/implementing-floyd-warshall2042/1
     public void shortestDistance(int[][] mat) {
         int n = mat.length;
         for(int i=0;i<n;i++){
@@ -1285,8 +1293,8 @@ public class Graphs {
             int u = edge[0];
             int v = edge[1];
             int cost = edge[2];
-            adj.get(u).add(new Pair(v, cost));
-            adj.get(v).add(new Pair(u, cost));
+            adj.get(u).add(new Pair<>(v, cost));
+            adj.get(v).add(new Pair<>(u, cost));
         }
         int minCount = n+1;
         int index = 0;
