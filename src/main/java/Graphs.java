@@ -1597,7 +1597,7 @@ public class Graphs {
     public int swimInWater(int[][] grid) {
         Queue<Pair<Integer, Pair<Integer, Integer>>> pq = new PriorityQueue<>((a, b) -> a.first - b.first);
         int n = grid.length;
-        pq.add(new Pair<>(grid[0][0], new Pair(0, 0)));
+        pq.add(new Pair<>(grid[0][0], new Pair<>(0, 0)));
         int[][] vis = new int[n][n];
         int[] delRow = new int[]{-1, 0, 1, 0};
         int[] delCol = new int[]{0, 1, 0, -1};
