@@ -180,7 +180,6 @@ public class DynamicProgramming2 {
         if(index >= prices.length)
             return 0;
 
-
         if(dp[index][canBuy] != -1)
             return dp[index][canBuy];
 

@@ -71,8 +71,6 @@ public class DynamicProgramming1 {
     }
     //3. Frog Jump with k distances(DP-4)
     public int minimizeCost1(int k, int arr[]) {
-        // code here
-
         int n = arr.length;
         if( n == 1)
             return 0;
@@ -108,7 +106,6 @@ public class DynamicProgramming1 {
 
                 int val = Math.abs(arr[i] - arr[i-j]);
                 res = Math.min(dp[i-j] + val, res);
-
             }
             dp[i] = res;
         }
@@ -141,16 +138,15 @@ public class DynamicProgramming1 {
         int n = nums.length;
         int[] dp = new int[n];
         Arrays.fill(dp, -1);
-        int pick = nums[n-1] + solve(nums, n-3, dp);
-        int notPick = 0 + solve(nums, n-2, dp);
-        return Math.max(pick, notPick);
+        return solve(nums, n-1, dp);
     }
     int solve(int[] nums, int index, int[] dp){
+        if(index == 0)
+            return nums[0];
         if(index < 0)
             return 0;
         if(dp[index] != -1)
             return dp[index];
-
         int pick = nums[index] + solve(nums, index-2, dp);
         int notPick = 0 + solve(nums, index-1, dp);
         return dp[index] = Math.max(pick, notPick);
@@ -517,6 +513,8 @@ public class DynamicProgramming1 {
     }
     //10. Minimum path sum in Triangular Grid (DP 11)
     public int minimumTotal1(List<List<Integer>> triangle) {
+        List<Integer> list = new ArrayList<>();
+        list.sort((a, b) -> a-b);
         int n = triangle.size();
         int[][] dp = new int[n][n];
         for(int[] a: dp)
@@ -1464,11 +1462,8 @@ public class DynamicProgramming1 {
             }
             prev = Arrays.copyOf(curr, m + 1);
         }
-        if (res == Math.min(n, m))
-            return Math.max(n, m) - res;
-        else {
-            return n + m - 2 * res;
-        }
+
+        return (n -res) + (m - res);
     }
     //30. Shortest Common Super sequence | (DP - 31)
     public String shortestCommonSupersequence(String str1, String str2) {
