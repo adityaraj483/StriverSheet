@@ -706,6 +706,54 @@ public class DynamicProgramming2 {
         }
         return dp[1][n];
     }
+    // extra. Egg Dropping Puzzle
+    static int eggDrop1(int n, int k) {
+        int[][] dp = new int[n+1][k+1];
+        for(int[] row : dp){
+            Arrays.fill(row, -1);
+        }
+        return solve(n, k, dp);
+    }
+    static int solve(int n , int k, int[][] dp){
+        if( k <= 1)
+            return k;
+        if( n == 1)
+            return k;
+        if(dp[n][k] != -1) return dp[n][k];
+        int res = (int) 1e9;
+        for(int j=1;j<=k;j++){
+            int val = 1 + Math.max(solve(n-1, j-1, dp), solve(n, k-j, dp));
+            res = Math.min(res, val);
+        }
+        return dp[n][k] = res;
+    }
+    //-------------------OR-------------------
+    static int eggDrop(int n, int k) {
+        int[][] dp = new int[n+1][k+1];
+        for(int i=0;i<=n;i++){
+            dp[i][1] = 1;
+        }
+        for(int i=0;i<=k;i++){
+            dp[1][i] = i;
+        }
+
+        for(int i=2;i<=n;i++){
+            for(int j=2;j<=k;j++){
+                // if(j <= 1 || i == 1){ // either include this or prev base case
+                //     dp[i][j] = j;
+                //     continue;
+                // }
+                int res = (int) 1e9;
+                for(int fr = 1; fr<=j;fr++){
+                    int val = 1 + Math.max(dp[i-1][fr-1], dp[i][j-fr]);
+                    res = Math.min(val, res);
+                }
+                dp[i][j] = res;
+            }
+        }
+        return dp[n][k];
+    }
+
     //51. Evaluate Boolean Expression to True|(DP-52)
 
     //52. Palindrome Partitioning - II|(DP-53)

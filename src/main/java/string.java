@@ -358,4 +358,44 @@ public class string {
         }
         return max - min;
     }
+
+    //15. Longest valid parenthesis
+    static int maxLength(String s) {
+        int open = 0, close = 0;
+        int cnt = 0;
+        for(int i=0;i<s.length();i++){
+            if(s.charAt(i) == '(')
+                open++;
+            else{
+                close++;
+            }
+
+            if(close > open){
+                open =0;
+                close = 0;
+            }
+
+            if(open == close)
+                cnt = Math.max(cnt, open+close);
+        }
+
+        close = 0;
+        open = 0;
+        for(int i=s.length()-1;i>=0;i--){
+            if(s.charAt(i) == ')')
+                close++;
+            else{
+                open++;
+            }
+
+            if(open > close){
+                open = 0;
+                close = 0;
+            }
+            if(open == close)
+                cnt = Math.max(cnt, open+close);
+        }
+        return cnt;
+    }
+
 }

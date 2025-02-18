@@ -144,7 +144,7 @@ public class Recursion {
         generate(open, close -1, ds + ')', res);
     }
     //8. Print all subsequences/Power Set
-    public List<List<Integer>> subsets(int[] nums) {
+    public List<List<Integer>> subsets1(int[] nums) {
         List<List<Integer>> res = new ArrayList<>();
         List<Integer> ds = new ArrayList<>();
         generate(nums, 0, ds, res);
@@ -159,6 +159,22 @@ public class Recursion {
         ds.add(nums[index]);
         generate(nums, index+1, ds, res);
         ds.remove(ds.size()-1);
+    }
+    //-------------------OR---------------------
+    public List<List<Integer>> subsets2(int[] nums) {
+        List<List<Integer>> res = new ArrayList<>();
+        int n = (int)Math.pow(2, nums.length);
+        for(int i=0;i<n;i++){
+            List<Integer> ds = new ArrayList<>();
+            for(int j=0;j<nums.length;j++){
+                if((i & (1<<j)) > 0){
+                    ds.add(nums[j]);
+                }
+            }
+            res.add(new ArrayList<>(ds));
+        }
+
+        return res;
     }
     //9. Better String
     public String betterString(String str1, String str2) {
@@ -603,8 +619,19 @@ public class Recursion {
             if(board[3 * (row/3) + i/3][3 * (col/3) + i%3] == ch)
                 return false;
         }
+
+        //for boxed check
+        int startRow = row - (row % 3), startCol = col - (col % 3);
+
+        for (int i = 0; i < 3; i++)
+            for (int j = 0; j < 3; j++)
+                if (board[i + startRow][j + startCol] == ch)
+                    return false;
+
         return true;
     }
+
+
     //25. Expression Add Operators
 
 

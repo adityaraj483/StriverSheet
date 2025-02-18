@@ -385,7 +385,7 @@ public class BinarySearch {
         int count =0;
         for(int i=0;i<arr.length;i++){
 
-            count += Math.ceil(((double)arr[i]/(double)div));
+            count += (int) Math.ceil(((double)arr[i]/(double)div));
         }
         return count;
     }
@@ -621,9 +621,10 @@ public class BinarySearch {
             return kthElement(b, a, k);
 
         int low = Math.max(0, k-m), high = Math.min(n, k);
+        int left = k;
         while(low <= high){
             int cut1 = (low +high)/2;
-            int cut2 = k-cut1;
+            int cut2 = left-cut1;
 
             int l1 = cut1 == 0 ? Integer.MIN_VALUE: a[cut1-1];
             int l2 = cut2 ==0 ? Integer.MIN_VALUE: b[cut2-1];
@@ -744,5 +745,41 @@ public class BinarySearch {
         }
         return res;
     }
+    //33. Seperate squares by its area using a horizontal line
+    public double separateSquares(int[][] squares) {
+        double low = 0, high = 0;
+        for (int i = 0; i < squares.length; i++) {
+            high = Math.max(high, (double)(squares[i][1] + squares[i][2]));
+        }
 
+        double res = 0;
+        while(high-low > (double)1e-5){
+            double mid = low +(high-low)/2.0;
+
+            if(isPossible(mid, squares)){
+                res = mid;
+                low = mid;
+            }else{
+                high= mid;
+            }
+        }
+        return res;
+    }
+    boolean isPossible(double mid, int[][] sq){
+        double areaAbove =0.0, areaBelow = 0.0;
+        for(int i=0;i<sq.length;i++){
+
+            int x = sq[i][0], y = sq[i][1], l = sq[i][2];
+
+            if(y+l <= mid){
+                areaBelow += (double)l*(double)l;
+            }else if( y >= mid){
+                areaAbove += (double)l*(double)l;
+            }else{
+                areaAbove += (y+l - mid)*l;
+                areaBelow += (mid - y) * l;
+            }
+        }
+        return areaBelow < areaAbove;
+    }
 }
