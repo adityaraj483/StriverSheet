@@ -1,4 +1,4 @@
-import java.util.Arrays;
+import java.util.*;
 public class GooglePrevious {
     public static void main(String[] args) {
 
@@ -85,34 +85,91 @@ public class GooglePrevious {
         return (solve(n-1, k) + k) % n;
     }
 
-    //--------------------List of All DSA questions that are asked in Google interview--------------------
-    //3. Kth Largest Element in an Array
-    //4. Kth Smallest Element in an array
-    //5. Median of Stream of Running Integers using Heaps
-    //6. Sum of bit differences
-    //7. Travelling Salesman Problem
-    //8. Find the element that appears once in an array where every other element appears twice
-    //9. Find the two non-repeating elements in an array of repeating elements
-    //10. Find the Missing Number
-    //11. Find the maximum and minimum element in an array
-    //12. Find the "Kth" max and min element of an array
-    //13. Count Inversions in an array
-    //14. Find the maximum product subarray
-    //15. Find the Longest Consecutive Subsequence
-    //16. Given an array of size n and a number k, find all elements that appear more than n/k times
-    //17. Maximum profit by buying and selling a share at most twice
-    //18. Find whether an array is a subset of another array
-    //19. Find the triplet that sum to a given value
-    //20. Trapping Rain Water problem
-    //21. Chocolate Distribution problem
-    //22. Smallest Subarray with sum greater than a given value
-    //23. Three way partitioning of an array around a given value
-    //24. Minimum swaps required bring elements less equal K together
-    //25. Minimum no. of operations required to make an array palindrome
-    //26. Median of 2 sorted arrays of equal size
-    //27. Median of 2 sorted arrays of different size
-    //28. Merge Without Extra Space
-    //29. Count triplets with sum smaller than a given value
-    //30. Count of pairs with the given sum
-    //31. Merge Overlapping Subintervals
+    //5. Find All Possible Recipes from Given Supplies
+    class AllReceipe {
+        Map<String,Integer> recipMp;
+        Set<String> suppliesSet;
+        Map<String, Boolean> created;
+        Set<String> vis;
+        public List<String> findAllRecipes(String[] recipes, List<List<String>> ingredients, String[] supplies) {
+
+            suppliesSet = new HashSet<>();
+            for(int i=0;i<supplies.length;i++){
+                suppliesSet.add(supplies[i]);
+            }
+
+            recipMp = new HashMap<>();
+            for(int i =0;i<recipes.length;i++){
+                recipMp.put(recipes[i], i);
+            }
+
+            List<String> res = new ArrayList<>();
+            created = new HashMap<>();
+            vis = new HashSet<>();
+
+            for(int i=0;i<recipes.length;i++){
+                if(canRecipes(recipes[i], i, ingredients)){
+                    res.add(recipes[i]);
+                }
+            }
+            return res;
+        }
+
+        boolean canRecipes(String recip, int index, List<List<String>> ingredients){
+            if(created.containsKey(recip))
+                return created.get(recip);
+
+            if(vis.contains(recip))
+                return false;
+            vis.add(recip);
+
+            boolean res = true;
+            for(String ingredient : ingredients.get(index)){
+
+                if(recipMp.containsKey(ingredient)){
+
+                    res = res & canRecipes(ingredient, recipMp.get(ingredient), ingredients);
+                }else{
+                    res = res & suppliesSet.contains(ingredient);
+                }
+                if(res ==  false)
+                    break;
+            }
+            created.put(recip, res);
+            return res;
+        }
+    }
+    //6. RLE Iterator
+    class RLEIterator {
+        int[] encoded;
+        int index;
+        int size;
+        public RLEIterator(int[] encoding) {
+            encoded = encoding;
+            index = 0;
+            size = encoding.length;
+        }
+
+        public int next(int n) {
+            int val = -1;
+            while(index < size){
+                if(encoded[index] > n){
+                    encoded[index] -= n;
+                    val = encoded[index+1];
+                    break;
+                }else if(encoded[index] == n){
+                    val = encoded[index+1];
+                    encoded[index] = 0;
+                    index +=2;
+                    break;
+                }else{
+                    n -= encoded[index];
+                    encoded[index] = 0;
+                    index +=2;
+                }
+            }
+            return val;
+        }
+    }
+    //
 }

@@ -8,9 +8,6 @@ import java.util.*;
 
 public class Array {
     public static void main(String[] args) {
-
-        int val = 1000000000+1000000000+1000000000+1000000000;
-        System.out.println(val);
     }
 
     // Sorting algorithms ------------------------------------------------------------
@@ -106,11 +103,10 @@ public class Array {
 
     //2. check if array is sorted and rotated
     public boolean check(int[] nums) {
-        int val = nums[0], count = 0;
+        int count = 0;
         for(int i=1;i<nums.length;i++){
-            if(nums[i] < val)
+            if(nums[i] < nums[i-1])
                 count++;
-            val = nums[i];
         }
         if(nums[0] < nums[nums.length-1]) count ++;
         return count <= 1;
@@ -118,10 +114,10 @@ public class Array {
     //3. Remove Duplicates from Sorted Array II
     public int removeDuplicates(int[] nums) {
 
-        int n =nums.length;
-        if(n<=2)
+        int n = nums.length;
+        if(n <= 2)
             return n;
-        int i=2;
+        int i = 2;
         for(int j=2;j<n;j++){
             if(nums[j] != nums[i-2])
                 nums[i++] = nums[j];
@@ -211,6 +207,17 @@ public class Array {
         }
         return xor;
     }
+    // follow up -> all num appears 3 time just one num appears 1 time
+    public int singleNumber(int[] nums) {
+        int first = 0, second = 0;
+
+        for (int num : nums) {
+            first = (first ^ num) & ~second;
+            second = (second ^ num) & ~first;
+        }
+        return first;
+    }
+
     //8. max consecutive ones III
     public int longestOnes(int[] nums, int k) {
         int zeroCount = 0, i = 0;

@@ -444,7 +444,7 @@ public class Recursion {
         board[row][col] = currCh;
         return false;
     }
-    //20. N-Queens
+    //20. N Queens
     public List<List<String>> solveNQueens(int n) {
         List<List<String>> res = new ArrayList<>();
         char[][] board = new char[n][n];
