@@ -959,8 +959,7 @@ public class StackAndQueue {
 
             if(currFre == minFre && currList.size == 0)
                 minFre++;
-
-
+            
             node.fre++;
             DLLNodeList newList = freListMp.getOrDefault(node.fre, new DLLNodeList());
 
