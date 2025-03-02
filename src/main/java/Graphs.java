@@ -1208,7 +1208,7 @@ public class Graphs {
         }
         return dist;
     }
-    //37. Floyd Warshal Algorithm -> when weight can be negative -> https://www.geeksforgeeks.org/problems/implementing-floyd-warshall2042/1
+    //37. Floyd Warshal Alg orithm -> when weight can be negative -> https://www.geeksforgeeks.org/problems/implementing-floyd-warshall2042/1
     public void shortestDistance(int[][] mat) {
         int n = mat.length;
         for(int i=0;i<n;i++){

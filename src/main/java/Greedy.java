@@ -200,13 +200,24 @@ public class Greedy {
     //---------------------OR------------------------------
     public int jump2(int[] nums) {
         int n = nums.length;
+        if( n == 1)
+            return 0;
+        if(nums[0] == 0)
+            return -1;
+
         int min = 0, max = 0;
         int cnt = 0;
+
         while(max < n-1){
+
             int fartest = 0;
             for(int i = min;i<=max;i++){
-                fartest = Math.max(fartest, min + nums[i]);
+                fartest = Math.max(fartest, i + nums[i]);
             }
+
+            if(fartest <= max)
+                return -1; // if you are not able to go beyond this line
+
             min = max+1;
             max = fartest;
             cnt ++;

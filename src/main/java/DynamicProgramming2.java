@@ -755,6 +755,48 @@ public class DynamicProgramming2 {
     }
 
     //51. Evaluate Boolean Expression to True|(DP-52)
+    public boolean parseBoolExpr(String e) {
+        Stack<Character> st = new Stack<>();
+        for(int i=0;i<e.length();i++){
+            char ch = e.charAt(i);
+            if(ch == ',')
+                continue;
+            else if( ch == ')'){
+                List<Character> list = new ArrayList<>();
+                while(st.peek() != '('){
+                    list.add(st.pop());
+                }
+                st.pop();
+                char op = st.pop();
+                st.push(solve(list, op));
+            }else
+                st.push(ch);
+        }
+
+        return st.peek() == 't';
+    }
+    char solve(List<Character> list, char op){
+
+        if(op == '!')
+            return list.get(0) == 't' ? 'f' : 't';
+
+        if(op == '&'){
+            for(int i=0;i<list.size();i++){
+                if(list.get(i) == 'f')
+                    return 'f';
+            }
+            return 't';
+        }
+
+        if(op == '|'){
+            for(int i=0;i<list.size();i++){
+                if(list.get(i) == 't')
+                    return 't';
+            }
+            return 'f';
+        }
+        return 't';
+    }
 
     //52. Palindrome Partitioning - II|(DP-53)
     public int minCut1(String s) {
