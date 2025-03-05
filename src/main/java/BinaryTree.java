@@ -678,5 +678,90 @@ public class BinaryTree {
             root = root.right;
         }
     }
+
+    //30. 3425. Longest Special Path // Sliding window on trees
+    int minLen = (int) 1e9, maxSum = 0;
+    public int[] longestSpecialPath(int[][] edges, int[] nums) {
+        int n = nums.length;
+        List<List<int[]>> adj = new ArrayList<>();
+        for(int i=0;i<n;i++){
+            adj.add(new ArrayList<>());
+        }
+
+        for(var edge : edges){
+            int u = edge[0];
+            int v = edge[1];
+            int len = edge[2];
+            adj.get(u).add(new int[]{v, len});
+            adj.get(v).add(new int[]{u, len});
+        }
+        int[] path = new int[n];
+        int pathSum = 0;
+        int start = 0, end = 0;
+        Map<Integer, Integer> colorIndMp = new HashMap<>();
+        solve(0, -1, adj, path, start, end, pathSum, colorIndMp, nums);
+        return new int[]{maxSum, minLen};
+    }
+
+    void solve(int node, int parent, List<List<int[]>> adj, int[] path, int start, int end, int pathSum, Map<Integer, Integer> colorIndMp, int[] color){
+
+        int prevClrInd = colorIndMp.getOrDefault(color[node], -1);
+
+        while(start <= prevClrInd){
+            pathSum -= path[start++];
+        }
+
+        colorIndMp.put(color[node], end);
+
+        if(maxSum < pathSum){
+            maxSum = pathSum;
+            minLen = end-start+1;
+        }else if(maxSum == pathSum){
+            minLen = Math.min(minLen, end-start+1);
+        }
+
+
+        for(var curr : adj.get(node)){
+            int currNode = curr[0];
+            int currLen = curr[1];
+            if(currNode == parent)
+                continue;
+
+            pathSum += currLen;
+            path[end] = currLen;
+
+            solve(currNode, node, adj, path, start, end+1, pathSum, colorIndMp, color);
+
+            pathSum -= currLen;
+        }
+        colorIndMp.remove(color[node]);
+        if(prevClrInd >=0)
+            colorIndMp.put(color[node], prevClrInd);
+    }
+
+    //31.  Populating Next Right Pointers in Each Node
+    public TreeNode connect(TreeNode root) {
+        if(root == null)
+            return root;
+        Queue<TreeNode> q = new LinkedList<>();
+        q.add(root);
+
+        while(!q.isEmpty()){
+            TreeNode node = q.remove();
+
+            if(node.left != null){
+                node.left.next = node.right;
+            }
+
+            if(node.right != null && node.next != null)
+                node.right.next = node.next.left;
+
+            if(node.left != null)
+                q.add(node.left);
+            if(node.right != null)
+                q.add(node.right);
+        }
+        return root;
+    }
     
 }

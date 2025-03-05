@@ -1,8 +1,8 @@
-import DS.Interval;
-import DS.MountainArray;
-import DS.TreeNode;
+import DS.*;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class GooglePrevious {
     public static void main(String[] args) {
         // 1 1 1 2 3 5 7
@@ -1045,6 +1045,140 @@ public class GooglePrevious {
         int r = findSize(root.right);
 
         return l+r+1;
+    }
+
+    //21. Detonate the Maximum Bombs
+    public int maximumDetonation(int[][] bombs) {
+        int n = bombs.length;
+
+        int res = 1;
+        for(int i=0;i<n;i++){
+            int[] vis = new int[n];
+            int val = dfs(i, bombs, vis);
+            res = Math.max(res, val);
+        }
+        return res;
+    }
+    int dfs(int index, int[][] bombs, int[] vis){
+        vis[index] = 1;
+
+
+        int cnt = 0;
+        for(int i=0;i<bombs.length;i++){
+            if(vis[i] == 1)
+                continue;
+            int dx = bombs[index][0] - bombs[i][0];
+            int dy = bombs[index][1] - bombs[i][1];
+
+            long distance = (long) dx * dx + (long) dy*dy;
+            long r = (long) bombs[index][2] * bombs[index][2];
+
+            if(distance <= r){
+                cnt += dfs(i, bombs, vis);
+            }
+        }
+        return cnt + 1;
+    }
+    //22. Guess the Word -> https://leetcode.com/problems/guess-the-word/description/
+    public void findSecretWord(String[] words, Master master) {
+        int n = words.length;
+
+        List<String> list = new LinkedList<>();
+        for(int i=0;i<n;i++){
+            list.add(words[i]);
+        }
+
+        while(!list.isEmpty()){
+            int rand = (int) (Math.random() * list.size());
+            String selectedWord = list.get(rand);
+            int val = master.guess(selectedWord);
+
+            if(val == 6)
+                return;
+
+            List<String> l1 = new LinkedList<>();
+            for(int i=0;i<list.size();i++){
+                if(rand == i || filter(selectedWord, list.get(i)) != val)
+                    continue;
+                l1.add(list.get(i));
+            }
+            list = l1;
+        }
+    }
+    int filter(String s1, String s2){
+        int cnt = 0;
+        for(int i=0;i<6;i++){
+            if(s1.charAt(i) == s2.charAt(i))
+                cnt++;
+        }
+        return cnt;
+    }
+
+    //23. Maximum Strictly Increasing Cells in a Matrix
+    public int maxIncreasingCells(int[][] mat) {
+        var mp = new TreeMap<Integer, List<int[]>>(Collections.reverseOrder());
+
+        var n = mat.length;
+        var m = mat[0].length;
+
+        for(var i =0;i<n;i++){
+            for(var j=0;j<m;j++){
+                mp.computeIfAbsent(mat[i][j], key->new ArrayList<>()).add(new int[]{i, j});
+            }
+        }
+
+        var dp = new int[n][m];
+        var rowMax = new int[n];
+        var colMax = new int[m];
+        int res = 0;
+
+        for(var entry : mp.entrySet()) {
+
+            var value = entry.getValue();
+            for(var curr : value){
+                var r = curr[0];
+                var c = curr[1];
+
+                var currMaxCount = Math.max(rowMax[r], colMax[c]);
+                dp[r][c] = currMaxCount + 1;
+                res = Math.max(res, dp[r][c]);
+            }
+
+            for(var curr : value){
+                var r = curr[0];
+                var c = curr[1];
+                rowMax[r] = Math.max(dp[r][c], rowMax[r]);
+                colMax[c] = Math.max(colMax[c], dp[r][c]);
+            }
+        }
+        return res;
+    }
+    //24.  The Earliest Moment When Everyone Become Friends
+    public static int minTime(int[][] logs, int n) {
+       DisjointSet set = new DisjointSet(n);
+
+        int res = 0;
+        Arrays.sort(logs, (a, b) -> a[0] - b[0]);
+
+        for (int[] log : logs) {
+
+            int cost = log[0];
+            int u = log[1];
+            int v = log[2];
+
+            if (set.findUParent(u) == set.findUParent(v))
+                continue;
+
+            res = Math.max(res, cost);
+            set.unionBySize(u, v);
+        }
+        int cnt = 0;
+        for(int i=0;i<n;i++){
+            if(set.parent.get(i) == i)
+                cnt++;
+        }
+
+        return cnt == 1 ? res : -1;
     }
 
 }
