@@ -3,11 +3,9 @@ import DS.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+
 public class GooglePrevious {
-    public static void main(String[] args) {
-        // 1 1 1 2 3 5 7
-        System.out.println(repeatedNumber(Arrays.asList(1,1,1,2,3,5,7)));
-    }
+
     //1. Sum of bit differences -> https://practice.geeksforgeeks.org/problems/sum-of-bit-differences-1587115620/1
     long sumBitDifferences(int[] arr, int n) {
         // code here
@@ -1179,6 +1177,383 @@ public class GooglePrevious {
         }
 
         return cnt == 1 ? res : -1;
+    }
+
+    //25. 1713. Minimum Operations to Make a Subsequence
+    public int minOperations(int[] target, int[] arr) {
+        int n = target.length;
+        int m = arr.length;
+
+        Map<Integer, Integer> mp = new HashMap<>();
+        for(int i=0;i<n;i++){
+            mp.put(target[i], i);
+        }
+
+        List<Integer> list = new ArrayList<>();
+        for(int i=0;i<m;i++){
+            int val = arr[i];
+            if(mp.containsKey(val))
+                list.add(mp.get(val));
+        }
+
+        return n - lis(list);
+    }
+
+    int lis(List<Integer> list){
+
+        List<Integer> curr = new ArrayList<>();
+
+        for(int i=0;i<list.size();i++){
+            int pos = findPos(curr, list.get(i));
+
+            if(pos == curr.size())
+                curr.add(list.get(i));
+            else
+                curr.set(pos, list.get(i));
+        }
+        return curr.size();
+    }
+
+    int findPos(List<Integer> curr, int target){
+
+        int low =0, high = curr.size()-1;
+
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(target <= curr.get(mid))
+                high = mid-1;
+            else
+                low = mid+1;
+        }
+        return low;
+    }
+    //26. 1706. Where Will the Ball Fall
+    public int[] findBall(int[][] grid) {
+        int n = grid.length;
+        int m = grid[0].length;
+
+        int[] res = new int[m];
+
+        for(int col=0;col<m;col++){
+            int ans = 0;
+            int currCol = col;
+
+            for(int row =0;row<n;row++){
+
+                int nextCol = currCol + grid[row][currCol];
+
+                if(nextCol < 0 || nextCol >=m || grid[row][nextCol] != grid[row][currCol]){
+                    currCol = -1;
+                    break;
+                }
+                currCol = nextCol;
+            }
+            res[col] = currCol;
+        }
+        return res;
+    }
+    //27. A town is building a watchtower. The watchtower is located at (0, 0).
+    // Each unit height of the watchtower has a cost H. There are N houses located at (x, y)
+    // coordinates. Each house will pay cost C if it comes under the surveillance of the watchtower.
+    // The horizontal distance covered by the watchtower is the same as it's height.
+    // Find out the max profit you can make.
+    double solve(List<int[]> position, double H, double C) {
+
+        List<Double> dist = new ArrayList<>();
+        for (int[] ints : position) {
+            double x = ints[0];
+            double y = ints[1];
+            double val = Math.sqrt(x * x  + y * y);
+            dist.add(val);
+        }
+        Collections.sort(dist);
+        double res = 0;
+        for(int i=0;i<dist.size();i++){
+            double dis = dist.get(i);
+            double val = (i+1) * C - dis * H;
+            res = Math.max(val, res);
+        }
+        return res;
+    }
+    //28. Given two strings s1 and s2, find out if they only differ by the insertion of a phrase (more than one word is inserted in between them).
+    static boolean checkIfPhrase(String s1, String s2){ // i am assuming s2 have extra words
+        String[] s11 = s1.split(" ");
+        String[] s22 = s2.split(" ");
+
+        int start = -1, end = -1;
+        int i=0, j=0, n = s11.length, m = s22.length;
+        int phraseCount = 0;
+
+        while(j < m){
+            if(i < n && s11[i].equals(s22[j])){
+                i++;
+            }else{
+                if(start == -1)
+                    start = j;
+                end = j;
+                phraseCount++;
+            }
+            j++;
+        }
+        if(i == n && (start == -1 || (end - start+1) >=2) && phraseCount <= 1)
+            return true;
+        return false;
+    }
+    //29. Longest increasing subsequence with one change allowed , strictly increasing
+    static int LIS(int[] arr, int n){
+
+        int[] dp1 = new int[n];
+        Arrays.fill(dp1, 1);
+
+        for(int i=0;i<n;i++){
+            for(int j=0;j<i;j++){
+                if(arr[j] < arr[i]){
+                    dp1[i] = Math.max(dp1[i], dp1[j]+1);
+                }
+            }
+        }
+        int[] dp2 = new int[n];
+        Arrays.fill(dp2, 1);
+
+        for(int i=n-1;i>=0;i--){
+            for(int j=i+1;j<n;j++){
+                if(arr[i] < arr[j]){
+                    dp2[i] = Math.max(dp2[i], dp2[j]+1);
+                }
+            }
+        }
+
+        int res = 1;
+        for(int i=0;i<n;i++){
+            int val = 0;
+            if( i>0 && i <n-1  && arr[i-1] + 1 < arr[i+1]){
+                val = dp1[i-1] + dp2[i+1] +1;
+            }else
+                val = Math.max(dp1[i], dp2[i]);
+            res = Math.max(res, val);
+        }
+        return res;
+    }
+    //30. Android phone patterns : Given n,m which are a set of points,
+    // we have to find the total possible unique patterns that can be drawn, min len of a
+    // pattern is 1, n,m >=1. -> https://www.naukri.com/code360/problems/mobile-pattern-lock_1263698
+
+    public int numberOfPatterns(int m, int n) {
+        // Write Your Code here
+        int[][] midEle = new int[10][10];
+        midEle[1][3] = midEle[3][1] = 2;
+        midEle[1][7] = midEle[7][1] = 4;
+
+        midEle[3][9] = midEle[9][3] = 6;
+        midEle[7][9] = midEle[9][7] = 8;
+
+        midEle[1][9] = midEle[9][1] =
+                midEle[2][8] = midEle[8][2] =
+                        midEle[3][7] = midEle[7][3] =
+                                midEle[4][6] = midEle[6][4] = 5;
+
+        boolean[] vis = new boolean[10];
+
+        int cnt = 0;
+        for(int i=m;i<=n;i++){
+            cnt += dfs(1, midEle, vis, i-1) * 4;
+            cnt += dfs(2, midEle, vis, i-1) * 4;
+            cnt += dfs(5, midEle, vis, i-1);
+        }
+        return cnt;
+    }
+
+    int dfs(int curr, int[][] midEle, boolean[] vis, int allowedCnt){
+
+        if(allowedCnt <=0)
+            return 1;
+
+        vis[curr] = true;
+        int cnt = 0;
+        for(int i=1;i<=9;i++){
+            int midVal = midEle[curr][i];
+            if(vis[i] == false && (midVal == 0 || vis[midVal] == true)){
+                cnt += dfs(i, midEle, vis, allowedCnt -1);
+            }
+        }
+        vis[curr] = false;
+        return cnt;
+    }
+    //31. There will be some tasks, and each task can have one or more subtasks, by default all
+    // tasks have completion time 1 unit, but the comp_time of a parent task is the x if all
+    // subtasks have time x, otherwise it is their sum, we have to find the total completion time.
+//    public static void main(String[] args) {
+//        int[][] arr = new int[][]{
+//                {0, 1},
+//                {0, 2},
+//                {1, 3},
+//                {1, 4},
+//                {2, 5},
+//                {6, 7},
+//        };
+//        int V = 9;  // 0-based indexing
+//        System.out.println(func(arr, V));
+//    }
+
+    private static int func(int[][] edges, int V) {
+        List<List<Integer>> adj = new ArrayList<>();
+        for (int i = 0; i < V; i++)
+            adj.add(new ArrayList<>());
+
+        for (int[] edge : edges) {
+            int u = edge[0];
+            int v = edge[1];
+            adj.get(u).add(v);
+        }
+        return totalCompletionTime(adj, V);
+    }
+
+    static int totalCompletionTime(List<List<Integer>> adj, int V) {
+        int cnt = 0;
+        int[] vis = new int[V];
+        int[] dp = new int[V];
+        Arrays.fill(dp, -1); // Initialize memoization array
+
+        for (int i = 0; i < V; i++) {
+            if (dp[i] == -1) { // Ensures every node is computed correctly
+                cnt += dfs(i, adj, vis, dp);
+            }
+        }
+        return cnt;
+    }
+
+    static int dfs(int node, List<List<Integer>> adj, int[] vis, int[] dp) {
+        if (dp[node] != -1) return dp[node]; // Return cached result
+        vis[node] = 1; // Mark node as visited
+
+        if (adj.get(node).isEmpty()) {
+            return dp[node] = 1; // Store and return 1 if it's a leaf node
+        }
+
+        List<Integer> values = new ArrayList<>();
+        for (int adjNode : adj.get(node)) {
+            if (dp[adjNode] != -1) {
+                values.add(dp[adjNode]); // Use stored result if available
+            } else if (vis[adjNode] == 0) {
+                values.add(dfs(adjNode, adj, vis, dp));
+            }
+        }
+
+        int firstNum = values.get(0);
+        boolean allEqual = values.stream().allMatch(val -> val == firstNum);
+        return dp[node] = (allEqual ? firstNum : values.stream().reduce(0, Integer::sum));
+    }
+    //32. There are n people and each person has a specific order in which the songs should be played,
+    //P1 : a,b,c
+    //P2. : b, e , f
+
+    //33. Given roots of 2 n-ary trees write code to merge them. Complete the following function:
+    // https://leetcode.com/discuss/post/5847086/google-l3-phone-screen-by-anonymous_user-9ybo/
+    static Node1 solve(Node1 t1, Node1 t2){
+
+        if(t1 == null)
+            return t2;
+        if(t2 == null)
+            return t1;
+
+        Node1 mergedNode = new Node1(t2.name, t2.value);
+
+        Map<String, Node1> childrenOfT1 = new LinkedHashMap<>();
+
+        for(Node1 node: t1.children){
+            childrenOfT1.put(node.name, node);
+        }
+
+        List<Node1> mergedChildren = new ArrayList<>();
+        for(Node1 node : t2.children){
+
+            if(childrenOfT1.containsKey(node.name)){
+                mergedChildren.add(solve(childrenOfT1.remove(node.name),node));
+            }else
+                mergedChildren.add( node);
+        }
+        mergedChildren.addAll(childrenOfT1.values());
+
+        mergedNode.children = mergedChildren;
+        return mergedNode;
+    }
+
+    //34. 962. Maximum Width Ramp -
+
+    public int maxWidthRamp(int[] nums) {
+        Stack<Integer> st = new Stack<>();
+        int n = nums.length;
+        for(int i=0;i<n;i++){
+            if(st.isEmpty() || nums[st.peek()] > nums[i])
+                st.push(i);
+        }
+        int res = 0;
+        for(int i=n-1;i>=0;i--){
+            while(!st.isEmpty() && nums[st.peek()] <= nums[i]){
+                int val = i- st.peek();
+                res = Math.max(res, val);
+                st.pop();
+            }
+        }
+        return res;
+    }
+
+    //Question: Given n routers placed on a Cartesian plane and provided with a source and
+    // destination vertex, the task was to determine whether it was possible to reach the
+    // destination. Only adjacent vertices could be explored, and a vertex was considered
+    // adjacent if it had the minimum distance from the current vertex while remaining within
+    // a given threshold. Additionally, once a vertex was visited, the previously visited node became
+    // inactive (i.e., could no longer be used). The goal was to determine if a path existed from the
+    // source to the destination under these constraints.
+
+    static boolean isPossible(int[][] points, int source, int dest, double threshold){ // source and dest index given
+
+        int n = points.length;
+        Map<Integer, List<Point>> graph = new HashMap<>();
+        for (int i=0;i<n;i++)
+            graph.put(i, new ArrayList<>());
+        for(int i=0;i<n;i++){
+            for(int j=0;j<n;j++){
+                if(i == j)
+                    continue;
+                double dist = findDist(points[i], points[j]);
+                if(dist <= threshold)
+                    graph.get(i).add(new Point(j, dist));
+            }
+        }
+
+        Queue<Point> pq = new PriorityQueue<>((a, b) -> Double.compare(a.dist , b.dist));
+        Set<Integer> vis = new HashSet<>();
+
+        pq.add(new Point(source, 0));
+
+        while (!pq.isEmpty()){
+
+            Point p = pq.remove();
+
+            if(p.index == dest)
+                return true;
+
+            if(vis.contains(p.index))
+                continue;
+
+            vis.add(p.index);
+
+            List<Point> adjNode = graph.get(p.index);
+            adjNode.sort((a, b) -> Double.compare(a.dist, b.dist));
+
+            for(Point adj : adjNode){
+                if(!vis.contains(adj.index)){
+                    pq.add(adj);
+                }
+            }
+
+        }
+        return false;
+    }
+
+    private static double findDist(int[] point1, int[] point2) {
+        return Math.sqrt(Math.pow(point1[0] - point2[0], 2) + Math.pow(point1[1] - point2[1], 2));
     }
 
 }

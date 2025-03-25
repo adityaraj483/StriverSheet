@@ -399,45 +399,46 @@ public class Graphs {
     //15. Word ladder - 2
     public List<List<String>> findLadders(String beginWord, String endWord, List<String> wordList) {
 
-        Set<String> hs = new HashSet<>(wordList);
-
-        if(!hs.contains(endWord))
+        Set<String> set = new HashSet<>(wordList);
+        if(!set.contains(endWord))
             return Collections.emptyList();
 
+        List<String> usedWord = new ArrayList<>(List.of(beginWord));
+
         Queue<List<String>> q = new LinkedList<>();
+        q.add(List.of(beginWord));
         List<List<String>> res = new ArrayList<>();
-        q.add(new ArrayList<>(List.of(beginWord)));
-        hs.remove(beginWord);
-        List<String> usedWords = new ArrayList<>();
-        int level = 0;
 
         while(!q.isEmpty()){
+            int size = q.size();
+            for(int i=0;i<size;i++){
+                List<String> curr = q.remove();
+                String word = curr.get(curr.size()-1);
+                if(word.equals(endWord)){
+                    res.add(curr);
+                    continue;
+                }
 
-            List<String> curr = q.remove();
-            if(curr.size()> level){
-                level++;
-                for(String t : usedWords)
-                    hs.remove(t);
-            }
-            String word = curr.get(curr.size()-1);
-            if(word.equals(endWord)){
-                if(res.size() == 0 || res.get(0).size() == curr.size())
-                    res.add(new ArrayList<>(curr));
-            }
+                for(int j=0;j<word.length();j++){
+                    char[] str = word.toCharArray();
+                    for(char k='a';k<='z';k++){
+                        str[j] = k;
 
-            for(int j=0;j<word.length();j++){
-                for(char ch = 'a';ch <='z';ch++){
-                    char[] newWord = word.toCharArray();
-                    newWord[j] = ch;
-                    String newWord1 = new String(newWord);
-                    if(hs.contains(newWord1)){
-                        curr.add(newWord1);
-                        usedWords.add(newWord1);
-                        q.add(new ArrayList<>(curr));
-                        curr.remove(curr.size()-1);
+                        String newWord = new String(str);
+                        if(set.contains(newWord)){
+                            List<String> newList = new ArrayList<>(curr);
+                            newList.add(newWord);
+                            q.add(newList);
+                            usedWord.add(newWord);
+                        }
                     }
                 }
             }
+
+            for(String s : usedWord){
+                set.remove(s);
+            }
+            usedWord.clear();
         }
         return res;
     }

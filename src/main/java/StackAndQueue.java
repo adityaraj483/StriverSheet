@@ -816,8 +816,10 @@ public class StackAndQueue {
             end = new DLLNode(-1, -1);
             start.next = end;
             end.prev= start;
+
             mp = new HashMap<>();
             totalSize = capacity;
+            currSize = 0;
         }
 
         public int get(int key) {
@@ -839,132 +841,143 @@ public class StackAndQueue {
                 currSize++;
                 DLLNode node = new DLLNode(key, value);
                 mp.put(key, node);
+
                 if(currSize > totalSize){
-
-                    mp.remove(end.prev.key);
-                    end.prev = end.prev.prev;
-
-                    end.prev.next = end;
-                    node.next = start.next;
-                    start.next = node;
-                    node.prev = start;
-                    node.next.prev = node;
+                    removeNode(end.prev);
+                    addFirstElement(node);
                     currSize--;
                 }else{
-                    node.next = start.next;
-                    start.next = node;
-                    node.prev = start;
-                    node.next.prev = node;
+                    addFirstElement(node);
                 }
             }
         }
+        void removeNode(DLLNode node){
+            mp.remove(node.key);
+            DLLNode prev = node.prev;
+            DLLNode next = node.next;
+            prev.next = node.next;
+            next.prev = node.prev;
+
+        }
+        void addFirstElement(DLLNode node){
+            mp.put(node.key, node);
+            node.next = start.next;
+            node.prev = start;
+            start.next = node;
+            node.next.prev = node;
+        }
         void updateNode(DLLNode node){
-            node.prev.next = node.next;
-            node.next.prev = node.prev;
+            removeNode(node);
+            addFirstElement(node);
+        }
+    }
+    //30 LFU cache
+    class DLLNode{
+        int key, value, fre;
+        DLLNode prev, next;
+        DLLNode(int key, int value, int fre){
+            this.key = key;
+            this.value = value;
+            this.fre = fre;
+        }
+    }
+
+    class DLLNodeList{
+        DLLNode start, end;
+        int size;
+        DLLNodeList(){
+            size = 0;
+            start = new DLLNode(-1, -1, -1);
+            end = new DLLNode(-1, -1, -1);
+
+            start.next = end;
+            end.prev = start;
+        }
+
+        void removeNode(DLLNode node){
+            DLLNode prev = node.prev;
+            DLLNode next = node.next;
+
+            prev.next = node.next;
+            next.prev = node.prev;
+            size--;
+        }
+        void addNode(DLLNode node){
             node.next = start.next;
             start.next = node;
             node.prev = start;
             node.next.prev = node;
+            size++;
         }
-    }
-    //30 LFU cache
-    class LFUCache {
-        class DLLNode{
-            int key,val,fre;
-            DLLNode prev, next;
-            DLLNode(int key, int val, int fre){
-                this.key = key;
-                this.val = val;
-                this.fre = fre;
-            }
-        }
-        class DLLNodeList{
-            DLLNode start, end;
-            int size;
-            DLLNodeList(){
-                start = new DLLNode(0, 0, 0);
-                end = new DLLNode(0, 0, 0);
-                start.next = end;
-                end.prev = start;
-                size = 0;
-            }
 
-            void addNode(DLLNode node){
-                DLLNode next = start.next;
-                start.next = node;
-                node.next = next;
-                next.prev = node;
-                node.prev = start;
-                size++;
-            }
-            void deleteNode(DLLNode node){
-                DLLNode prev = node.prev ;
-                DLLNode next = node.next;
-                prev.next = next;
-                next.prev = prev;
-                size--;
-            }
-        }
-        Map<Integer, DLLNode> cache;
-        Map<Integer, DLLNodeList> freListMp;
-        int totalSize , currSize;
+    }
+
+    class LFUCache {
         int minFre;
+        int currSize, totalSize;
+        Map<Integer, DLLNode> cache;
+        Map<Integer, DLLNodeList> freMap;
 
         public LFUCache(int capacity) {
-            totalSize = capacity;
-            currSize = 0;
-            cache = new HashMap<>();
-            freListMp = new HashMap<>();
             minFre = 0;
+            currSize = 0;
+            totalSize = capacity;
+            cache = new HashMap<>();
+            freMap = new HashMap<>();
         }
 
         public int get(int key) {
-            DLLNode node = cache.get(key);
-            if(node == null){
+            if(!cache.containsKey(key)){
                 return -1;
+            }else{
+                DLLNode node = cache.get(key);
+                update(node);
+                return node.value;
             }
-
-            updateNode(node);
-            return node.val;
         }
 
         public void put(int key, int value) {
-
             if(cache.containsKey(key)){
                 DLLNode node = cache.get(key);
-                node.val = value;
-                updateNode(node);
+                node.value = value;
+                update(node);
             }else {
                 currSize ++;
                 if(currSize > totalSize){
-                    DLLNodeList currList = freListMp.get(minFre);
-                    cache.remove(currList.end.prev.key);
-                    currList.deleteNode(currList.end.prev);
-
+                    removeLast();
                     currSize--;
                 }
                 minFre = 1;
-
                 DLLNode node = new DLLNode(key, value, 1);
-                DLLNodeList list = freListMp.getOrDefault(1, new DLLNodeList());
+                DLLNodeList list = freMap.getOrDefault(1, new DLLNodeList());
                 list.addNode(node);
-                freListMp.put(1, list);
+                freMap.put(1, list);
                 cache.put(key, node);
             }
         }
-        void updateNode(DLLNode node){
+
+        private void removeLast(){
+            DLLNodeList currList = freMap.get(minFre);
+            DLLNode node = currList.end.prev;
+            currList.removeNode(node);
+            cache.remove(node.key);
+        }
+
+        private void update(DLLNode node){
+
             int currFre = node.fre;
-            DLLNodeList currList = freListMp.get(currFre);
-            currList.deleteNode(node);
+            DLLNodeList currList = freMap.get(currFre);
+            currList.removeNode(node);
 
-            if(currFre == minFre && currList.size == 0)
+            if(currFre == minFre && currList.size == 0){
                 minFre++;
-            
+            }
             node.fre++;
-            DLLNodeList newList = freListMp.getOrDefault(node.fre, new DLLNodeList());
+            currFre++;
 
+            DLLNodeList newList = freMap.getOrDefault(currFre, new DLLNodeList());
             newList.addNode(node);
-            freListMp.put(node.fre, newList);
+            freMap.put(currFre, newList);
         }
     }
 

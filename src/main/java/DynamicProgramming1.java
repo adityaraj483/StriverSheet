@@ -864,6 +864,70 @@ public class DynamicProgramming1 {
         return isSubsetSum3(nums, target); // Just above same logic.
     }
     //15. Partition Set Into 2 Subsets With Min Absolute Sum Diff (DP- 16)
+    public int minimumDifference(int[] nums) {
+
+        int totalSum = Arrays.stream(nums).sum();
+        int N = nums.length;
+        int n = N/2;
+
+        List<List<Integer>> left = new ArrayList<>();
+        List<List<Integer>> right = new ArrayList<>();
+
+        for(int i=0;i<=n;i++){
+            left.add(new ArrayList<>());
+            right.add(new ArrayList<>());
+        }
+
+        int powOfN = 1 <<n;
+        for(int i=0;i<powOfN;i++){
+            int sum1=0, sum2 = 0;
+            int cnt = 0;
+            for(int j=0;j<n;j++){
+
+                if((i & (1 << j)) >0){
+                    sum1+= nums[j];
+                    sum2 += nums[n+j];
+                    cnt++;
+                }
+            }
+            left.get(cnt).add(sum1);
+            right.get(cnt).add(sum2);
+        }
+
+        for(int i=0;i<=n;i++){
+            Collections.sort(right.get(i));
+        }
+
+        int res = (int) 1e9;
+
+        for(int i=0;i<=n;i++){
+            for(int leftSum1 : left.get(i)){
+                int leftSum2 = lb(right.get(n-i), totalSum/2 - leftSum1);
+
+                int totalLeftSum = Math.abs(totalSum - 2*(leftSum1 + leftSum2));
+                res = Math.min(res, totalLeftSum);
+            }
+        }
+
+        return res;
+    }
+    int lb(List<Integer> arr, int target){
+        int low = 0, high = arr.size()-1;
+        int res = arr.get(0);
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (Math.abs(arr.get(mid) - target) < Math.abs(res - target)) {
+                res = arr.get(mid);
+            }
+            if (arr.get(mid) < target) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+
+        return res;
+    }
 
     //16. Count Subsets with Sum K (DP - 17)
     public int perfectSum1(int[] nums, int target) {

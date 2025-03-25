@@ -67,6 +67,25 @@ public class Heap {
         }
         return time;
     }
+    //10-2 Task Scheduler 2
+    public long taskSchedulerII(int[] tasks, int space) {
+        Map<Integer, Long> mp = new HashMap<>();
+        long currDay = 0;
+
+        for (int task : tasks) {
+
+            if (mp.containsKey(task)) {
+                long prevDay = mp.get(task);
+                currDay = Math.max(currDay, prevDay + space + 1);
+                mp.put(task, currDay);
+
+            } else {
+                mp.put(task, currDay);
+            }
+            currDay++;
+        }
+        return currDay;
+    }
     //11. Hands of Straights
     public boolean isNStraightHand(int[] hand, int groupSize) {
         int n = hand.length;

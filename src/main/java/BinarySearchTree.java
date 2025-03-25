@@ -2,6 +2,7 @@ import DS.TreeNode;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 public class BinarySearchTree {
     public static void main(String[] args) {
@@ -238,8 +239,7 @@ public class BinarySearchTree {
         return root.data > min && root.data < max && isBST(root.left, min, root.data) && isBST(root.right, root.data, max);
     }
     //13. Two sum in BST
-    /*
-      class Solution {
+    class Solution {
         class BSTIterator{
             Stack<TreeNode> min, max;
             BSTIterator(TreeNode root){
@@ -303,7 +303,7 @@ public class BinarySearchTree {
             return false;
         }
     }
-   */
+
     //14. Recover BST | Correct BST with two nodes swapped
     TreeNode first, mid, last, prev;
     public void recoverTree(TreeNode root) {
