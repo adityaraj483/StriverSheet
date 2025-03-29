@@ -1209,7 +1209,7 @@ public class Graphs {
         }
         return dist;
     }
-    //37. Floyd Warshal Alg orithm -> when weight can be negative -> https://www.geeksforgeeks.org/problems/implementing-floyd-warshall2042/1
+    //37. Floyd Warshall Algorithm -> when weight can be negative -> https://www.geeksforgeeks.org/problems/implementing-floyd-warshall2042/1
     public void shortestDistance(int[][] mat) {
         int n = mat.length;
         for(int i=0;i<n;i++){
@@ -1337,6 +1337,49 @@ public class Graphs {
                 count++;
         }
         return count;
+    }
+    // --------------- Using Floyd Warshall Algorithm -------------------------------------------
+    public int findTheCity1(int n, int[][] edges, int distanceThreshold) {
+        int[][] dist = new int[n][n];
+        for(int[] col : dist)
+            Arrays.fill(col, (int) 1e9);
+
+        for(int[] edge : edges){
+            int u = edge[0];
+            int v = edge[1];
+            int cost = edge[2];
+            dist[u][v] = cost;
+            dist[v][u] = cost;
+        }
+
+        for(int i=0;i<n;i++)
+            dist[i][i] = 0;
+
+        for(int via = 0; via <n; via++){
+            for(int i=0;i<n;i++){
+                for(int j=0;j<n;j++){
+
+                    if(dist[i][via] == 1e9 || dist[via][j] == 1e9)
+                        continue;
+                    dist[i][j] = Math.min(dist[i][j], dist[i][via] + dist[via][j]);
+                }
+            }
+        }
+        int minCnt = n;
+        int fcity = -1;;
+        for(int city=0;city<n;city++){
+            int cnt = 0;
+            for(int adjCity = 0;adjCity < n; adjCity++){
+                if(dist[city][adjCity] <= distanceThreshold)
+                    cnt ++;
+            }
+
+            if(cnt <= minCnt){
+                minCnt = cnt;
+                fcity = city;
+            }
+        }
+        return fcity;
     }
     //39. Minimum Spanning Tree
     static int spanningTree(int V, int E, List<List<int[]>> adj) {

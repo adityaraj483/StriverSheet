@@ -394,7 +394,7 @@ public class GooglePrevious {
             j--;
         }
     }
-    //12. Maximum Score of a Node Sequence -> https://leetcode.com/problems/maximum-score-of-a-good-subarray/
+    //12. Maximum Score of a Node Sequence ->
     public int maximumScore(int[] scores, int[][] edges) {
         int n = scores.length;
         List<List<Integer>> graph = new ArrayList<>();
@@ -760,7 +760,7 @@ public class GooglePrevious {
             }
         }
     }
-    //15. Gas Station
+    //15. Gas Station -> https://leetcode.com/problems/gas-station/description/
     public int canCompleteCircuit1(final List<Integer> A, final List<Integer> B) {
         int n = A.size();
 
@@ -925,6 +925,24 @@ public class GooglePrevious {
             arr[i][1] = temp[i-low][1];
         }
     }
+    //----------------------------- OR --------------------
+    public int maximumGap1(final List<Integer> A) {
+
+        Stack<Integer> st = new Stack<>();
+        for(int i=0;i<A.size();i++){
+            if(st.isEmpty() || A.get(st.peek()) > A.get(i))
+                st.add(i);
+        }
+
+        int res = 0;
+        for(int i=A.size()-1;i>=0;i--){
+
+            while(!st.isEmpty() && A.get(st.peek()) <= A.get(i)){
+                res = Math.max(res, i-st.pop());
+            }
+        }
+        return res;
+    }
     //19. Meeting Rooms III
     public int mostBooked(int n, int[][] meetings) {
 
@@ -1045,7 +1063,7 @@ public class GooglePrevious {
         return l+r+1;
     }
 
-    //21. Detonate the Maximum Bombs
+    //21. Detonate the Maximum Bombs -> https://leetcode.com/problems/detonate-the-maximum-bombs/description/
     public int maximumDetonation(int[][] bombs) {
         int n = bombs.length;
 
@@ -1498,7 +1516,7 @@ public class GooglePrevious {
         return res;
     }
 
-    //Question: Given n routers placed on a Cartesian plane and provided with a source and
+    //35. Question: Given n routers placed on a Cartesian plane and provided with a source and
     // destination vertex, the task was to determine whether it was possible to reach the
     // destination. Only adjacent vertices could be explored, and a vertex was considered
     // adjacent if it had the minimum distance from the current vertex while remaining within
