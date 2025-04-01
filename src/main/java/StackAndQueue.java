@@ -465,8 +465,8 @@ public class StackAndQueue {
     //19. Trapping Rain Water
     public int trap(int[] height) {
         int n = height.length;
-        int l =0, r= n-1;
-        int leftMax =0, rightMax =0;
+        int l = 0, r = n-1;
+        int leftMax = 0, rightMax = 0;
         int res = 0;
 
         while(l<=r){

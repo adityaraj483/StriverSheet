@@ -398,4 +398,29 @@ public class string {
         return cnt;
     }
 
+    //16. Shortest Palindrome
+    public String shortestPalindrome(String s) {
+        int mod = (int) 1e9 + 7;
+        int n = s.length();
+        long prefix = 0, suffix = 0;
+        int lastIndex = -1;
+        int base = 29;
+        long power = 1;
+
+        String rev = new StringBuilder(s).reverse().toString();
+
+        for(int i=0;i<n;i++){
+            int ch = s.charAt(i) - 'a' +1;
+            prefix = (prefix * base) % mod;
+            prefix = (prefix + ch) % mod;
+
+            suffix = (suffix + ch * power) % mod;
+            power = (power * base)%mod;
+
+            if(prefix == suffix)
+                lastIndex = i;
+        }
+        return new StringBuilder(s.substring(lastIndex+1)).reverse().toString() + s;
+    }
+
 }

@@ -547,23 +547,23 @@ public class BinaryTree {
     public int countNodes1(TreeNode root) {
         if(root == null)
             return 0;
+        int leftHeight = left(root);
+        int rightHeight = right(root);
 
-        int left = leftHeight(root.left);
-        int right = rightHeight(root.right);
-        if(left == right)
-            return ((2<<left) -1);
-        else
-            return 1 + countNodes1(root.left)+countNodes1(root.right);
+        if(leftHeight == rightHeight){
+            return (1 << leftHeight) -1;
+        }else
+            return 1 + countNodes1(root.left) + countNodes1(root.right);
     }
-    int leftHeight(TreeNode left){
-        if(left == null)
+    int left(TreeNode node){
+        if(node == null)
             return 0;
-        return 1 + leftHeight(left.left);
+        return 1 + left(node.left);
     }
-    int rightHeight(TreeNode right){
-        if(right == null)
+    int right(TreeNode node){
+        if(node == null)
             return 0;
-        return 1 + rightHeight(right.right);
+        return 1 + right(node.right);
     }
     //25.Unique Binary Tree Requirements(tree constructed with the help of either of them) (preOrder = 1, inOrder = 2, postOrder = 3)
     public static boolean isPossible(int a, int b){

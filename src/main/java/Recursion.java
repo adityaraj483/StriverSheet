@@ -55,25 +55,28 @@ public class Recursion {
     //3. Count Good Numbers
     int mod = (int) 1e9 + 7;
     public int countGoodNumbers(long n) {
-        if(n == 1)
+        if( n == 1)
             return 5;
-        long count4 = n/2;
-        long count5 = n - count4;
+        long oddCount = n/2;
+        long evenCount = n - oddCount;
 
-        long res = (power(4, count4) * power(5, count5)) % mod;
-        return  (int)res;
+        long res = (pow(5, evenCount) * pow(4, oddCount)) % mod;
+        return (int) res;
     }
-    long power(long x, long n){
-        if( n == 0 || x == 0)
-            return 1;
-        if(n == 1)
-            return x;
-        long res = power(x, n/2);
 
-        if(n % 2 == 0)
-            return (res * res) % mod;
-        else
-            return (res*res*x) % mod;
+    long pow(long x, long n){
+        long ans = 1;
+        while(n > 0){
+
+            if( n % 2 == 0){
+                x = (x * x) % mod;
+                n = n /2;
+            }else{
+                ans = (ans * x) % mod;
+                n = n-1;
+            }
+        }
+        return ans;
     }
     //4. sort stack
     public Stack<Integer> sort(Stack<Integer> s) {
@@ -188,7 +191,7 @@ public class Recursion {
         return str2;
     }
     void generate(String s, Set<String> hs){
-        long n = power(2, s.length());
+        long n = (long) Math.pow(2, s.length());
 
         for(long i=0;i<n;i++){
             StringBuilder sb = new StringBuilder();
@@ -633,6 +636,33 @@ public class Recursion {
 
 
     //25. Expression Add Operators
+    List<String> list;
+    public List<String> addOperators(String num, int target) {
+        list = new ArrayList<>();
+        func(0, "", 0, 0, num, target);
+        return list;
+    }
 
+    private void func(int index, String path, long res, long prev, String num, int target ){
+        if(index == num.length()){
+            if(res == (long)target)
+                list.add(path);
+            return ;
+        }
 
+        for(int j=index;j<num.length();j++){
+            if(j> index && num.charAt(index) == '0')
+                break;
+            long currNum = Long.parseLong(num.substring(index, j+1));
+            if(index == 0){
+                func(j+1, path + currNum, currNum, currNum, num, target);
+            }else{
+
+                func(j+1, path + "+" + currNum, res + currNum, currNum, num, target);
+                func(j+1, path + "-" + currNum, res - currNum, -currNum, num, target);
+                func(j+1, path + "*" + currNum, res - prev + prev * currNum,
+                        prev * currNum, num, target);
+            }
+        }
+    }
 }

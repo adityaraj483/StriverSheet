@@ -192,7 +192,7 @@ public class BinarySearchTree {
             root = root.left;
         }
     }
-    //12. Merge BSTs to Create Single BST
+    //12. Merge BSTs to Create Single BST -> https://leetcode.com/problems/merge-bsts-to-create-single-bst/description/
     public TreeNode canMerge(List<TreeNode> trees) {
         Set<Integer> leafNodes = new HashSet<>();
         for(TreeNode node : trees){

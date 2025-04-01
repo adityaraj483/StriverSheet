@@ -179,18 +179,19 @@ public class GooglePrevious {
 
         int l =0, r = arr.length()-1;
         int n = arr.length();
-
-        while(l<r){
-            int mid = (l+r)/2;
-            if(arr.get(mid) > arr.get(mid+1)){
-                r = mid;
-            }else{
+        int mid = -1;
+        while(l<=r){
+            mid = (l+r)/2;
+            if(mid +1 < n && arr.get(mid) < arr.get(mid+1)){
                 l = mid+1;
-            }
+            }else if(mid -1 >= 0 && arr.get(mid-1) > arr.get(mid))
+                r = mid-1;
+            else
+                break;
         }
-        System.out.println(l);
-        int a = binarySearchSorted(arr, 0, l, target);
-        int b = binarySearchReverse(arr, l+1, n-1, target);
+
+        int a = binarySearchSorted(arr, 0, mid, target);
+        int b = binarySearchReverse(arr, mid+1, n-1, target);
         if( a >= 0 && b >= 0)
             return Math.min(a, b);
         else if(a >=0 || b >=0)
@@ -284,8 +285,6 @@ public class GooglePrevious {
         return 0;
     }
     boolean solve(List<String> A, int row, int col, int n, int m, String B, int k, int z){
-
-
 
         if( k == z)
             return true;
@@ -997,7 +996,7 @@ public class GooglePrevious {
         }
         return room;
     }
-    //20. Height of Binary Tree After Subtree Removal Queries
+    //20. Height of Binary Tree After Subtree Removal Queries -> https://leetcode.com/problems/height-of-binary-tree-after-subtree-removal-queries/description/
     public int[] treeQueries(TreeNode root, int[] queries) {
         int n = findSize(root);
         int[] level = new int[n+1];
@@ -1197,7 +1196,7 @@ public class GooglePrevious {
         return cnt == 1 ? res : -1;
     }
 
-    //25. 1713. Minimum Operations to Make a Subsequence
+    //25. 1713. Minimum Operations to Make a Subsequence -> https://leetcode.com/problems/minimum-operations-to-make-a-subsequence/
     public int minOperations(int[] target, int[] arr) {
         int n = target.length;
         int m = arr.length;
@@ -1253,7 +1252,6 @@ public class GooglePrevious {
         int[] res = new int[m];
 
         for(int col=0;col<m;col++){
-            int ans = 0;
             int currCol = col;
 
             for(int row =0;row<n;row++){
@@ -1278,9 +1276,9 @@ public class GooglePrevious {
     double solve(List<int[]> position, double H, double C) {
 
         List<Double> dist = new ArrayList<>();
-        for (int[] ints : position) {
-            double x = ints[0];
-            double y = ints[1];
+        for (int[] pos : position) {
+            double x = pos[0];
+            double y = pos[1];
             double val = Math.sqrt(x * x  + y * y);
             dist.add(val);
         }
@@ -1573,5 +1571,133 @@ public class GooglePrevious {
     private static double findDist(int[] point1, int[] point2) {
         return Math.sqrt(Math.pow(point1[0] - point2[0], 2) + Math.pow(point1[1] - point2[1], 2));
     }
+
+    //36. Dungeon Game -> https://leetcode.com/problems/dungeon-game/description/
+    public int calculateMinimumHP(int[][] mat) {
+        int n = mat.length;
+        int m = mat[0].length;
+
+        Queue<int[]> pq = new PriorityQueue<>((a, b) -> b[3] - a[3]);
+
+        pq.add(new int[]{0, 0, mat[0][0], mat[0][0]});
+        int res = 0;
+        while(!pq.isEmpty()){
+            int row = pq.peek()[0];
+            int col = pq.peek()[1];
+            int cost = pq.peek()[2];
+            int min = pq.remove()[3];
+            if(row == n-1 && col == m-1){
+                res = min;
+                break;
+            }
+
+            if(valid(row+1, col, n, m)){
+                int currCost = cost + mat[row+1][col];
+                int currMin = Math.min(min, currCost);
+                pq.add(new int[]{row+1, col,currCost, currMin});
+            }
+
+            if(valid(row, col+1, n, m)){
+                int currCost = cost + mat[row][col+1];
+                int currMin = Math.min(min, currCost);
+                pq.add(new int[]{row, col+1, currCost, currMin});
+            }
+        }
+
+        return res>0 ? 1 : -1 * res +1;
+
+    }
+    boolean valid(int row, int col, int n, int m) {
+        return row >=0 && row <n && col >=0 && col < m;
+    }
+
+    //------------------------------- OR------------------------
+    public int calculateMinimumHP1(int[][] mat) {
+        int n = mat.length;
+        int m = mat[0].length;
+        int[][] dp = new int[n][m];
+
+        for(int i=n-1;i>=0;i--){
+            for(int j=m-1;j>=0 ;j--){
+
+                if(i == n-1 && j == m-1){
+                    dp[i][j] = Math.min(0, mat[i][j]);
+                }else if( i == n-1){
+                    dp[i][j] = Math.min(0, dp[i][j+1] + mat[i][j]);
+                }else if( j == m-1){
+                    dp[i][j] = Math.min(0, dp[i+1][j] + mat[i][j]);
+                }else{
+                    dp[i][j] = Math.min(0, Math.max(dp[i][j+1], dp[i+1][j]) + mat[i][j]);
+                }
+            }
+        }
+        return dp[0][0] > 0 ? 1 : dp[0][0] * -1 + 1;
+    }
+    //37. 2035. Partition Array Into Two Arrays to Minimize Sum Difference || meet in the middle algorithm-> https://leetcode.com/problems/partition-array-into-two-arrays-to-minimize-sum-difference/description/
+    public int minimumDifference(int[] nums) {
+
+        int totalSum = Arrays.stream(nums).sum();
+        int N = nums.length;
+        int n = N/2;
+
+        List<List<Integer>> left = new ArrayList<>();
+        List<List<Integer>> right = new ArrayList<>();
+
+        for(int i=0;i<=n;i++){
+            left.add(new ArrayList<>());
+            right.add(new ArrayList<>());
+        }
+
+        int powOfN = 1 <<n;
+        for(int i=0;i<powOfN;i++){
+            int sum1=0, sum2 = 0;
+            int cnt = 0;
+            for(int j=0;j<n;j++){
+
+                if((i & (1 << j)) >0){
+                    sum1+= nums[j];
+                    sum2 += nums[n+j];
+                    cnt++;
+                }
+            }
+            left.get(cnt).add(sum1);
+            right.get(cnt).add(sum2);
+        }
+
+        for(int i=0;i<=n;i++){
+            Collections.sort(right.get(i));
+        }
+
+        int res = (int) 1e9;
+
+        for(int i=0;i<=n;i++){
+            for(int leftSum1 : left.get(i)){
+                int leftSum2 = lb(right.get(n-i), totalSum/2 - leftSum1);
+
+                int totalLeftSum = Math.abs(totalSum - 2*(leftSum1 + leftSum2));
+                res = Math.min(res, totalLeftSum);
+            }
+        }
+
+        return res;
+    }
+    int lb(List<Integer> arr, int target){
+        int low = 0, high = arr.size()-1;
+        int res = 0;
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+            if (Math.abs(arr.get(mid) - target) < Math.abs(res - target)) {
+                res = arr.get(mid);
+            }
+            if (arr.get(mid) < target) {
+                low = mid + 1;
+            } else {
+                high = mid - 1;
+            }
+        }
+
+        return res;
+    }
+
 
 }

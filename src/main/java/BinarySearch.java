@@ -747,7 +747,7 @@ public class BinarySearch {
         }
         return res;
     }
-    //33. Seperate squares by its area using a horizontal line
+    //33. Separate squares by its area using a horizontal line
     public double separateSquares(int[][] squares) {
         double low = 0, high = 0;
         for (int i = 0; i < squares.length; i++) {

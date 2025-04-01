@@ -291,6 +291,44 @@ public class SlidingWindow {
         return "";
     }
     //12. minimum window subsequences
+    public static String minWindow1(String S, String T) {
+        // Write your code here
+        int n = S.length();
+        int m = T.length();
 
+        int i=0, j=0;
+        int k = 0;
+        int start = -1, len = n+1;
+
+        while(j<n){
+
+            if(S.charAt(j) == T.charAt(k))
+                k++;
+
+            if(k>= m){
+                i = j;
+                k--;
+                while(k>=0){
+                    if(S.charAt(i) == T.charAt(k))
+                        k--;
+                    i--;
+                }
+
+                if(len > j-i)
+                {
+                    len = j-i;
+                    start = i+1;
+                }
+
+                k++;
+                i+=2;
+                j=i-1;
+            }
+            j++;
+        }
+        if(start == -1)
+            return "";
+        return S.substring(start, start + len);
+    }
 
 }
