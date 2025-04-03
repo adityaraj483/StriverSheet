@@ -1699,5 +1699,374 @@ public class GooglePrevious {
         return res;
     }
 
+    //38. given a lattice kinda graph where each node is either a torch node that has power 16 or wire node where value is 0,
+    //if power node is connected to wire node, it will transmit power to wire and value would become 15 from 0
+    // (1 value would be lost during transmission), again if this wire node is connected to another wire node then
+    // value would become 14 of that node.
+    //for eg 16 -> 0 -> 0 would become 15 -> 14 -> 13, unless there is one more torch node ahead, then
+    //16 -> 0 -> 0 -> 16
+    //16 -> 15 -> 14 -> 16
+    //16 -> 15 -> 15 <- 16
+
+    static void flowCurrent(int[][] edges, int V, int[] volts){
+       List<List<Integer>> adj = new ArrayList<>();
+
+       for(int i=0;i<V;i++)
+           adj.add(new ArrayList<>());
+
+       for (int[] edge : edges){
+           int u = edge[0];
+           int v = edge[1];
+           adj.get(u).add(v);
+       }
+       Queue<int[]> q = new LinkedList<>();
+       for(int i=0;i<V;i++){
+           if(volts[i] > 0)
+               q.add(new int[]{i,volts[i]});
+       }
+
+        while(!q.isEmpty()){
+
+            int node = q.peek()[0];
+            int volt= q.remove()[1];
+
+            for(int adjNode : adj.get(node)){
+
+                if(volts[adjNode] < volt -1){
+                    q.add(new int[]{adjNode, volt-1});
+                    volts[adjNode] = volt-1;
+                }
+            }
+
+        }
+
+        for(int i =0;i<V;i++){
+            System.out.println(i + ": "+ volts[i]);
+        }
+    }
+
+    //39. 1820. Maximum Number of Accepted Invitations -> https://algo.monster/liteproblems/1820
+    // how many persons can be matched for prome dance like that.
+    static int findTotalPersons(int[][] grid){
+        int boysCount = grid.length;
+        int girlsCount = grid[0].length;
+
+        int[] matched = new int[girlsCount];
+        Arrays.fill(matched, -1);
+
+        int res = 0;
+        for(int i=0;i<boysCount;i++){
+            boolean[] vis = new boolean[girlsCount];
+            if(solve(i, grid, matched, vis))
+                res ++;
+        }
+        return res;
+    }
+    static boolean solve(int boy, int[][] grid, int[] matched, boolean[] vis){
+
+        for(int girl =0;girl < matched.length;girl++){
+
+            if(grid[boy][girl] == 0 || vis[girl])
+                continue;
+            vis[girl] = true;
+            if(matched[girl] == -1 || solve(matched[girl], grid, matched, vis)){
+                matched[girl] = boy;
+                return true;
+            }
+            vis[girl] = false;
+        }
+        return false;
+    }
+
+    //40.   This question is similar to above question
+    // questions[
+    //{id:1, tags: ["MAC", "VSCODE"]},
+    //{id:2, tags: ["PY", "AI"]}
+    //{id:3, tags: ["JAVA", "OS"]}
+    //{id:4, tags: ["PY", "NW"]}
+    //]
+    //
+    //Volunteer[
+    //{id: "1", tags:["PY",""NW], name: "A"},
+    //{id: "2", tags:["AI"], name: "B"},
+    //{id: "3", tags:["JAVA","NW], name: "C"},
+    //{id: "4", tags:["JAVA","NW"], name: "D"}
+    //]
+    //
+    //Assign question to volunteers such that each question is assigned to at most one volunteer based on tags match.
+    //One volunteer can take at most one question and maximise the question assigned to volunteer.
+    //
+    //for this example
+    //A can take question 4(PY match)
+    //B can take question 2(AI match)
+    //C can take question 3(Java match)
+    //Question one no one can take as not match.
+
+    static int totalAssignedQuestions(List<String> questions, List<String> volunteers){
+
+        int quesCount = questions.size();
+        int volCount = volunteers.size();
+
+        List<List<Integer>> adj = new ArrayList<>();
+        for(int i=0;i<quesCount;i++){
+            adj.add(new ArrayList<>());
+        }
+
+        for(int i=0;i<quesCount;i++){
+            for(int j=0;j<volCount;j++){
+
+                if(isCommonTags(questions.get(i), volunteers.get(j))){
+                    adj.get(i).add(j);
+                }
+            }
+        }
+
+        int[] matched = new int[volCount];
+        Arrays.fill(matched, -1);
+        int totalCount = 0;
+        for(int ques= 0;ques<quesCount;ques++){
+            boolean[] vis = new boolean[volCount];
+            if(dfs(ques, adj, matched,vis)){
+                totalCount++;
+            }
+        }
+        for(int i=0;i<matched.length;i++){
+
+            if(matched[i] == -1)
+                System.out.println("Question " + ((char) (i + 'A')) + " not assigned");
+            else
+                System.out.println("Question " + ((char) (i + 'A')) + ": volunteer " + (matched[i]+1));
+        }
+        return totalCount;
+    }
+
+    static boolean isCommonTags(String str1, String str2){
+        Set<String> set = new HashSet<>(Arrays.asList(str1.split(" ")));
+
+        for(String s : str2.split(" ")){
+            if(set.contains(s))
+                return true;
+        }
+        return false;
+    }
+
+    static boolean dfs(int ques, List<List<Integer>> adj, int[] matched, boolean[] vis){
+
+        for(int vol : adj.get(ques)){
+
+            if(vis[vol])
+                continue;
+            vis[vol] = true;
+            if(matched[vol] == -1 || dfs(matched[vol], adj, matched, vis)){
+                matched[vol] = ques;
+                return true;
+            }
+            vis[vol] = false;
+        }
+        return false;
+    }
+
+    //41. I recently had a google interview, and I was asked the below question, let me know if you get it.
+    //
+    //Basically I needed to implement cli.
+    //
+    //I was given (as strings) as directories e.g.
+    ///a/b/x.txt
+    ///a/b/p.txt
+    ///a/c
+    ///a/d/y.txt
+    ///a/d/z.txt
+    //
+    //Also, I was given the selected directories e.g.
+    ///a/d/y.txt
+    ///a/d/z.txt
+    ///a/b/p.txt
+    //
+    //My output should be
+    ///a/d
+    ///a/b/p.txt
+    //
+    ///a/d
+    //is the answer because it has 2 txt files (y and z), and both are selected.
+    ///a/b/p.txt
+    //is the answer because another file in the directory i.e. /a/b/x.txt is not selected, if it was selected, answer would have been /a/b
+    //
+    //Basically, if all items are selected in a particular directory, we need to return the just prev directory.
+    //
+    //I tried solving it, assuming the directories to be a tree, and used dfs. I messed up really bad.
+    //How can we solve this problem? If possible, can someone code it up?
+
+    static class solution{
+//        public static void main(String[] args) {
+//            solution sol = new solution();
+//            List<String> dir = new ArrayList<>(List.of("/a/b/x.txt", "/a/b/p.txt", "/a/c", "/a/d/y.txt", "/a/d/z.txt"));
+//            List<String> selectedDir = new ArrayList<>(List.of("/a/d/y.txt", "/a/d/z.txt", " /a/b/p.txt"));
+//            sol.func(dir, selectedDir);
+//        }
+        class File{
+            String name;
+            boolean isVisited;
+            File(String name, boolean isVisited){
+                this.name = name;
+                this.isVisited = isVisited;
+            }
+        }
+
+        class TrieNode{
+            TrieNode[] links = new TrieNode[26];
+            List<File> files = new ArrayList<>();
+            int visCount = 0;
+
+        }
+
+        class Trie{
+            TrieNode root;
+            Trie(){
+                root = new TrieNode();
+            }
+
+            void insert(String s){
+                String[] str = s.split("/");
+
+                int n = str.length;
+                TrieNode node = root;
+                for(int i=0;i<n-1;i++){
+                    if(str[i].trim().isEmpty())
+                        continue;
+                    char ch = str[i].charAt(0);
+                    if(node.links[ch - 'a'] == null)
+                        node.links[ch - 'a'] = new TrieNode();
+                    node = node.links[ch - 'a'];
+                }
+                node.files.add(new File(str[n-1], false));
+            }
+
+            void visit(String s){
+
+                String[] str = s.split("/");
+                int n = str.length;
+                TrieNode node = root;
+                for(int i=0;i<n-1;i++){
+                    if(str[i].trim().isEmpty())
+                        continue;
+                    char ch = str[i].charAt(0);
+
+                    if(node.links[ch - 'a'] == null)
+                        return ;
+                    node = node.links[ch - 'a'];
+                }
+
+                node.visCount++;
+            }
+
+            String getResults(String s){
+                StringBuilder sb = new StringBuilder();
+                String[] str = s.split("/");
+                int n = str.length;
+                TrieNode node = root;
+                for(int i=0;i<n-1;i++){
+                    if(str[i].trim().isEmpty())
+                        continue;
+                    char ch = str[i].charAt(0);
+
+                    if(node.links[ch - 'a'] == null)
+                        return "";
+                    node = node.links[ch - 'a'];
+                    sb.append(ch).append("/");
+                }
+                if(node.visCount == node.files.size()){
+                    return sb.substring(0, sb.length()-1);
+                }else
+                    return sb.append(str[n-1]).toString();
+            }
+        }
+
+        void func(List<String> directories, List<String> selectedDir){
+            Trie trie = new Trie();
+
+            for(String s : directories){
+                trie.insert(s);
+            }
+
+            for (String s : selectedDir){
+                trie.visit(s);
+            }
+
+            Set<String> set = new LinkedHashSet<>();
+            for(String s : selectedDir){
+                set.add(trie.getResults(s));
+            }
+
+            for(String res : set)
+                System.out.println(res);
+        }
+    }
+
+    //42. assume that "byte" contains only "a" to "f"
+    //input: "abcdefacbeddefd"
+    //
+    //"a" is present
+    //"b" is present
+    //..
+    //"f" is present
+    //"aa" is not present
+    //"ab" is present
+    //"ac" is present
+    //
+    //you can return "aa" or "ad" or "ae"... "ff"
+    //but not "ab" "ac" "bc"
+    //
+    //testcases
+    //input - aabcdf
+    //output - e
+    //Check for single byte shortest byte sequence a,b,c, .... f
+
+//    public static void main(String[] args) {
+//        System.out.println(findMissing("abcdefacbeddefd"));
+//    }
+
+    static String findMissing(String input){
+
+        char[] allowedChar = "abcdef".toCharArray();
+
+        Set<Character> seenChar = new HashSet<>(); // 1 size
+
+        for(char ch : input.toCharArray()){
+            seenChar.add(ch);
+        }
+
+        for(char ch : allowedChar){
+            if(!seenChar.contains(ch) )
+                return String.valueOf(ch);
+        }
+
+        Set<String> seenWords = new HashSet<>();
+        for(int i=0;i<input.length()-1;i++){
+            seenWords.add(input.substring(i, i+2));
+        }
+
+        for(char ch1 : allowedChar){
+            for(char ch2 : allowedChar){
+                if(!seenWords.contains(""+ch1 + ch2))
+                    return ""+ch1 + ch2;
+            }
+        }
+
+        return "";
+    }
+
+    //43. There is a testRunner function that takes multiple unit test and returns if those uts are
+    // executed together & then there is some error or not. If no error then return true other wise false.
+    // You have been given N unit tests, and you know that when you run all test cases at a time then it fails.
+    // Now you need to find at least one pair of UTs, which fails when executed at the same time using the test runner.
+    //Its easy when we assume that the testRunner takes O(1) to execute any number of test cases.
+    // But for the case when the test runner takes O(n) time to execute n test cases at a time then
+    // find the optimal way to find one pair of failed UTs.
+    //Note there may be multiple pairs that fail with each other, but need to report only one.
+    // Also all the UTs are running ok when executed individually.
+
+    class TestRunner{
+
+    }
 
 }
