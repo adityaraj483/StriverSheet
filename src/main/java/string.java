@@ -243,6 +243,25 @@ public class string {
         }
         return res;
     }
+    // 10.1  Integer to Roman
+    public String intToRoman(int num) {
+        int[] values = new int[]{1000, 900, 500, 400, 100, 90, 50, 40, 10, 9, 5, 4, 1};
+        String[] symbol = new String[]{"M","CM","D","CD","C","XC","L","XL","X","IX","V","IV","I"};
+        StringBuilder sb = new StringBuilder();
+        int i = 0;
+        while(i < values.length){
+
+            if(num>= values[i]){
+                sb.append(symbol[i]);
+                num -= values[i];
+            }else{
+                i++;
+            }
+            if(num == 0)
+                break;
+        }
+        return sb.toString();
+    }
     //11. Implement Atoi
     long res;
     public int myAtoi(String s) {
@@ -398,7 +417,190 @@ public class string {
         return cnt;
     }
 
-    //16. Shortest Palindrome
+    //16. Minimum Number of Swaps to Make the String Balanced -> https://leetcode.com/problems/minimum-number-of-swaps-to-make-the-string-balanced/
+    public int minSwaps(String s) {
+        int open =0, close = 0;
+        for(char ch : s.toCharArray()){
+            if(ch == '[')
+                open++;
+            else if(open > 0)
+                open--;
+            else
+                close++;
+        }
+
+        return (close +1)/2;
+    }
+    //17. count and say
+    public String countAndSay(int n) {
+        if(n == 1)
+            return "1";
+        String ans = countAndSay(n-1);
+        int len = ans.length();
+        StringBuilder sb = new StringBuilder();
+        int cnt = 1;
+        for(int i=1;i<len;i++){
+            if(ans.charAt(i-1) == ans.charAt(i))
+                cnt++;
+            else{
+                sb.append(""+cnt).append(ans.charAt(i-1));
+                cnt = 1;
+            }
+        }
+        sb.append(""+cnt).append(ans.charAt(len-1));
+        return sb.toString();
+    }
+    //18. Rabin Karp algorithm
+    public static List< Integer > stringMatch(String text, String pat){
+        // Write your code here.
+        long mod = (int) 1e9 + 7;
+        long base = 27;
+        int n = text.length();
+        int m = pat.length();
+        long hashP = 0;
+        long hashT = 0;
+
+        long lastIndexHash = 1;
+        //creating hash of pat
+        for(int i=0;i<m;i++){
+            long p = pat.charAt(i) - 'a';
+            long t = text.charAt(i) - 'a';
+            hashP = (hashP * base + p) % mod;
+            hashT = (hashT * base + t) % mod;
+
+            if(i < m-1)
+                lastIndexHash = (lastIndexHash * base) % mod;
+        }
+
+        List<Integer> res = new ArrayList<>();
+
+        if(hashP == hashT)
+            res.add(1);
+
+        for(int i=m;i<n;i++){
+
+            //removing old value
+            long chOut = text.charAt(i - m) - 'a';
+            hashT = (int)((hashT - (chOut * lastIndexHash % mod) + mod) % mod);
+
+            if(hashT < 0)
+                hashT += mod;
+
+            //adding
+            long chIn = text.charAt(i) - 'a';
+            hashT = (hashT * base + chIn) % mod;
+
+
+            if(hashT == hashP)
+                res.add(i-m+2);
+
+        }
+        return res;
+    }
+    //19. 686. Repeated String Match using rabin carp
+    public int repeatedStringMatch(String a, String b) {
+        StringBuilder sb = new StringBuilder(a);
+
+        int cnt = 1;
+        while(sb.length() < b.length()){
+            sb.append(a);
+            cnt++;
+        }
+
+        if(find(sb.toString(), b)){
+            return cnt;
+        }
+        sb.append(a);
+        cnt++;
+        if(find(sb.toString(), b))
+            return cnt;
+        return -1;
+    }
+
+    boolean find(String text, String pat){
+        int n = text.length();
+        int m = pat.length();
+        long base = 27;
+        long mod = (long) 1e9 + 7;
+
+        long hashP = 0;
+        long hashT = 0;
+        long lastIndexHash = 1;
+
+        for(int i=0;i<m;i++){
+            hashP = (hashP * base + (pat.charAt(i)-'a')) % mod;
+            hashT = (hashT * base + (text.charAt(i) - 'a')) % mod;
+
+            if(i < m-1)
+                lastIndexHash = (lastIndexHash * base) %mod;
+        }
+
+        if(hashT == hashP) //For suriety, we can add extra check here.
+            return true;
+
+        for(int i=m;i<n;i++){
+            long chOut = text.charAt(i-m) - 'a';
+            hashT = (hashT - (chOut * lastIndexHash) % mod);
+            if(hashT < 0)
+                hashT += mod;
+
+            long chIn = text.charAt(i) - 'a';
+            hashT = (hashT * base + chIn) % mod;
+            if(hashT == hashP) // For suriety, we can add extra check here.
+                return true;
+        }
+        return false;
+    }
+    //20. z-algorithm
+
+    //21. KMP algorithm
+    public int findMatching(String text, String pat) {
+        int n = text.length();
+        int m = pat.length();
+
+        if(m > n)
+            return -1;
+
+        int[] lps = getLps(pat);
+
+        int i = 0, j = 0;
+
+        while(i < n && j < m){
+            if(text.charAt(i) == pat.charAt(j)){
+                i++;
+                j++;
+            }else{
+                if(j == 0)
+                    i++;
+                else
+                    j = lps[j-1];
+            }
+        }
+        return j == m ? i-j : -1;
+    }
+
+    int[] getLps(String pat){
+
+        int m = pat.length();
+        int[] lps = new int[m];
+
+        int i= 1, prevLps = 0;
+
+        while(i < m){
+            if(pat.charAt(i) == pat.charAt(prevLps)){
+                lps[i] = prevLps + 1;
+                i++;
+                prevLps++;
+            }else if( prevLps == 0){
+                lps[i] = 0;
+                i++;
+            }else
+                prevLps = lps[prevLps -1];
+        }
+        return lps;
+    }
+
+    //22. Shortest Palindrome
     public String shortestPalindrome(String s) {
         int mod = (int) 1e9 + 7;
         int n = s.length();

@@ -1801,6 +1801,11 @@ public class GooglePrevious {
     //B can take question 2(AI match)
     //C can take question 3(Java match)
     //Question one no one can take as not match.
+//    public static void main(String[] args) {
+//        List<String> questions = new ArrayList<>(List.of("MAC VSCODE", "PY AI", "JAVA OS", "PY NW"));
+//        List<String> volunteers = new ArrayList<>(List.of("PY NW", "AI", "JAVA NW", "JAVA, NW"));
+//        System.out.println(totalAssignedQuestions(questions, volunteers));
+//    }
 
     static int totalAssignedQuestions(List<String> questions, List<String> volunteers){
 
@@ -2065,8 +2070,94 @@ public class GooglePrevious {
     //Note there may be multiple pairs that fail with each other, but need to report only one.
     // Also all the UTs are running ok when executed individually.
 
-    class TestRunner{
+//    public static void main(String[] args) {
+//        List<Integer> testCases = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
+//        TestRunner testRunner = new TestRunner();
+//        int[] failingPair = testRunner.findFailingPairs(testCases);
+//        if (failingPair != null) {
+//            System.out.println("Failing Pair: " + failingPair[0] + ", " + failingPair[1]);
+//        } else {
+//            System.out.println("No failing pair found");
+//        }
+//    }
 
+    static class TestRunner{
+        boolean testRunner(Set<Integer> testSet){
+
+            Set<Set<Integer>> failingPairs = new HashSet<>();
+            failingPairs.add(new HashSet<>(List.of(2,5)));
+            failingPairs.add(new HashSet<>(List.of(3, 7)));
+
+            for(Set<Integer> pair : failingPairs){
+                if(testSet.containsAll(pair))
+                    return true;
+            }
+            return false;
+        }
+
+        int[] findFailingPairs(List<Integer> tests){
+
+            if(tests.size() <= 1)
+                return new int[0];
+
+            int mid = tests.size()/2;
+
+            List<Integer> left = tests.subList(0, mid);
+            List<Integer> right = tests.subList(mid, tests.size());
+
+            boolean leftTest = testRunner(new HashSet<>(left));
+            boolean rightTest = testRunner((new HashSet<>(right)));
+
+            if(leftTest) return findFailingPairs(left);
+            if(rightTest) return findFailingPairs(right);
+
+
+            return findCross(left, right);
+
+        }
+
+        int[] findCross(List<Integer> left, List<Integer> right){
+
+            for(int l : left ){
+                for(int r : right){
+                    if(testRunner(new HashSet<>(List.of(l, r))))
+                        return new int[]{l, r};
+                }
+            }
+            return new int[0];
+        }
     }
+
+    //44. Variation of coin change.
+    //we are given dp array that we created while finding number of ways to make the target sum. We need to find the coins array, using which this dp array is created.
+    //Example:
+    //target = 10
+    //number of ways to make 10: 3
+    //Input: [1, 0, 1, 0, 1, 1, 2, 1, 2, 1, 3]
+    //Output: [2, 5, 6]
+
+//    public static void main(String[] args){
+//        int[] dp = new int[]{1,1,2,3,4,6};
+//        int target = 4;
+//        for(int val : constructOriginalArray(dp, target)){
+//            System.out.print(val+" ");
+//        }
+//    }
+    static List<Integer> constructOriginalArray(int[] dp, int target) {
+        List<Integer> coins = new ArrayList<>();
+        int i, j, n = dp.length; // dp array should be equal to target+1
+        if(target > n)
+            return coins;
+        for(i=1;i<=target;i++) {
+            if (dp[i] == 1) {
+                for(j=target;j>=i;j--) {
+                    dp[j] = dp[j] - dp[j-i];
+                }
+                coins.add(i);
+            }
+        }
+        return coins;
+    }
+    //45.
 
 }
