@@ -600,7 +600,7 @@ public class string {
         return lps;
     }
 
-    //22. Shortest Palindrome
+    //22. Shortest Palindrome using rabin karp
     public String shortestPalindrome(String s) {
         int mod = (int) 1e9 + 7;
         int n = s.length();
@@ -623,6 +623,81 @@ public class string {
                 lastIndex = i;
         }
         return new StringBuilder(s.substring(lastIndex+1)).reverse().toString() + s;
+    }
+    //---------------------------------------- USing KMP Algorithm ----------------
+    public String shortestPalindromee(String s) {
+        String str = s + "#" + new StringBuilder(s).reverse();
+        int n = str.length();
+        int[] lps = getLps(str, n);
+
+        return new StringBuilder(s.substring(lps[n-1])).reverse() + s;
+    }
+    int[] getLps(String s, int n){
+        int[] lps = new int[n];
+
+        int i = 1, prevLps = 0;
+
+        while(i < n){
+            if(s.charAt(i) == s.charAt(prevLps)){
+                lps[i] = prevLps + 1;
+                prevLps += 1;
+                i++;
+            }else if(prevLps == 0){
+                lps[i] = 0;
+                i++;
+            }else{
+                prevLps = lps[prevLps-1];
+            }
+        }
+        return lps;
+    }
+
+    //23. Longest Happy prefix
+    public String longestPrefix(String s) {
+        int n = s.length();
+        int[] lps = getLpss(s, n);
+        int size = lps[n-1];
+        return s.substring(0, size);
+    }
+    int[] getLpss(String s, int n){
+        int[] lps = new int[n];
+        int i = 1, prevLps = 0;
+
+        while(i < n){
+            if(s.charAt(i) == s.charAt(prevLps)){
+                lps[i] = prevLps + 1;
+                prevLps += 1;
+                i++;
+            }else if(prevLps == 0){
+                lps[i] = 0;
+                i++;
+            }else{
+                prevLps = lps[prevLps-1];
+            }
+        }
+        return lps;
+    }
+    //24. Count Palindromic Subsequences
+    int countPS(String s) {
+        int n = s.length();
+        int[][] dp = new int[n][n];
+        for(int[] cols: dp)
+            Arrays.fill(cols, -1);
+        return solve(s, 0, n-1, dp);
+
+    }
+    int solve(String s, int i, int j, int[][] dp){
+        if(i == j)
+            return 1;
+        if(i > j)
+            return 0;
+        if(dp[i][j] != -1) return dp[i][j];
+
+        if(s.charAt(i) == s.charAt(j)){
+            return dp[i][j] = 1 + solve(s, i+1, j, dp) + solve(s, i, j-1, dp);
+        }else
+            return dp[i][j] = solve(s, i+1, j, dp) + solve(s, i, j-1, dp) - solve(s, i+1, j-1, dp);
+
     }
 
 }
