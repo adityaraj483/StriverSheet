@@ -2,6 +2,7 @@ import DS.*;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 
 public class GooglePrevious {
@@ -2158,6 +2159,657 @@ public class GooglePrevious {
         }
         return coins;
     }
-    //45.
+    //45. Parallel course II
+    class Solution {
+        int totalMask;
+        int n;
+        int k;
+        Map<String, Integer> memo;
+        public int minNumberOfSemesters(int n, int[][] relations, int k) {
+            this.n = n;
+            this.totalMask = (1 << n) -1;
+            this.k = k;
 
+            memo = new HashMap<>();
+
+
+            List<List<Integer>> adj = new ArrayList<>();
+            for(int i=0;i<n;i++)
+                adj.add(new ArrayList<>());
+
+            int[] indegree = new int[n];
+
+            for(int[] edge : relations){
+                int u = edge[0]-1;
+                int v = edge[1]-1;
+                adj.get(u).add(v);
+
+                indegree[v] ++;
+            }
+
+            int mask = 0;
+            for(int i= 0;i<n;i++){
+                if(indegree[i] == 0)
+                    mask = mask | 1 <<i;
+            }
+
+            return solve(adj, indegree, mask);
+        }
+
+        int solve(List<List<Integer>> adj, int[] indegree, int mask){
+            if(mask == 0)
+                return 0;
+
+            String key = mask +","+ Arrays.toString(indegree);
+            if(memo.containsKey(key)) return memo.get(key);
+
+            List<Integer> avl = new ArrayList<>();
+            for(int i=0;i<n;i++){
+                if(indegree[i] > 0 || (mask & 1 << i) == 0)
+                    continue;
+                avl.add(i);
+            }
+
+            List<List<Integer>> allCombi = getCombi(avl, Math.min(k, avl.size()));
+            int res = (int) 1e9;
+            for(List<Integer> combi : allCombi){
+                int newMask = mask;
+                int[] newIndegree = Arrays.copyOf(indegree, n);
+                for(int node : combi){
+
+                    for(int adjNode : adj.get(node)){
+                        newIndegree[adjNode] --;
+                        if(newIndegree[adjNode] == 0){
+                            newMask = newMask | (1 << adjNode);
+                        }
+                    }
+                    newMask = newMask ^ ( 1 << node);
+
+                }
+                res = Math.min(res, 1 + solve(adj, newIndegree, newMask));
+            }
+            memo.put(key, res);
+            return res;
+        }
+        List<List<Integer>> getCombi(List<Integer> avl, int k){
+
+            List<List<Integer>> res = new ArrayList<>();
+            if(avl.size() == k){
+                res.add(avl);
+                return res;
+            }
+            List<Integer> ds = new ArrayList<>();
+            dfs(avl, 0, k, ds, res);
+            return res;
+        }
+        void dfs(List<Integer> avl, int i, int k, List<Integer> ds, List<List<Integer>> res){
+            if( k == 0){
+                res.add(new ArrayList<>(ds));
+                return ;
+            }
+            if(i == avl.size())
+                return;
+
+            dfs(avl, i+1, k, ds, res);
+            ds.add(avl.get(i));
+            dfs(avl, i+1, k-1, ds, res);
+            ds.remove(ds.size()-1);
+        }
+    }
+    //46. 2127. Maximum Employees to Be Invited to a Meeting -> https://leetcode.com/problems/maximum-employees-to-be-invited-to-a-meeting/description/
+    public int maximumInvitations(int[] fav) {
+        int n = fav.length;
+        int[] indegree = new int[n];
+
+        for(int i=0;i<n;i++){
+            indegree[fav[i]]++;
+        }
+
+        Queue<Integer> q = new LinkedList<>();
+        for(int i=0;i<n;i++){
+            if(indegree[i] == 0)
+                q.add(i);
+        }
+
+        int[] len = new int[n];
+        Arrays.fill(len, 1);
+
+        while(!q.isEmpty()){
+
+            int node = q.remove();
+            int adjNode = fav[node];
+
+            len[adjNode] = Math.max(len[adjNode], len[node]+1);
+
+            indegree[adjNode]--;
+            if(indegree[adjNode] == 0){
+
+                q.add(adjNode);
+            }
+
+        }
+        int[] vis = new int[n];
+        int chainSum = 0, maxCircle = 0;
+        for(int i=0;i<n;i++){
+
+            if(indegree[i] <=0 || vis[i] == 1)
+                continue;
+
+            int cnt = 0, curr = i;
+            while(vis[curr] == 0){
+                vis[curr] = 1;
+                cnt ++;
+                curr = fav[curr];
+            }
+
+            if(cnt == 2 ){
+                curr = i;
+                int next = fav[i];
+                chainSum += len[curr] + len[next];
+            }else
+                maxCircle = Math.max(maxCircle, cnt);
+        }
+        return Math.max(maxCircle, chainSum);
+    }
+    //47.Validate if the equation is syntactically correct.
+    //
+    //Valid operators: +, -, a-z, (, )
+    //Test cases:
+    //Valid - a + x = b + (c + a)
+    //Invalid - a + x = (ending with =; doesn't have RHS)
+    //Invalid - a + -x = a + b (- in -x is a unary operator)
+
+    static boolean isValid(String s){
+        String[] arr = s.split("=");
+        if(arr.length != 2 || arr[0].trim().isEmpty() || arr[1].trim().isEmpty())
+            return false;
+
+        return check(arr[0]) && check(arr[1]);
+    }
+
+    static boolean check(String s){
+        Stack<Character> st = new Stack<>();
+        boolean expectOperand = true;
+
+        for(int i=0;i<s.length();i++){
+
+            char ch = s.charAt(i);
+            if(ch == ' ')
+                continue;
+            if(ch == '('){
+                st.add(ch);
+                expectOperand = true;
+            }else if(ch == ')'){
+                if(st.isEmpty() || st.pop() != '(') return false;
+
+                expectOperand = false;
+
+            }else if(Character.isLetter(ch)){
+                if(!expectOperand) return false;
+                expectOperand = false;
+            }else{
+                if(expectOperand) return false;
+                expectOperand = true;
+            }
+        }
+
+        return st.isEmpty() && !expectOperand;
+    }
+
+    //48. Basic Calculator II -> https://leetcode.com/problems/basic-calculator-ii/description/
+
+    //49. Expression Add Operators -> https://leetcode.com/problems/expression-add-operators/description/
+    public List<String> addOperators(String num, int target) {
+        List<String> res = new ArrayList<>();
+        solve(0, num, 0, 0, target, "", res);
+        return res;
+    }
+
+    void solve(int i, String num, long sum, long prev, int target, String path, List<String> res){
+        if(i == num.length()){
+            if(sum == target){
+                res.add(path);
+            }
+            return;
+        }
+
+        for(int j=i;j<num.length();j++){
+
+            if( j > i && num.charAt(i) == '0')
+                return;
+            String currValStr = num.substring(i, j+1);
+            long currVal = Long.parseLong(currValStr);
+
+            if( i == 0){
+                solve(j+1, num, currVal, currVal, target, path + currValStr, res);
+            }else{
+
+                long revertPrevOp = sum - prev;
+
+                solve(j+1, num, sum + currVal, currVal, target, path +"+"+ currValStr, res);
+                solve(j+1, num, sum - currVal, -currVal, target, path +"-"+ currValStr, res);
+                solve(j+1, num, revertPrevOp + prev * currVal, prev * currVal, target, path +"*"+ currValStr, res);
+
+//                if(currVal > 0){
+//                    solve(j+1, num, sum / currVal, currVal, target, "(" + path +")"+"/"+ currValStr, res);
+//                    solve(j+1, num, revertPrevOp + prev/currVal, prev/currVal, target, path +"/"+ currValStr, res);
+//                }
+//                solve(j+1, num, sum * currVal, currVal, target, "(" + path +")" +"*"+ currValStr, res);
+
+            }
+        }
+    }
+    //50. Different Ways to Add Parentheses -> https://leetcode.com/problems/different-ways-to-add-parentheses/description/
+
+    class Solution1 {
+        class ExprResult {
+            int val;
+            String expr;
+            ExprResult(int val, String expr) {
+                this.val = val;
+                this.expr = expr;
+            }
+        }
+        int operations(int x, int y, char op){
+            switch(op){
+                case '+' :
+                    return x + y;
+                case '-' :
+                    return x - y;
+                case '*':
+                    return x *y;
+            }
+            return 0;
+        }
+
+        public List<Integer> diffWaysToCompute(String exp) {
+            List<ExprResult> res = solve(exp);
+
+            for(ExprResult e : res){
+                System.out.println(e.expr + " = " + e.val);
+            }
+
+            return res.stream().map(e -> e.val).collect(Collectors.toList());
+
+        }
+        public List<ExprResult> solve(String exp) {
+
+            List<ExprResult> res = new ArrayList<>();
+
+            for(int i=0;i<exp.length();i++){
+                char op = exp.charAt(i);
+                if(op == '+' || op == '-' || op == '*'){
+                    List<ExprResult> left = solve(exp.substring(0, i));
+                    List<ExprResult> right = solve(exp.substring(i+1));
+                    for(ExprResult l : left){
+                        for(ExprResult r : right){
+                            int val = operations(l.val, r.val, op);
+                            res.add(new ExprResult(val, "(" + l.expr + op + r.expr + ")"));
+                        }
+                    }
+                }
+            }
+            if(res.size() == 0){
+                int val = Integer.parseInt(exp);
+                res.add(new ExprResult(val, exp));
+            }
+            return res;
+        }
+    }
+    // 51. You're given a list of elements. Each element has a unique id and 3 properties. Two elements are
+    // considered as duplicates if they share any of the 3 properties. Please write a function that
+    // takes the input and returns all the duplicates.
+    //
+    //Input:
+    //E1: id1, p1, p2, p3
+    //E2: id2, p1, p4, p5
+    //E3: id3, p6, p7, p8
+    //
+    //Output: {{id1, id2}, {id3}}
+
+//    public static void main(String[] args) {
+//        List<String> input = List.of(
+//                "E1: id1, p1, p2, p3",
+//                "E2: id2, p1, p4, p5",
+//                "E3: id3, p6, p7, p8",
+//                "E4: id4, p4, p9",
+//                "E5: id5, p10",
+//                "E6: id6, p8, p11"
+//        );
+//        List<List<String  >> res = solve(input);
+//        for(List<String > a : res){
+//            for(String s : a){
+//                System.out.print(s);
+//            }
+//            System.out.println();
+//        }
+//    }
+
+    static List<List<String  >> solve(List<String> input){
+        int n = input.size();
+        DisjointSet set = new DisjointSet(n);
+        Map<String , Integer> propertyIndexMap = new HashMap<>();
+
+        for(int i=0;i<n;i++){
+
+            String[] arr = input.get(i).split(",");
+
+            for(int j=1;j<arr.length;j++){
+
+                if(propertyIndexMap.containsKey(arr[j])){
+                    int prevIndex = propertyIndexMap.get(arr[j]);
+                    set.unionBySize(prevIndex, i);
+                }else
+                    propertyIndexMap.put(arr[j], i);
+            }
+        }
+
+        Map<Integer, Set<Integer>> indexPropertyMap = new HashMap<>();
+
+
+        for(var entry : propertyIndexMap.entrySet()){
+            int index = entry.getValue();
+            int upi = set.findUParent(index);
+
+            if(indexPropertyMap.containsKey(upi)){
+                Set<Integer> a = indexPropertyMap.get(upi);
+                a.add(index);
+                indexPropertyMap.put(upi, a);
+            }else
+                indexPropertyMap.put(upi, new HashSet<>(List.of(index)));
+        }
+
+        List<List<String  >> res = new ArrayList<>();
+        for(var entry : indexPropertyMap.entrySet()){
+
+            List<String> list = new ArrayList<>();
+            for(int index : entry.getValue()){
+                String s = input.get(index).split(",")[0].split(":")[1];
+                list.add(s);
+            }
+            res.add(list);
+        }
+
+        return res;
+    }
+    //52. You are assigned the task of determining how many gifts an uncle can purchase
+    // for his nephew, given that he saves money daily for this purpose. The nephew has
+    // prepared a list of gifts, each with a designated day for purchase and a specified cost.
+    // The uncle begins with no savings but accumulates $1 each day Your objective is to calculate
+    // the maximum number of gifts the uncle can afford from the list, adhering to the financial
+    // constraints and timing.
+
+    int solve(int[][] gifts, int k){
+        Queue<Integer>  pq = new PriorityQueue<>((a, b) -> b - a);
+        Arrays.sort(gifts, (a, b) -> a[1] - b[1]);
+        int totalCost = 0;
+        List<Integer> list = new LinkedList<>();
+        for(int[] edge : gifts){
+            int cost = edge[0];
+            int day = edge[1];
+            if(cost > k)
+                break;
+
+            totalCost += cost;
+            pq.add(cost);
+            k-=cost;
+            if(totalCost > day){
+                int currCost = pq.remove();
+
+                totalCost -= currCost;
+                list.add(currCost);
+                k+= currCost;
+            }
+        }
+        int i= 0;
+        while(i < list.size() && list.get(i) <= k ){
+            k -= list.get(i);
+            pq.add(list.get(i));
+            i++;
+        }
+        return pq.size();
+    }
+    //53. Round 3: I was given a binary matrix and asked to find the upper-left corner
+    // of the largest square of 1's.
+    // The follow-up question was: What if we are allowed to switch at most k zeros to 1's?
+    public int countSquares(int[][] matrix) {
+        int n = matrix.length;
+        int m = matrix[0].length;
+        int[][] dp = new int[n][m];
+        for (int i = 0; i < n; i++) {
+            dp[i][0] = matrix[i][0];
+        }
+        for (int j = 0; j < m; j++) {
+            dp[0][j] = matrix[0][j];
+        }
+
+        int x = -1, y = -1;
+        int maxSize = 0;
+
+        for (int i = 1; i < n; i++) {
+            for (int j = 1; j < m; j++) {
+                if (matrix[i][j] == 0) {
+                    dp[i][j] = 0;
+                } else {
+                    int size = Math.min(dp[i - 1][j], Math.min(dp[i - 1][j - 1], dp[i][j - 1]));
+                    dp[i][j] = 1 + size;
+                }
+
+                if (maxSize < dp[i][j]) {
+                    maxSize = dp[i][j];
+                    x = i - maxSize + 1;
+                    y = j - maxSize + 1;
+                }
+            }
+        }
+
+        System.out.println(maxSize); // max size of the square
+        System.out.println("row: " + x + " col: " + y); // starting of maxSqare
+        return maxSize;
+    }
+    // follow ups when k zeros chn be modified to k ones
+    public int countSquares(int[][] matrix, int k) {
+        int n = matrix.length;
+        int m = matrix[0].length;
+
+        int[][] prefix = new int[n+1][m+1];
+            for(int i=1;i<=n;i++){
+            for(int j=1;j<=m;j++){
+                int zero = matrix[i-1][j-1] == 0 ? 1 : 0;
+                int val = prefix[i-1][j] + prefix[i][j-1] - prefix[i-1][j-1] + zero;
+
+                prefix[i][j] = val;
+            }
+        }
+
+
+        int min = Math.min(n, m);
+
+        boolean flag = false;
+        int maxSize = 0;
+
+        for(int size = min;size >0;size--){
+            for(int i = 0;i <= n-size;i++){
+                for(int j = 0;j <= m-size;j++){
+
+                    int prevRow = i+1, prevCol = j+1;
+                    int lastRow = i + size, lastCol = j + size;
+                    int cnt = prefix[lastRow][lastCol]
+                            - prefix[lastRow][prevCol-1]
+                            - prefix[prevRow-1][lastCol]
+                            + prefix[prevRow-1][prevCol-1];
+                    if(cnt <= k){
+                        maxSize = size;
+                        flag = true;
+                        break;
+                    }
+                }
+
+                if(flag)
+                    break;
+            }
+            if(flag)
+                break;
+        }
+        System.out.println(maxSize);
+        return maxSize;
+
+    }
+    //54. Let's say you have given a list of neighborhood, each neighborhood has different houses in it,
+    // e.g {{8,2,9}, {4,6,4}, {4,5,1}}.
+    // Respective house color is also given {{'x','r','b'}, {'z', 'r', 'q'}, {'c', 'x', 'a'}}.
+    //We need to return the sorted house order with color attached to it but one condition is that
+    // one neighborhood can't have same house number twice in it. Result of above example is:
+    //{{'1a','2r','4z'}, {'4q','5x','6r'}, {'4c','8x','9b'}}.
+
+    static class House{
+        int num;
+        List<Character> colors = new ArrayList<>();
+        int index = 0;
+    }
+    static List<List<String>> findHouse(List<List<Integer>> houses, List<List<Character>> colors){
+        int n = houses.size();
+        int m = houses.get(0).size();
+        Map<Integer, List<Character>> map = new HashMap<>();
+
+        for(int i=0;i<houses.size();i++) {
+            for (int j = 0; j < houses.get(i).size(); j++) {
+                int house = houses.get(i).get(j);
+                char color = colors.get(i).get(j);
+                map.computeIfAbsent(house, e -> new ArrayList<>()).add(color);
+            }
+        }
+
+        Queue<House> pq = new PriorityQueue<>((a, b) -> b.colors.size() - a.colors.size());
+        for(var entry : map.entrySet()){
+            House house = new House();
+            house.num = entry.getKey();
+            house.colors = entry.getValue();
+            pq.add(house);
+        }
+        List<List<String>> res = new ArrayList<>();
+        for(int i=0;i<n;i++){
+            Queue<House> q = new LinkedList<>();
+            List<String> neighbour = new ArrayList<>();
+            for(int j=0;j<m;j++){
+
+                House h = pq.remove();
+                neighbour.add(""+h.num + h.colors.get(h.index));
+                h.index++;
+                if(h.index < h.colors.size())
+                    q.add(h);
+            }
+            Collections.sort(neighbour);
+            res.add(neighbour);
+            pq.addAll(q);
+        }
+        return res;
+    }
+    //55. Let's say you have given a string and list of words. We need to find words that we can make from
+    // the given string by deleting chars from string from any position.
+    // Follow up : if we have listOfWords given in the starting and we can preprocess it and then find out the same result.
+    //Eg:
+    //string: "ozweitosgshg", listOfWords: ["egg", "zoo"]
+
+    class Word{
+        int index;
+        int len;
+        String word;
+        Word(String word){
+            this.word =word;
+            this.index = 0;
+            this.len = word.length();
+        }
+
+    }
+    List<String> findWord(String text, List<String> words){
+
+        Map<Character, List<Word>> mp = new HashMap<>();
+        for(String word : words){
+            char ch = word.charAt(0);
+            mp.computeIfAbsent(ch, e -> new ArrayList<>()).add(new Word(word));
+        }
+
+        List<String> res = new ArrayList<>();
+
+        for(char ch : text.toCharArray()){
+
+            List<Word> list = mp.getOrDefault(ch, new ArrayList<>());
+            mp.put(ch, new ArrayList<>());// clear this char from map
+
+            for(Word word : list){
+                word.index++;
+                if(word.index == word.len){
+                    res.add(word.word);
+                }else{
+                    char curr = word.word.charAt(word.index);
+                    mp.computeIfAbsent(curr, e -> new ArrayList<>()).add(word);
+                }
+            }
+        }
+        return res;
+    }
+    //56. Given an array of start time for N processes that have the same duration of completion.
+    // Given M CPUs, determine the minimum time when all processes will be completed.
+//    public static void main(String[] args) {
+//        List<Integer> start = new ArrayList<>(List.of(1, 2, 3, 4, 5));
+//        int m = 2, t = 3;
+//        System.out.println(solve(start, m, t));
+//    }
+
+    static int solve(List<Integer> startTimes, int m, int t){
+
+        PriorityQueue<Integer> cpu = new PriorityQueue<>((a, b) -> a -b);
+        for(int i=0;i<m;i++)
+            cpu.add(0);
+
+        int lastFinished = 0;
+        for(int startTime : startTimes){
+            int free = cpu.remove();
+            int start = Math.max(startTime, free);
+            int endTime = start + t;
+            cpu.add(endTime);
+            lastFinished = Math.max(lastFinished, endTime);
+        }
+        return lastFinished;
+    }
+
+    //57 Given two source A, B and one destination D in a unweighted graph.
+    // Determine the number of minimum distinct edges that both A and B will cover to reach D
+    public int minDistinctEdges(List<List<Integer>> graph, int A, int B, int D) {
+        int n = graph.size();
+        int[] distA = bfs(graph, A, n);
+        int[] distB = bfs(graph, B, n);
+        int[] distD = bfs(graph, D, n);
+
+        int minEdges = Integer.MAX_VALUE;
+
+        for (int i = 0; i < n; i++) {
+            if (distA[i] != -1 && distB[i] != -1 && distD[i] != -1) {
+                minEdges = Math.min(minEdges, distA[i] + distB[i] + distD[i]);
+            }
+        }
+
+        return minEdges;
+    }
+
+    private int[] bfs(List<List<Integer>> graph, int start, int n) {
+        int[] dist = new int[n];
+        Arrays.fill(dist, -1);
+        Queue<Integer> q = new LinkedList<>();
+        q.offer(start);
+        dist[start] = 0;
+
+        while (!q.isEmpty()) {
+            int node = q.poll();
+            for (int nei : graph.get(node)) {
+                if (dist[nei] == -1) {
+                    dist[nei] = dist[node] + 1;
+                    q.offer(nei);
+                }
+            }
+        }
+
+        return dist;
+    }
 }
