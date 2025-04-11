@@ -40,8 +40,7 @@ public class GooglePrevious {
         if(dp[node][mask] != -1) return dp[node][mask];
         int res = (int) 1e9;
         for(int j=0;j<n;j++){
-            if(j == node)
-                continue;
+
             if((mask & (1 << j)) == 0){
                 int ans = cost[node][j] + solve(cost, j, n, mask |(1<<j), dp);
                 res = Math.min(res, ans);
@@ -84,8 +83,8 @@ public class GooglePrevious {
     }
     int solve(int n, int k) {
         // code here
-        if(n == 1)
-            return 0;
+        if(n == 0)
+            return 1;
         return (solve(n-1, k) + k) % n;
     }
 
@@ -394,7 +393,7 @@ public class GooglePrevious {
             j--;
         }
     }
-    //12. Maximum Score of a Node Sequence ->
+    //12. Maximum Score of a Node Sequence -> https://leetcode.com/problems/maximum-score-of-a-node-sequence/description/
     public int maximumScore(int[] scores, int[][] edges) {
         int n = scores.length;
         List<List<Integer>> graph = new ArrayList<>();
@@ -487,24 +486,23 @@ public class GooglePrevious {
         if (B == 0 || A.size() == 0)
             return res;
 
-        ArrayList<String> temp = new ArrayList<>();
+        ArrayList<String> currWords = new ArrayList<>();
         int currLen = 0;
 
-        for (int i = 0; i < A.size(); i++) {
-            String word = A.get(i);
+        for (String word : A) {
             int wordLen = word.length();
 
-            if (currLen + wordLen + temp.size() > B) {
-                res.add(func(temp, B, false));
-                temp.clear();
+            if (currLen + wordLen + currWords.size() > B) {
+                res.add(func(currWords, B, false));
+                currWords.clear();
                 currLen = 0;
             }
 
-            temp.add(word);
+            currWords.add(word);
             currLen += wordLen;
         }
 
-        res.add(func(temp, B, true));
+        res.add(func(currWords, B, true));
         return res;
     }
 
@@ -946,19 +944,19 @@ public class GooglePrevious {
     //19. Meeting Rooms III
     public int mostBooked(int n, int[][] meetings) {
 
-        Arrays.sort(meetings, (a, b) -> Integer.compare(a[0] ,b[0]));
+        Arrays.sort(meetings, (a, b) -> Integer.compare(a[0], b[0]));
 
         Queue<long[]> occupiedRooms = new PriorityQueue<>((a, b) -> {
-            if(a[1] != b[1]){
+            if(a[1] != b[1]) {
                 return Long.compare(a[1], b[1]);
-            }else
+            } else
                 return Long.compare(a[0], b[0]);
         });
 
         Map<Integer, Integer> mp = new HashMap<>();
         Queue<Integer> avlRooms = new PriorityQueue<>((a, b) -> a-b);
 
-        for(int i=0;i<n;i++){
+        for(int i=0;i<n;i++) {
             avlRooms.add(i);
             mp.put(i, 0);
         }
@@ -1019,7 +1017,7 @@ public class GooglePrevious {
             if(maxHeightOfLevel[currLevel] == currHeight){
                 res = maxHeight - maxHeightOfLevel[currLevel] + secondMaxHeightOfLevel[currLevel] -1;
             }else
-                res = maxHeight-1;
+                res = maxHeight-1; // we have to count edge not node , so -1
             ans[k++] = res;
         }
         return ans;
@@ -1132,7 +1130,7 @@ public class GooglePrevious {
 
     //23. Maximum Strictly Increasing Cells in a Matrix
     public int maxIncreasingCells(int[][] mat) {
-        var mp = new TreeMap<Integer, List<int[]>>(Collections.reverseOrder());
+        Map<Integer, List<int[]>> mp = new TreeMap<>((b, a) -> b-a);
 
         var n = mat.length;
         var m = mat[0].length;
@@ -1399,18 +1397,18 @@ public class GooglePrevious {
     //31. There will be some tasks, and each task can have one or more subtasks, by default all
     // tasks have completion time 1 unit, but the comp_time of a parent task is the x if all
     // subtasks have time x, otherwise it is their sum, we have to find the total completion time.
-//    public static void main(String[] args) {
-//        int[][] arr = new int[][]{
-//                {0, 1},
-//                {0, 2},
-//                {1, 3},
-//                {1, 4},
-//                {2, 5},
-//                {6, 7},
-//        };
-//        int V = 9;  // 0-based indexing
-//        System.out.println(func(arr, V));
-//    }
+    //    public static void main(String[] args) {
+    //        int[][] arr = new int[][]{
+    //                {0, 1},
+    //                {0, 2},
+    //                {1, 3},
+    //                {1, 4},
+    //                {2, 5},
+    //                {6, 7},
+    //        };
+    //        int V = 9;  // 0-based indexing
+    //        System.out.println(func(arr, V));
+    //    }
 
     private static int func(int[][] edges, int V) {
         List<List<Integer>> adj = new ArrayList<>();
@@ -1463,6 +1461,40 @@ public class GooglePrevious {
     //32. There are n people and each person has a specific order in which the songs should be played,
     //P1 : a,b,c
     //P2. : b, e , f
+    static List<Character> getSongOrder(List<List<Character>> songs){
+        Map<Character, List<Character>> graph = new LinkedHashMap<>();
+
+        for (List<Character> song : songs) {
+            char parent = song.get(0);
+            for (int j = 1; j < song.size(); j++) {
+                graph.computeIfAbsent(parent, e -> new ArrayList<>()).add(song.get(j));
+                parent = song.get(j);
+            }
+            graph.computeIfAbsent(parent, e -> new ArrayList<>());
+        }
+
+        Stack<Character> st = new Stack<>();
+        Set<Character> vis = new HashSet<>();
+        for(var entry : graph.entrySet()){
+            char node = entry.getKey();
+            if(!vis.contains(node))
+                dfs(node, graph, st, vis);
+        }
+        List<Character> res = new ArrayList<>(st);
+        Collections.reverse(res);
+        return res;
+    }
+    static void dfs(char node, Map<Character, List<Character>> graph, Stack<Character> st, Set<Character> vis){
+        vis.add(node);
+
+        for (Character adjNode : graph.get(node)) {
+            if (!vis.contains(adjNode)) {
+                dfs(adjNode, graph, st, vis);
+            }
+        }
+
+        st.add(node);
+    }
 
     //33. Given roots of 2 n-ary trees write code to merge them. Complete the following function:
     // https://leetcode.com/discuss/post/5847086/google-l3-phone-screen-by-anonymous_user-9ybo/
@@ -1523,55 +1555,47 @@ public class GooglePrevious {
     // inactive (i.e., could no longer be used). The goal was to determine if a path existed from the
     // source to the destination under these constraints.
 
-    static boolean isPossible(int[][] points, int source, int dest, double threshold){ // source and dest index given
-
-        int n = points.length;
-        Map<Integer, List<Point>> graph = new HashMap<>();
-        for (int i=0;i<n;i++)
-            graph.put(i, new ArrayList<>());
-        for(int i=0;i<n;i++){
-            for(int j=0;j<n;j++){
-                if(i == j)
-                    continue;
-                double dist = findDist(points[i], points[j]);
-                if(dist <= threshold)
-                    graph.get(i).add(new Point(j, dist));
-            }
+    static double solve(int[][] points , int V, int src, int dest, double threshold){
+        List<List<double[]>> adj = new ArrayList<>();
+        for(int i=0;i<V;i++){
+            adj.add(new ArrayList<>());
         }
 
-        Queue<Point> pq = new PriorityQueue<>((a, b) -> Double.compare(a.dist , b.dist));
-        Set<Integer> vis = new HashSet<>();
-
-        pq.add(new Point(source, 0));
-
-        while (!pq.isEmpty()){
-
-            Point p = pq.remove();
-
-            if(p.index == dest)
-                return true;
-
-            if(vis.contains(p.index))
-                continue;
-
-            vis.add(p.index);
-
-            List<Point> adjNode = graph.get(p.index);
-            adjNode.sort((a, b) -> Double.compare(a.dist, b.dist));
-
-            for(Point adj : adjNode){
-                if(!vis.contains(adj.index)){
-                    pq.add(adj);
+        for(int i=0;i<points.length;i++){
+            for(int j=i+1;j<points.length;j++){
+                double dist = getDist(points[i], points[j]);
+                if(dist <= threshold){
+                    adj.get(i).add(new double[]{j, dist});
                 }
             }
-
         }
-        return false;
+
+        double[] count = new double[V];
+        Arrays.fill(count, 1e9);
+        Queue<double[]> q = new LinkedList<>();
+        q.add(new double[]{src, 0});
+        while(!q.isEmpty()){
+
+            int node = (int)q.peek()[0];
+            double dist = q.remove()[1];
+
+            if(node == dest)
+                continue;
+            for(double[] adjNode : adj.get(node)){
+                int currNode = (int)adjNode[0];
+                double currDist = adjNode[1] + dist;
+                if(count[currNode] > currDist){
+                    count[currNode] = currDist;
+                    q.add(new double[]{currNode, currDist});
+                }
+            }
+        }
+        return count[dest];
+    }
+    static double getDist(int[] a, int[] b){
+        return Math.sqrt(Math.pow(a[0] - b[0], 2) + Math.pow(a[1]-b[1], 2));
     }
 
-    private static double findDist(int[] point1, int[] point2) {
-        return Math.sqrt(Math.pow(point1[0] - point2[0], 2) + Math.pow(point1[1] - point2[1], 2));
-    }
 
     //36. Dungeon Game -> https://leetcode.com/problems/dungeon-game/description/
     public int calculateMinimumHP(int[][] mat) {
@@ -1872,8 +1896,7 @@ public class GooglePrevious {
         return false;
     }
 
-    //41. I recently had a google interview, and I was asked the below question, let me know if you get it.
-    //
+    //41.
     //Basically I needed to implement cli.
     //
     //I was given (as strings) as directories e.g.
@@ -1921,11 +1944,18 @@ public class GooglePrevious {
         class TrieNode{
             TrieNode[] links = new TrieNode[26];
             List<File> files = new ArrayList<>();
-            int visCount = 0;
 
+            public File getFile(String fileName) {
+                for(File file : files){
+                    if(file.name.equals(fileName))
+                        return file;
+                }
+                return null;
+            }
         }
 
         class Trie{
+
             TrieNode root;
             Trie(){
                 root = new TrieNode();
@@ -1936,15 +1966,18 @@ public class GooglePrevious {
 
                 int n = str.length;
                 TrieNode node = root;
-                for(int i=0;i<n-1;i++){
+                for(int i=0;i<n;i++){
                     if(str[i].trim().isEmpty())
                         continue;
+                    if(str[i].contains("txt")){
+                        node.files.add(new File(str[n-1], false));
+                        break;
+                    }
                     char ch = str[i].charAt(0);
                     if(node.links[ch - 'a'] == null)
                         node.links[ch - 'a'] = new TrieNode();
                     node = node.links[ch - 'a'];
                 }
-                node.files.add(new File(str[n-1], false));
             }
 
             void visit(String s){
@@ -1952,20 +1985,24 @@ public class GooglePrevious {
                 String[] str = s.split("/");
                 int n = str.length;
                 TrieNode node = root;
-                for(int i=0;i<n-1;i++){
+                for(int i=0;i<n;i++){
                     if(str[i].trim().isEmpty())
                         continue;
+                    if(str[i].contains("txt")){
+                        File file = node.getFile(str[i]);
+                        if(file == null)
+                            return;
+                        file.isVisited = true;
+                    }
                     char ch = str[i].charAt(0);
 
                     if(node.links[ch - 'a'] == null)
                         return ;
                     node = node.links[ch - 'a'];
                 }
-
-                node.visCount++;
             }
 
-            String getResults(String s){
+            List<String> getResults(String s){
                 StringBuilder sb = new StringBuilder();
                 String[] str = s.split("/");
                 int n = str.length;
@@ -1975,15 +2012,21 @@ public class GooglePrevious {
                         continue;
                     char ch = str[i].charAt(0);
 
-                    if(node.links[ch - 'a'] == null)
-                        return "";
                     node = node.links[ch - 'a'];
                     sb.append(ch).append("/");
                 }
-                if(node.visCount == node.files.size()){
-                    return sb.substring(0, sb.length()-1);
+                String base = sb.toString();
+                List<String> res = new ArrayList<>();
+                for(File file : node.files){
+                    if(file.isVisited){
+                        res.add(base + file.name);
+                    }else
+                        break;
+                }
+                if(res.size() == node.files.size()){
+                    return new ArrayList<>(List.of(sb.substring(0, sb.length()-1)));
                 }else
-                    return sb.append(str[n-1]).toString();
+                    return res;
             }
         }
 
@@ -2000,7 +2043,7 @@ public class GooglePrevious {
 
             Set<String> set = new LinkedHashSet<>();
             for(String s : selectedDir){
-                set.add(trie.getResults(s));
+                set.addAll(trie.getResults(s));
             }
 
             for(String res : set)
@@ -2159,7 +2202,7 @@ public class GooglePrevious {
         }
         return coins;
     }
-    //45. Parallel course II
+    //45. Parallel course II -> https://leetcode.com/problems/parallel-courses-ii/description/
     class Solution {
         int totalMask;
         int n;
@@ -2234,7 +2277,7 @@ public class GooglePrevious {
         List<List<Integer>> getCombi(List<Integer> avl, int k){
 
             List<List<Integer>> res = new ArrayList<>();
-            if(avl.size() == k){
+            if(avl.size() <= k){
                 res.add(avl);
                 return res;
             }
@@ -2283,7 +2326,6 @@ public class GooglePrevious {
 
             indegree[adjNode]--;
             if(indegree[adjNode] == 0){
-
                 q.add(adjNode);
             }
 
@@ -2353,6 +2395,7 @@ public class GooglePrevious {
             }
         }
 
+
         return st.isEmpty() && !expectOperand;
     }
 
@@ -2399,7 +2442,7 @@ public class GooglePrevious {
             }
         }
     }
-    //50. Different Ways to Add Parentheses -> https://leetcode.com/problems/different-ways-to-add-parentheses/description/
+    //50. Different Ways to Add Parentheses and solve expression-> https://leetcode.com/problems/different-ways-to-add-parentheses/description/
 
     class Solution1 {
         class ExprResult {
@@ -2417,7 +2460,7 @@ public class GooglePrevious {
                 case '-' :
                     return x - y;
                 case '*':
-                    return x *y;
+                    return x * y;
             }
             return 0;
         }
@@ -2569,7 +2612,7 @@ public class GooglePrevious {
         }
         return pq.size();
     }
-    //53. Round 3: I was given a binary matrix and asked to find the upper-left corner
+    //53. I was given a binary matrix and asked to find the upper-left corner
     // of the largest square of 1's.
     // The follow-up question was: What if we are allowed to switch at most k zeros to 1's?
     public int countSquares(int[][] matrix) {
@@ -2607,7 +2650,7 @@ public class GooglePrevious {
         System.out.println("row: " + x + " col: " + y); // starting of maxSqare
         return maxSize;
     }
-    // follow ups when k zeros chn be modified to k ones
+    // follow ups when upto k zeros can be modified to k ones
     public int countSquares(int[][] matrix, int k) {
         int n = matrix.length;
         int m = matrix[0].length;
@@ -2797,7 +2840,7 @@ public class GooglePrevious {
         int[] dist = new int[n];
         Arrays.fill(dist, -1);
         Queue<Integer> q = new LinkedList<>();
-        q.offer(start);
+        q.add(start);
         dist[start] = 0;
 
         while (!q.isEmpty()) {
@@ -2805,11 +2848,306 @@ public class GooglePrevious {
             for (int nei : graph.get(node)) {
                 if (dist[nei] == -1) {
                     dist[nei] = dist[node] + 1;
-                    q.offer(nei);
+                    q.add(nei);
                 }
             }
         }
 
         return dist;
     }
+    //58.  Longest Repeating Subsequence -> https://www.naukri.com/code360/problems/longest-repeating-subsequence_1118110?topList=top-google-coding-interview-questions&problemListRedirection=true&company%5B%5D=Google&leftPanelTabValue=PROBLEM
+    public static int longestRepeatingSubsequence(String st, int n)
+    {
+        int[][] dp = new int[n+1][n+1];
+        for(int[] cols : dp){
+            Arrays.fill(cols, -1);
+        }
+        return solve(st, n, n, dp);
+    }
+    static int solve(String s, int i, int j, int[][] dp){
+        if( i ==0 || j== 0)
+            return 0;
+        if(dp[i][j] != -1) return dp[i][j];
+        int res = 0;
+        if(s.charAt(i-1) == s.charAt(j-1) && i != j){
+            res = 1 + solve(s, i-1, j-1, dp);
+        }else
+            res = Math.max(solve(s,i-1, j, dp), solve(s, i, j-1, dp));
+        return dp[i][j] = res;
+    }
+    //59. 1074. Number of Submatrices That Sum to Target -> https://leetcode.com/problems/number-of-submatrices-that-sum-to-target/description/
+    public int numSubmatrixSumTarget(int[][] matrix, int target) {
+        int n = matrix.length;
+        int m = matrix[0].length;
+        int[][] preSum = new int[n][m];
+
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                int top = i > 0 ? preSum[i-1][j] : 0;
+                int left = j>0 ? preSum[i][j-1] : 0;
+                int topLeft = i>0 && j>0 ? preSum[i-1][j-1] : 0;
+                preSum[i][j] = matrix[i][j] + left + top - topLeft;
+            }
+        }
+        int k = n * m;
+        int count = 0;
+        for(int r1 =0;r1 <n;r1++){
+            for(int r2=r1;r2<n;r2++){
+
+                Map<Integer, Integer> mp = new HashMap<>();
+                mp.put(0, 1);
+
+                for(int c=0;c<m;c++){
+                    int prev = r1 > 0 ? preSum[r1-1][c] : 0;
+                    int currSum = preSum[r2][c] - prev;
+                    if(mp.containsKey(currSum - target)){
+                        count += mp.get(currSum-target);
+                    }
+                    mp.put(currSum, mp.getOrDefault(currSum, 0) +1);
+
+                }
+            }
+        }
+        return count;
+    }
+    //60.  BST queries -> https://www.naukri.com/code360/problems/bst-queries_1095658?topList=top-google-coding-interview-questions&problemListRedirection=true&leftPanelTabValue=PROBLEM
+    public static ArrayList<Integer> bstQueries(TreeNode root, int q, int[][] queries) {
+        // Write your code here
+        ArrayList<Integer> arr = new ArrayList<>();
+        dfs(root, arr);
+        ArrayList<Integer> res = new ArrayList<>();
+        for(int[] query : queries){
+            int l = query[0];
+            int r = query[1];
+
+            int index2 = findFloor(arr, r);
+            int index1 = findCeil(arr, l);
+            if(index1 <= index2)
+                res.add(index2 - index1+1);
+            else
+                res.add(0);
+        }
+        return res;
+    }
+
+    static int findCeil(ArrayList<Integer> arr, int target){
+        int low = 0, high = arr.size()-1;
+        int res = high+1;
+
+        while(low <= high){
+            int mid = (low + high)/2;
+
+            if(target <= arr.get(mid)){
+                res = mid;
+                high = mid-1;
+            }else
+                low = mid+1;
+        }
+        return res;
+    }
+
+    static int findFloor(ArrayList<Integer> arr, int target){
+        int low = 0;
+        int high = arr.size()-1;
+        int res = -1;
+        while(low <= high){
+            int mid = (low + high)/2;
+
+            if(target >= arr.get(mid)){
+                res = mid;
+                low = mid+1;
+            }else
+                high = mid-1;
+        }
+        return res;
+    }
+    static void dfs(TreeNode root, ArrayList<Integer> arr){
+        if(root == null){
+            return;
+        }
+
+        dfs(root.left, arr);
+        arr.add(root.data);
+        dfs(root.right, arr);
+    }
+    //61. 1129. Shortest Path with Alternating Colors -> https://leetcode.com/problems/shortest-path-with-alternating-colors/description/
+    public int[] shortestAlternatingPaths(int n, int[][] redEdges, int[][] greenEdges) {
+        List<List<Integer>> red = new ArrayList<>();
+        List<List<Integer>> green = new ArrayList<>();
+        for(int i=0;i<n;i++){
+            red.add(new ArrayList<>());
+        }
+        for(int i=0;i<n;i++){
+            green.add(new ArrayList<>());
+        }
+        for(int[] edge : redEdges){
+            int u = edge[0];
+            int v = edge[1];
+            red.get(u).add(v);
+        }
+        for(int[] edge : greenEdges){
+            int u = edge[0];
+            int v = edge[1];
+            green.get(u).add(v);
+        }
+        int[] dist = new int[n];
+        Arrays.fill(dist, -1);
+        int [][] vis = new int[n][2];
+        Queue<int[]> q = new LinkedList<>();//node, steps, color
+
+        q.add(new int[]{0, 0, -1});
+        vis[0][0] = 1;
+        vis[0][1] = 1;
+
+        while(!q.isEmpty()){
+            //red -> 1
+            //green -> 0
+            int node = q.peek()[0];
+            int step = q.peek()[1];
+            int color = q.remove()[2];
+
+            if(dist[node] == -1)
+                dist[node] = step;
+
+            if(color != 1){
+                for(int adj : red.get(node)){
+                    if(vis[adj][1] == 0){
+                        vis[adj][1] = 1;
+                        q.add(new int[]{adj, step+1, 1});
+                    }
+                }
+            }
+
+            if(color != 0){
+                for(int adj : green.get(node)){
+                    if(vis[adj][0] == 0){
+                        vis[adj][0] = 1;
+                        q.add(new int[]{adj, step+1, 0});
+                    }
+                }
+            }
+
+        }
+        return dist;
+
+    }
+    //62. All Unique Permutations -> https://www.naukri.com/code360/problems/all-unique-permutations_1094902?topList=top-google-coding-interview-questions&problemListRedirection=true&leftPanelTabValue=PROBLEM
+    public static ArrayList<ArrayList< Integer >> uniquePermutations(ArrayList<Integer> arr, int n) {
+        Set<ArrayList<Integer>> res = new HashSet<>();
+        solve(arr, 0, arr.size(), res);
+        return new ArrayList<>(res);
+    }
+    static void solve(List<Integer> arr, int i, int n, Set<ArrayList<Integer>> res){
+
+        if(i== n){
+            res.add(new ArrayList<>(arr));
+            return;
+        }
+
+        for(int k=i;k<n;k++){
+
+            swap(arr, i, k);
+            solve(arr, i+1, n, res);
+            swap(arr, i, k);
+        }
+    }
+    static void swap(List<Integer> arr, int i, int j){
+        int temp = arr.get(i);
+        arr.set(i, arr.get(j));
+        arr.set(j, temp);
+    }
+    //63. Shortest Unique Prefix -> https://www.naukri.com/code360/problems/shortest-unique-prefix_1094887?topList=top-google-coding-interview-questions&problemListRedirection=true&leftPanelTabValue=PROBLEM
+    public String[] shortestUniquePrefix(String[] s, int n) {
+        // Write your code here
+        String[] res = new String[n];
+
+        Trie trie = new Trie();
+        for(String str : s){
+            trie.insert(str);
+        }
+        int i= 0;
+        for(String str : s){
+            res[i++] = trie.getPrefix(str);
+        }
+        return res;
+    }
+    //64. Maximum Points On Straight Line -> https://www.naukri.com/code360/problems/maximum-points-on-straight-line_1092972?topList=top-google-coding-interview-questions&problemListRedirection=true&leftPanelTabValue=PROBLEM
+    public static int maxPointsOnLine(int[][] points, int n) {
+
+        if (n <= 2) return n;
+
+        int result = 0;
+
+        for (int i = 0; i < n; i++) {
+            Map<String, Integer> slopes = new HashMap<>();
+            int samePointCount = 0;
+            int localMax = 0;
+
+
+            for (int j = i + 1; j < n; j++) {
+
+                if (points[i][0] == points[j][0] && points[i][1] == points[j][1]) {
+                    samePointCount++;
+                    continue;
+                }
+
+                int deltaY = points[j][1] - points[i][1];
+                int deltaX = points[j][0] - points[i][0];
+                int gcd = findGCD(deltaY, deltaX);
+
+                deltaY /= gcd;
+                deltaX /= gcd;
+
+                if (deltaX < 0) {
+                    deltaX = -deltaX;
+                    deltaY = -deltaY;
+                }
+
+                String slope = deltaY + "/" + deltaX;
+                slopes.put(slope, slopes.getOrDefault(slope, 0) + 1);
+                localMax = Math.max(localMax, slopes.get(slope));
+            }
+
+            result = Math.max(result, localMax + samePointCount + 1);
+        }
+
+        return result;
+    }
+    private static int findGCD(int a, int b) {
+        if (b == 0) return a;
+        return findGCD(b, a % b);
+    }
+
+    //65. Single Number II -> All number 3 time one number 1 time
+    public static int elementThatAppearsOnce(int[] arr) {
+        // one can have a value ,it it is not in two
+        //two can have a value , if it is not in one
+        //three can have a value , if it not in one and two
+        int one = 0, two = 0, three = 0;
+        for(int num : arr){
+
+            one = (one ^ num) & ~two;
+            two = (two ^ num) & ~one;
+            three = ((three ^ num) & ~two) & ~one;
+        }
+        return one;
+    }
+
+    //58.
+    //Given below pattern of license plates (Pattern only, not the actual list of license plates), Find the nth license plate
+    //All license plates no are of size 5 chars
+    //Eg, if n is 3, ans is - 00002
+    //
+    //00000
+    //00001
+    //99999
+    //0000A
+    //0001A
+    //........
+    //9999Z
+    //000AA
+    //001AA
+    //........
+    //ZZZZZ
+
 }
