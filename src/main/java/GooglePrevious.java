@@ -3132,6 +3132,129 @@ public class GooglePrevious {
         }
         return one;
     }
+    //66. Four Keys Keyboard -> https://www.naukri.com/code360/problems/four-keys-keyboard_1092346?topList=top-google-coding-interview-questions&problemListRedirection=true&company%5B%5D=Google&leftPanelTabValue=PROBLEM
+    static Map<Integer, Long> mp = new HashMap<>();
+    static long findMaxAs(int n) {
+        if(n <=6)
+            return n;
+        if(mp.containsKey(n))
+            return mp.get(n);
+        long res = 0;
+
+        for(int i = n-3;i>=1;i--){
+            long val = findMaxAs(i) * (n-i-1);
+            res = Math.max(res, val);
+        }
+        mp.put(n, res);
+        return res;
+    }
+    //67. two keys keyboard -> https://leetcode.com/problems/2-keys-keyboard/description/
+    int size;
+    Map<String, Integer> mp1;
+    public int minSteps(int n) {
+        if(n==1)
+            return 0;
+        size = n;
+        mp = new HashMap<>();
+        return 1 + solve1(1, 1);
+    }
+
+    int solve1(int cnt, int copy){
+        if( cnt > size)
+            return (int) 1e9;
+        if(cnt == size){
+            return 0;
+        }
+        String key = cnt +","+copy;
+        if(mp1.containsKey(key))
+            return mp1.get(key);
+
+        int left = 1 + solve1(cnt + copy, copy);
+        int right = 2 + solve1(cnt * 2, cnt);
+        mp1.put(key, Math.min(left, right));
+        return mp1.get(key);
+    }
+    //68. 847. Shortest Path Visiting All Nodes -> https://leetcode.com/problems/shortest-path-visiting-all-nodes/description/
+    public int shortestPathLength(int[][] graph) {
+        List<List<Integer>> adj = new ArrayList<>();
+        int V = graph.length;
+        for(int i=0;i<V;i++){
+            adj.add(new ArrayList<>());
+        }
+
+
+        for(int i=0;i<graph.length;i++){
+
+            for(int j=0;j<graph[i].length;j++){
+                adj.get(i).add(graph[i][j]);
+
+            }
+        }
+        Queue<int[]> q = new LinkedList<>();// node, mask, count
+        Set<String> vis = new HashSet<>();
+        for(int i=0;i<V;i++){
+            q.add(new int[]{i, 1 << i, 0});
+            vis.add(i + "," +( 1 << i));
+        }
+
+        while(!q.isEmpty()){
+
+            int[] curr = q.remove();
+            int node = curr[0];
+            int mask = curr[1];
+            int count = curr[2];
+
+            if(curr[1] == (1 << V) -1)
+                return curr[2];
+
+            for(int adjNode : adj.get(node)){
+
+                int currMask = mask | ( 1 << adjNode);
+                if(!vis.contains(adjNode +"," + currMask)){
+                    q.add(new int[]{adjNode, currMask, count+1});
+                    vis.add(adjNode +"," + currMask);
+                }
+            }
+        }
+        return -1;
+    }
+    //69. Journey to the Moon -> https://www.hackerrank.com/challenges/journey-to-the-moon/problem
+    public static long journeyToMoon(int n, List<List<Integer>> astronaut) {
+        List<List<Integer>> adj = new ArrayList<>();
+        for(int i=0;i<n;i++)
+            adj.add(new ArrayList<>());
+        for(var list: astronaut){
+            int u = list.get(0);
+            int v = list.get(1);
+            adj.get(u).add(v);
+            adj.get(v).add(u);
+        }
+
+        int[] vis = new int[n];
+
+        long cnt = 0, res = 0;
+        for(int i=0;i<n;i++){
+            if(vis[i] == 1)
+                continue;
+            long val = dfs(i, adj, vis);
+            res += cnt * val;
+            cnt += val;
+        }
+        return  res;
+
+    }
+    static long dfs(int node, List<List<Integer>> adj, int[] vis){
+        vis[node] = 1;
+        long cnt = 0;
+        for(int adjNode : adj.get(node)){
+            if(vis[adjNode] == 0){
+                cnt += dfs(adjNode, adj, vis);
+            }
+        }
+        return cnt+1;
+    }
+    //70.
+
 
     //58.
     //Given below pattern of license plates (Pattern only, not the actual list of license plates), Find the nth license plate

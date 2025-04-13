@@ -1793,4 +1793,45 @@ public class Graphs {
         }
     }
 
+    //48. 815. Bus Routes -> https://leetcode.com/problems/bus-routes/description/
+    public int numBusesToDestination(int[][] routes, int source, int target) {
+        if(source == target)
+            return 0;
+        Map<Integer, List<Integer>> stopBusId = new HashMap<>();
+
+        for(int i=0;i<routes.length;i++){
+            for(int stop : routes[i]){
+                stopBusId.computeIfAbsent(stop, e -> new ArrayList<>()).add(i);
+            }
+        }
+
+        Set<Integer> busVis = new HashSet<>();
+        Set<Integer> stopVis = new HashSet<>();
+        Queue<int[]> q = new LinkedList<>();// stop, count;
+        q.add(new int[]{source, 0});
+        stopVis.add(source);
+
+        while(!q.isEmpty()){
+            int stop = q.peek()[0];
+            int count = q.remove()[1];
+            if(stop == target)
+                return count;
+
+            for(int busId : stopBusId.getOrDefault(stop, new ArrayList<>())){
+                if(busVis.contains(busId))
+                    continue;
+                busVis.add(busId);
+
+                for(int currStop : routes[busId]){
+                    if(stopVis.contains(currStop))
+                        continue;
+
+                    q.add(new int[]{currStop, count+1});
+                    stopVis.add(currStop);
+                }
+            }
+        }
+        return -1;
+    }
+
 }

@@ -1,9 +1,5 @@
 package DS;
 
-import javax.swing.event.ListDataListener;
-import java.util.*;
-import java.util.stream.Collectors;
-
 
 //35. Question: Given n routers placed on a Cartesian plane and provided with a source and
 // destination vertex, the task was to determine whether it was possible to reach the
@@ -16,20 +12,17 @@ import java.util.stream.Collectors;
 public class test {
 
     public static void main(String[] args) {
-        int a = 10;
-        print(a);
-        print(~a);
-    }
-    static void print(int n ){
-        System.out.println(n);
-        if( n < 0)
-            n *=-1;
-        StringBuilder sb = new StringBuilder();
-        while(n != 0){
-            sb.append(n % 2);
-            n /= 2;
+        int[] arr = new int[]{1,6,9,3,4,76,9,9};
+        FenwickTree tree = new FenwickTree(8);
+        for(int i=0;i<arr.length;i++){
+            tree.update(i+1, arr[i]);
         }
-        System.out.println(sb.reverse());
+
+//        for(int i=0;i<=arr.length;i++){
+//            System.out.print(tree.arr[i]+", ");
+//        }
+
+        System.out.println(tree.query(3) - tree.query(2));
     }
 
 }
