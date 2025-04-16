@@ -1833,5 +1833,50 @@ public class Graphs {
         }
         return -1;
     }
+    //49. 1857. Largest Color Value in a Directed Graph -> https://leetcode.com/problems/largest-color-value-in-a-directed-graph/description/
+    public int largestPathValue(String colors, int[][] edges) {
+        int n = colors.length();
+        int[][] count = new int[n][26];
+
+        List<List<Integer>> adj = new ArrayList<>();
+        for(int i=0;i<n;i++)
+            adj.add(new ArrayList<>());
+        for(int[] edge : edges){
+            int u = edge[0];
+            int v = edge[1];
+            adj.get(u).add(v);
+        }
+        int[] vis = new int[n];
+        int[] pathVis = new int[n];
+        int res = 1;
+        for(int i=0;i<n;i++){
+            if(vis[i] == 1)
+                continue;
+            res = Math.max(res, dfs(i, adj, vis, pathVis, colors, count));
+        }
+        return res == 1e9 ? -1 : res;
+    }
+    int dfs(int node, List<List<Integer>> adj, int[] vis, int[] pathVis, String colors, int[][] count){
+        if(pathVis[node] == 1)
+            return (int)1e9;
+        if(vis[node] == 1)
+            return 0;
+        pathVis[node] = 1;
+        vis[node] = 1;
+        int currColor = colors.charAt(node) - 'a';
+        count[node][currColor] = 1;
+
+        for(int adjNode : adj.get(node)){
+            if(dfs(adjNode, adj, vis, pathVis, colors, count) == 1e9)
+                return (int) 1e9;
+
+            for(int c =0;c<26;c++){
+                int val = currColor == c ? 1 :0;
+                count[node][c] = Math.max(count[node][c], count[adjNode][c] + val);
+            }
+        }
+        pathVis[node] = 0;
+        return Arrays.stream(count[node]).reduce(0, Integer::max);
+    }
 
 }

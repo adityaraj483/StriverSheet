@@ -966,4 +966,106 @@ public class DynamicProgramming2 {
         }
         return res;
     }
+    //56. 741. Cherry Pickup -> https://leetcode.com/problems/cherry-pickup/description/
+    public int cherryPickup(int[][] grid) {
+        int n = grid.length;
+        int[][][][] dp = new int[n][n][n][n];
+        for(int[][][] r1 : dp){
+            for(int[][] r2 : r1){
+                for(int[] r3 : r2)
+                    Arrays.fill(r3, -1);
+            }
+        }
+        int res = solve(grid, 0,0, 0, 0, n, dp);
+        return Math.max(res, 0);
+    }
+
+    int solve(int[][] grid, int row1, int row2, int col1, int col2, int n, int[][][][] dp){
+
+        if(row1 <0 || row1 >=n || row2 <0 || row2 >= n|| col1 < 0 || col1 >=n || col2 <0 || col2 >=n || grid[row1][col1] == -1 || grid[row2][col2] == -1)
+            return (int) -1e8;
+
+
+        if(row1 == n-1 && row2 == n-1 && col1 == n-1 && col2 == n-1)
+            return grid[row1][col1];
+
+        if(dp[row1][row2][col1][col2] != -1) return dp[row1][row2][col1][col2];
+
+        int res = 0;
+        if(col1 == col2 && row1 == row2){
+            res = grid[row1][col1];
+        }else
+            res = grid[row1][col1] + grid[row2][col2];
+
+
+        int a = solve(grid, row1, row2, col1+1, col2+1, n, dp);
+        int b = solve(grid, row1+1, row2+1, col1, col2, n, dp);
+        int c = solve(grid, row1,row2+1, col1+1, col2, n, dp);
+        int d = solve(grid, row1+1, row2, col1, col2+1, n, dp);
+
+        res += Math.max(a, Math.max(b, Math.max(c, d)));
+        return dp[row1][row2][col1][col2] = res;
+    }
+    //57. 2999. Count the Number of Powerful Integers || Digit dp
+    public long numberOfPowerfulInt(long start, long finish, int limit, String s) {
+
+        long[][] dp = new long[17][2];
+        for(long[] arr : dp)
+            Arrays.fill(arr, -1);
+
+        String str1 = finish + "";
+
+        long a = 0;
+        if(valid(str1, s)){
+            a = solve(str1, 0, s, true, limit, dp);
+        }
+
+        for(long[] arr : dp)
+            Arrays.fill(arr, -1);
+
+        String str2 = (start-1)+"";
+        long b = 0;
+        if(valid(str2, s)){
+            b = solve(str2, 0, s, true, limit, dp);
+        }
+        return a - b;
+
+    }
+    boolean valid(String s1, String s2){
+        Long a1 = Long.parseLong(s1);
+        Long a2 = Long.parseLong(s2);
+        return a1 >= a2;
+    }
+    long solve(String str, int i, String suffix, boolean bound, int limit, long[][] dp){
+        int strLen = str.length();
+        int suffLen = suffix.length();
+
+        if( i == strLen)
+            return 1;
+
+        if(dp[i][bound?1:0] != -1) return dp[i][bound?1:0];
+
+        long res = 0;
+
+        int max = 0;
+        if(bound){
+            max = Math.min(limit, str.charAt(i) - '0');
+        }else
+            max = Math.min(9, limit);
+
+        int suffStartIdx = strLen - suffLen;
+        if(i >= suffStartIdx){
+            int idx = i - suffStartIdx;
+            int digit = suffix.charAt(idx) - '0';
+            if(digit <= max)
+                res += solve(str, i+1, suffix, (bound & (digit == max )), limit, dp);
+        }else{
+
+
+            for(int j=0;j<=max;j++){
+                res += solve(str, i+1, suffix, (bound & (j == str.charAt(i)-'0')), limit, dp);
+            }
+        }
+        return dp[i][bound?1:0] =res;
+    }
 }

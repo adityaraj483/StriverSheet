@@ -1,11 +1,10 @@
 import DS.*;
 
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 
-public class GooglePrevious {
+public class GooglePrevious1 {
 
     //1. Sum of bit differences -> https://practice.geeksforgeeks.org/problems/sum-of-bit-differences-1587115620/1
     long sumBitDifferences(int[] arr, int n) {
@@ -3253,7 +3252,80 @@ public class GooglePrevious {
         }
         return cnt+1;
     }
-    //70.
+    //70. Given an array of non-negative integers, the goal is to travel from the first index to the last index with maximum possible score with as many jumps allowed. Score of a jump is defined as the number of index jumped multiplied by the value on the jumped index.
+    //e.g. [3,7,9,10]
+    //
+    //if the jump is from index0 to index2, the score is (2-0)*9 = 18
+    //
+    //Sample input: [3,12,9,10]
+    //Sample output: 32
+    static int solve(int[] arr, int i, int n, int[] dp){
+        if( i == n -1)
+            return 0;
+        if(dp[i] != -1)
+            return dp[i];
+        int res = 0;
+        for(int k=i+1;k<n;k++){
+            int val = (k-i) * arr[k] + solve(arr, k, n, dp);
+            res = Math.max(res, val);
+        }
+        return dp[i] = res;
+    }
+    //---------------------OR-----------
+    public static int getMaxScore1(int[] nums) {
+        int result = 0;
+        int maxSeenSoFar = Integer.MIN_VALUE;
+        // First value doesn't matter hence condition > 0
+        for (int i = nums.length - 1; i > 0; i--) {
+            maxSeenSoFar = Math.max(maxSeenSoFar, nums[i]);
+            result += maxSeenSoFar;
+        }
+        return result;
+    }
+    //71.The tournament is knockout format. Which means if we have 8 players [a b c d e f g h] with their
+    // ranks [1 2 3 4 5 6 7 8], the tournament will look like this:
+    //1st round: [a b] [c d] [e f] [g h]
+    //2nd round: [a c] [e g]
+    //3rd round: [a e]
+    //champion : [a]
+    //
+    //We are calling [a b c d e f g h] or [1 2 3 4 5 6 7 8] a "draw" where in the 1st round:
+    // first two players meet in the first match, the next two players meet in the second match and so on.
+    // Problem 1:
+    //Given a draw, find out whether it is a valid draw.
+    //
+    //Round 1: [1,8,6,2,7,3,4,5] -> valid
+    //Round 2: [1,2,3,4] -> invalid
+    //
+    //Round 1: [1,8,4,5,3,6,2,7] -> valid
+    //Round 2: [1,4,3,2] -> valid
+    //Round 3: [1,2] -> valid
+    private static boolean solve(int[] arr, int n) {
+        if(arr.length % 2 != 0)
+            return false;
+        Queue<Integer> q = new LinkedList<>();
+        for(int i=0;i<n;i++)
+            q.add(arr[i]);
+        int cnt = 1;
+        while(q.size() > 1){
+            int size = q.size();
+            cnt++;
+            for(int i=0;i<size;i+=2){
+
+                int first = q.poll();
+                int second = q.poll();
+                if (first + second != n + 1) {
+                    System.out.println("Failed at " + cnt + " level");
+                    return false;
+                }
+                q.add(Math.min(first, second));
+            }
+            n/=2;
+        }
+        System.out.println("winner is " + q.peek());
+        return true;
+    }
+
 
 
     //58.
