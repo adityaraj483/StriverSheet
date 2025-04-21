@@ -210,25 +210,29 @@ public class BinarySearch {
         return ans;
     }
     //11. How many times sorted array is rotated
-    public int findKRotation(List<Integer> arr) {
-        int low = 0, high = arr.size()-1;
+    public int findKRotation(ArrayList<Integer> nums) {
+        int n = nums.size();
+        int low = 0, high = n-1;
+        int min = (int) 1e9;
+        int index = -1;
 
-        while(low < high){
+        while(low <= high){
             int mid = (low + high)/2;
-
-            if(arr.get(low) <= arr.get(mid)){
-                if(arr.get(mid) <= arr.get(high))
-                    high = mid;
-                else
-                    low = mid+1;
+            if(nums.get(low) <= nums.get(mid)){
+                if(min > nums.get(low)){
+                    min = nums.get(low);
+                    index = low;
+                }
+                low = mid+1;
             }else{
-                if(arr.get(high) <= arr.get(mid))
-                    low = mid+1;
-                else
-                    high = mid;
+                if(min > nums.get(mid)){
+                    min = nums.get(mid);
+                    index = mid;
+                }
+                high = mid-1;
             }
         }
-        return low;
+        return index;
     }
     //12. Single Element in a Sorted Array . eg [3,3,7,7,10,11,11] -> 10
     public int singleNonDuplicate(int[] nums) {
@@ -299,10 +303,16 @@ public class BinarySearch {
         }
         return -1;
     }
-    long nTimesMid(int mid, int n){
+    long nTimesMid(long mid, int n){
         long res = 1;
-        for(int i=1;i<=n;i++){
-            res *= mid;
+        while(n > 0){
+            if( n % 2 == 0){
+                mid = mid*mid;
+                n/=2;
+            }else{
+                n-=1;
+                res = res * mid;
+            }
         }
         return res;
     }
@@ -334,7 +344,7 @@ public class BinarySearch {
         int n = bloomDay.length;
         if((long) m * k > (long)n)
             return -1;
-        int low = 1, high = java.util.Arrays.stream(bloomDay).reduce(0, Integer::max);
+        int low = 1, high = Arrays.stream(bloomDay).reduce(0, Integer::max);
 
         int res =-1;
         while(low <= high){

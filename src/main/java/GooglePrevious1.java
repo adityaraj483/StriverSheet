@@ -80,11 +80,19 @@ public class GooglePrevious1 {
         // code here
         return solve(n, k) + 1;
     }
-    int solve(int n, int k) {
+    static int solve(int n, int k) {
         // code here
-        if(n == 0)
-            return 1;
+        if(n == 1)
+            return 0;
         return (solve(n-1, k) + k) % n;
+    }
+    //------------------------------
+    static int func(int n , int k){
+        int prev = 0;
+        for(int i=2;i<=n;i++){
+            prev = (prev + k) % i;
+        }
+        return prev;
     }
 
     //5. Find All Possible Recipes from Given Supplies ->

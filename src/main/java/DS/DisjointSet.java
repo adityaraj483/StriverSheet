@@ -36,4 +36,16 @@ public class DisjointSet{
             size.set(upx, size.get(upx) + size.get(upy));
         }
     }
+    public void rebuild(int n, List<int[]> edges){
+        for(int i=0;i<=n;i++){
+            parent.set(i, i);
+            size.set(i, 1);
+        }
+        for(int[] edge : edges){
+            unionBySize(edge[0], edge[1]);
+        }
+    }
+
+
+
 }
