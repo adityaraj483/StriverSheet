@@ -1,6 +1,5 @@
 import DS.DisjointSet;
 import DS.NTree;
-import com.sun.source.tree.Tree;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -1089,11 +1088,11 @@ public class GooglePrevious2 {
     //Output would be a list with the students re-arranged.
     // An acceptable output for the above case would be [1,2,3,2,1,2].
 
-    public static void main(String[] args) throws Exception {
-        List<Integer> arr = new ArrayList<>(List.of(1,2,3,2,2,2));
-        for(int val : seperateStudents(arr))
-            System.out.print(val +", ");
-    }
+//    public static void main(String[] args) throws Exception {
+//        List<Integer> arr = new ArrayList<>(List.of(1,2,3,2,2,2));
+//        for(int val : seprateStudents(arr))
+//            System.out.print(val +", ");
+//    }
 
     static int[] seperateStudents(List<Integer> arr) throws Exception {
         int n = arr.size();
@@ -1137,6 +1136,437 @@ public class GooglePrevious2 {
         return res;
     }
 
+    //20.
+    // You work as a consultant and have clients in cityA and cityB. On a given day,
+    ////    say i, you can either
+    ////    work in cityA and make Ai dollars or you can work in cityB and make Bi dollars. You can also spend
+    ////    the day traveling between cityA and cityB in which case your earnings that day are 0.
+    ////    Given Al,A2, ....An and B1, B2,....., Bn, return a schedule S of N days which maximizes your earnings,
+    ////    where S is a string of length N, and Si = A/B/T where A means work in cityA, B means work in cityB
+    ////    T means travel on day i. You can start either in cityA or cityB.
+    ////    Example1: A = [23, 4,5 ,10] B = [21,1,10, 100] The optimal schedule S here would be ->"ATBB"
+
+//    public static void main(String[] args) {
+//        int[] arr1 = {23, 4, 5, 100};
+//        int[] arr2 = {21, 1, 10, 100};
+//        int n = arr1.length;
+//
+//        dp = new Integer[n+1][3];
+//        pathdp = new String[n+1][3];
+//        int a = solve(0, arr1, arr2, n, 1);
+//        int b = solve(0, arr1, arr2, n, 2);
+//        if(a >= b){
+//            System.out.println(a + " : "+ pathdp[0][1]);
+//        }else
+//            System.out.println(b + " : "+ pathdp[0][2]);
+//    }
+    Integer[][] dp;
+    String[][] pathdp;
+    int solve(int index, int[] arr1, int[] arr2, int n, int currArray){
+
+        if(index >=n)
+            return 0;
+
+        if(dp[index][currArray] != null) return dp[index][currArray];
+
+        int currVal = currArray == 1 ? arr1[index] : arr2[index];
+
+        int option1 = currVal + solve(index+1, arr1, arr2, n, currArray);
+        String path1 = (currArray ==1 ? "A": "B") + (pathdp[index+1][currArray] == null ? "" : pathdp[index+1][currArray]);
+
+
+        int option2 = currVal;
+        String path2 = (currArray == 1 ? "A" : "B") + "T";
+        if(index+2 <= n) {
+            int otherArray = currArray ==1 ? 2 : 1;
+            option2 += solve(index+2, arr1, arr2, n, otherArray);
+            path2 = path2 + (pathdp[index+2][otherArray] == null ? "" : pathdp[index+2][otherArray]);
+        }
+
+        if(option1 >= option2){
+            dp[index][currArray] = option1;
+            pathdp[index][currArray] = path1;
+        }else {
+            dp[index][currArray] = option2;
+            pathdp[index][currArray] = path2;
+        }
+        return dp[index][currArray];
+    }
+
+    //21.Give a list of string, where every string in the list is of size 5.
+    // Return the list of 5 string such that all the characters in each of the strings are unique
+    //i.e if we combine all the strings(not nnecessary) we will have 25 unique characters)
+    //eg
+    //Input explanation
+    //List of string with length of 5 each
+    //intput = ["abcde", "fghij", "klmno",
+    // "pqrst", "uvwxy", "zabcd", "apple", "zebra", "ocean",
+    // "quick", "world", "jumps", "foxes", "liver"]
+//    public static void main(String[] args) {
+//        String[] arr = {"abcde", "fghij", "klmno", "pqrst", "uvwxy", "zabcd", "apple", "zebra", "ocean", "quick", "world", "jumps", "foxes", "liver"};
+//        List<String> ds = new ArrayList<>();
+//        System.out.println(solve(arr, 5,ds, new HashSet<>()));
+//        for(String s: ds){
+//            System.out.print(s +", ");
+//        }
+//    }
+    boolean solve(String[] arr, int count, List<String> ds, Set<Character> seen){
+        if( count == 0)
+            return true;
+
+        for(String s : arr){
+
+            if(isValid(s, seen)){
+                ds.add(s);
+                addToSeen(seen, s);
+                if(solve(arr, count-1, ds, seen))
+                    return true;
+                ds.remove(ds.size()-1);
+                removeFromSeen(seen, s);
+            }
+        }
+        return false;
+
+    }
+    void removeFromSeen(Set<Character> seen, String s){
+        for(char ch : s.toCharArray()){
+            seen.remove(ch);
+        }
+    }
+    void addToSeen(Set<Character> seen, String s){
+        for(char ch : s.toCharArray()){
+            seen.add(ch);
+        }
+    }
+    boolean isValid(String s, Set<Character> set){
+        for(char ch : s.toCharArray()){
+            if(set.contains(ch))
+                return false;
+        }
+        return true;
+    }
+
+    //22. sort all odd elements and leave even elements as it is at their original position
+    // we can use selection sort here.
+//    public static void main(String[] args) {
+//        int[] arr = {5, 8, 6, 3, 4, 1, 7};
+//        sortOddInPlace(arr);
+//    }
+    public void sortOddInPlace(int[] arr) {
+        int n = arr.length;
+
+        // Use selection sort-like logic but only for odd numbers
+        for (int i = 0; i < n - 1; i++) {
+            if (arr[i] % 2 == 0) continue; // skip even numbers
+
+            int minIdx = i;
+            for (int j = i + 1; j < n; j++) {
+                if (arr[j] % 2 != 0 && arr[j] < arr[minIdx]) {
+                    minIdx = j;
+                }
+            }
+
+            // Swap only if different index
+            if (minIdx != i) {
+                int temp = arr[i];
+                arr[i] = arr[minIdx];
+                arr[minIdx] = temp;
+            }
+        }
+        for (int val : arr)
+            System.out.print(val +", ");
+    }
+    //23.Give the count of managers who has salary less than average salary of direct and indirect employees
+    //Example:
+    //A->B, A->C, A->D, B->E
+    //Salaries
+    //A = 50000
+    //B = 20000
+    //C = 10000
+    //D = 10000
+    //E = 25000
+    //Answer: 1
+    //Explanation: A is the manager of direct employees B, C, D and indirect
+    // employee E so avg. is 16,250 and B = 20000 < E = 25000 so answer is B
+
+//    public static void main(String[] args) {
+//        int[][] edges = {{0,1}, {0,2}, {1,3}, {1,4}, {0, 4}};
+//        int[] salary = {20, 15, 30, 50, 40};
+//
+//        findManagers(edges, salary);
+//    }
+
+    private static void findManagers(int[][] edges, int[] salary) {
+        int V = salary.length;
+        List<List<Integer>> adj = new ArrayList<>();
+        for(int i=0;i<V;i++){
+            adj.add(new ArrayList<>());
+        }
+
+        for(int[] edge : edges){
+            adj.get(edge[0]).add(edge[1]);
+        }
+        int[] emp = new int[V];
+        Arrays.fill(emp, -1);
+        for(int i=0;i<V;i++){
+            if(emp[i] == -1){
+                dfs(i, adj, salary, emp);
+            }
+        }
+
+        for(int i=0;i<V;i++){
+            if(emp[i] == 1) {
+                char employee = (char) ('A' + i);
+                System.out.print(employee +", ");
+            }
+        }
+    }
+
+    static Set<Integer> dfs(int node, List<List<Integer>> adj, int[] salary, int[] emp){
+
+        emp[node] = 0;
+        Set<Integer> employeesSalary = new HashSet<>();
+        employeesSalary.add(node);
+        for(int adjNode : adj.get(node)){
+            Set<Integer> list = dfs(adjNode, adj, salary, emp);
+            employeesSalary.addAll(list);
+        }
+
+        int sum = employeesSalary.stream().map(ele -> salary[ele]).reduce(0, Integer::sum);
+
+        int cnt = employeesSalary.size();
+
+        if(cnt > 0 && salary[node] < 1D*sum / cnt){
+            emp[node] = 1;
+        }
+
+        return employeesSalary;
+    }
+    //24. There is a robot at location (0, 0) of a 10x10 grid of tiles.
+    // Each tile can be one of 8 different colors: (0, 1, ... 7). There is a star at a known location
+    // (marked with the color -1) on the grid. You can program the robot by giving it a lookup
+    // table of color to direction. The robot will sense the color of the tile it is currently on,
+    // and move in the direction (up, down, left, or right) specified by the lookup table you provided.
+    // Output a lookup table that guides the robot to the star, if such a table is possible.
+    //Small example grid: [[(0), 1, 0, 0], [3, 2,-1, 3], [0, 0, 0, 2], [0, 0, 0, 4]]
+
+//    public static void main(String[] args) throws Exception {
+//        int[][] mat = {
+//                {0, 1, 2, 3},
+//                {4, 5, 6, 7},
+//                {0, 1, 2, -1}
+//        };
+//        Map<Integer, String> lookup = new HashMap<>();
+//        lookup.put(0, "R");
+//        lookup.put(1, "R");
+//        lookup.put(2, "D");
+//        lookup.put(4, "R");
+//        lookup.put(5, "R");
+//        lookup.put(6, "R");
+//
+//        int n = mat.length;
+//        int m = mat[0].length;
+//
+//        int[][] path = new int[n][m];
+//        boolean res = findPath(mat, 0, 0, n, m, lookup, path);
+//        if(res ) {
+//            for (int[] col : path) {
+//                for (int val : col) {
+//                    System.out.print(val + ", ");
+//                }
+//                System.out.println();
+//            }
+//        }else{
+//            System.out.println(-1);
+//        }
+//    }
+
+    private boolean findPath(int[][] mat, int row, int col, int n, int m, Map<Integer, String> lookup, int[][] path) throws Exception {
+        if(row >= n || row < 0 || col >= m || col < 0 || mat[row][col] == -10)
+            return false;
+
+        path[row][col] = 1;
+        if(mat[row][col] == -1) {
+            return true;
+        }
+
+        int currVal = mat[row][col];
+        mat[row][col] = -10;
+
+        String dir = lookup.getOrDefault(currVal, "ALL");
+
+        switch (dir) {
+            case "ALL":
+
+                if (findPath(mat, row - 1, col, n, m, lookup, path)) return true;
+                if (findPath(mat, row, col + 1, n, m, lookup, path)) return true;
+                if (findPath(mat, row + 1, col, n, m, lookup, path)) return true;
+                if (findPath(mat, row, col - 1, n, m, lookup, path)) return true;
+                break;
+            case "U":
+                if (findPath(mat, row - 1, col, n, m, lookup, path)) return true;
+                break;
+            case "R":
+                if (findPath(mat, row, col + 1, n, m, lookup, path)) return true;
+                break;
+            case "D":
+                if (findPath(mat, row + 1, col, n, m, lookup, path)) return true;
+                break;
+            case "L":
+                if (findPath(mat, row, col - 1, n, m, lookup, path)) return true;
+                break;
+            default:
+                throw new Exception("Invalid Direction");
+        }
+
+        path[row][col] = 0;
+        mat[row][col] = currVal;
+        return false;
+    }
+
+    //25. There is a stream of integers. Every time you see a new element in the stream,
+    // return the mean value of the last N elements, excluding the largest K elements.
+    //Example:
+    //N=5
+    //K=2
+    //elements so far = [20, 2, -2, 0, 10, 1, 5, -2, 0]
+    //last N elements: [10, 1, 5, -2, 0] largest K elements: [10, 5]
+    //result = (1+(-2)+0)/3 = -0.3333333
+//    public static void main(String[] args) {
+//        int N = 5, K = 2;
+//        int[] arr = {1,2,3};
+//        Solution11 sln = new Solution11(N, K);
+//        for(int val : arr){
+//            sln.add(val);
+//        }
+//        System.out.println(sln.findMean());
+//    }
+
+    class Solution11{
+        int totalSize;
+        int k;
+        int leftCount;
+        int rightCount;
+        int leftSum ;
+        TreeMap<Integer, Integer> leftMap;// large elements on top
+        TreeMap<Integer, Integer> rightMap;// small elements on top
+        Queue<Integer> stream;
+        Solution11(int n, int k){
+            this.k = k;
+            this.totalSize = n;
+            leftMap = new TreeMap<>((a, b) -> b-a);
+            rightMap = new TreeMap<>((a, b) -> a- b);
+            leftCount =0;
+            rightCount = 0;
+            leftSum = 0;
+            stream = new LinkedList<>();
+        }
+
+        void add(int num){
+
+            stream.add(num);
+            leftMap.put(num, leftMap.getOrDefault(num, 0)+1);
+            leftCount++;
+            leftSum += num;
+
+            if(stream.size() > totalSize){
+                int lastVal = stream.remove();
+                remove(lastVal);
+            }
+            balance();
+        }
+
+        void balance() {
+            int keepSize = Math.max(0, stream.size() - k); // Avoid negative size
+
+            // Move from leftMap to rightMap if top of leftMap > top of rightMap
+            while (!leftMap.isEmpty() && !rightMap.isEmpty() && leftMap.firstKey() > rightMap.firstKey()) {
+                int val = leftMap.firstKey();
+                move(leftMap, rightMap, val);
+                leftSum -= val;
+                leftCount--;
+                rightCount++;
+            }
+
+            // Ensure leftMap has `keepSize` elements
+            while (leftCount < keepSize && !rightMap.isEmpty()) {
+                int val = rightMap.firstKey();
+                move(rightMap, leftMap, val);
+                leftSum += val;
+                rightCount--;
+                leftCount++;
+            }
+
+            while (leftCount > keepSize) {
+                int val = leftMap.firstKey();
+                move(leftMap, rightMap, val);
+                leftSum -= val;
+                leftCount--;
+                rightCount++;
+            }
+
+        }
+        void move(TreeMap<Integer, Integer> from, TreeMap<Integer, Integer> to, int val) {
+            from.put(val, from.get(val) - 1);
+            if (from.get(val) == 0) from.remove(val);
+            to.put(val, to.getOrDefault(val, 0) + 1);
+        }
+
+        double findMean() {
+            if(stream.size() < k)
+                return -1;
+            return 1D*leftSum/(stream.size() - k);
+        }
+        void remove(int num) {
+            if(leftMap.containsKey(num)){
+                leftMap.put(num, leftMap.get(num) -1);
+                if(leftMap.get(num) == 0)
+                    leftMap.remove(num);
+
+                leftSum -= num;
+                leftCount--;
+            }else{
+                rightMap.put(num, rightMap.get(num) -1);
+                if(rightMap.get(num) == 0){
+                    rightMap.remove(num);
+                }
+                rightCount--;
+            }
+        }
+    }
+    //26.
+    // Find the length of longest increasing subsequence such that the difference between
+    // consecutive elements in LIS is an increasing sequence
+    //Example :
+    //nums -> 1 2 3 4 5 6 ans -> 3
+    //Explanation : the best LIS can be gotten if we take 1 , 2 , 4 ( in this way )
+    public static void main(String[] args) {
+        int[] arr= {1, 3, 6, 10, 15};
+        System.out.println(findLIS(arr));
+    }
+
+    static int findLIS(int[] arr){
+        int n = arr.length;
+        int[] dp = new int[n];
+        int[] lastDiff = new int[n];
+        int res = 1;
+
+        for (int i = 0; i < n; i++) {
+            dp[i] = 1;
+            lastDiff[i] = -1;
+            for (int j = 0; j < i; j++) {
+                int diff = arr[i] - arr[j];
+                if (arr[i] > arr[j] && (lastDiff[j] == -1 || diff > lastDiff[j])) {
+                    if (dp[j] + 1 > dp[i]) {
+                        dp[i] = dp[j] + 1;
+                        lastDiff[i] = diff;
+                    }
+                }
+            }
+            res = Math.max(res, dp[i]);
+        }
+        return res;
+    }
 
 
 }

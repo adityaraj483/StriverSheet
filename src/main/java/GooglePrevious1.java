@@ -1906,137 +1906,41 @@ public class GooglePrevious1 {
     //41.
     //Basically I needed to implement cli.
     //
-    //I was given (as strings) as directories e.g.
-    ///a/b/x.txt
-    ///a/b/p.txt
-    ///a/c
-    ///a/d/y.txt
-    ///a/d/z.txt
-    //
-    //Also, I was given the selected directories e.g.
-    ///a/d/y.txt
-    ///a/d/z.txt
-    ///a/b/p.txt
-    //
-    //My output should be
-    ///a/d
-    ///a/b/p.txt
-    //
-    ///a/d
-    //is the answer because it has 2 txt files (y and z), and both are selected.
-    ///a/b/p.txt
-    //is the answer because another file in the directory i.e. /a/b/x.txt is not selected, if it was selected, answer would have been /a/b
-    //
-    //Basically, if all items are selected in a particular directory, we need to return the just prev directory.
-    //
-    //I tried solving it, assuming the directories to be a tree, and used dfs. I messed up really bad.
-    //How can we solve this problem? If possible, can someone code it up?
+    //    Replace files with directories if all files in directory are
+    //            specified
+    //    Example input & output:
+    //    allFiles = [
+    //            "a/b/c/d.txt",
+    //            "a/b/c/e.txt",
+    //            "a/b/b.txt",
+    //            "a/b/e.txt",
+    //            "b/c/d.txt"
+    //            ]
+    //    subsetFiles = [
+    //            "a/b/c/d.txt",
+    //            "a/b/c/e.txt",
+    //            "a/b/b.txt",
+    //            "b/c/d.txt"
+    //            ]
+    //    output=[
+    //            "a/b/c",
+    //            "a/b/b.txt",
+    //            "b"
+    //            ]
 
-    static class solution{
+    class Solution{
 //        public static void main(String[] args) {
-//            solution sol = new solution();
-//            List<String> dir = new ArrayList<>(List.of("/a/b/x.txt", "/a/b/p.txt", "/a/c", "/a/d/y.txt", "/a/d/z.txt"));
-//            List<String> selectedDir = new ArrayList<>(List.of("/a/d/y.txt", "/a/d/z.txt", " /a/b/p.txt"));
-//            sol.func(dir, selectedDir);
+//            List<String> dir = new ArrayList<>(List.of("a/b/c/d.txt",
+//                    "a/b/c/e.txt",
+//                    "a/b/b.txt",
+//                    "a/b/e.txt",
+//                    "b/c/d.txt"));
+//            List<String> selectedDir = new ArrayList<>(List.of("a/b/c/d.txt",
+//                    "a/b/c/e.txt",
+//                    "a/b/b.txt",
+//                    "b/c/d.txt"));
+//            func(dir, selectedDir);
 //        }
-        class File{
-            String name;
-            boolean isVisited;
-            File(String name, boolean isVisited){
-                this.name = name;
-                this.isVisited = isVisited;
-            }
-        }
-
-        class TrieNode{
-            TrieNode[] links = new TrieNode[26];
-            List<File> files = new ArrayList<>();
-
-            public File getFile(String fileName) {
-                for(File file : files){
-                    if(file.name.equals(fileName))
-                        return file;
-                }
-                return null;
-            }
-        }
-
-        class Trie{
-
-            TrieNode root;
-            Trie(){
-                root = new TrieNode();
-            }
-
-            void insert(String s){
-                String[] str = s.split("/");
-
-                int n = str.length;
-                TrieNode node = root;
-                for(int i=0;i<n;i++){
-                    if(str[i].trim().isEmpty())
-                        continue;
-                    if(str[i].contains("txt")){
-                        node.files.add(new File(str[n-1], false));
-                        break;
-                    }
-                    char ch = str[i].charAt(0);
-                    if(node.links[ch - 'a'] == null)
-                        node.links[ch - 'a'] = new TrieNode();
-                    node = node.links[ch - 'a'];
-                }
-            }
-
-            void visit(String s){
-
-                String[] str = s.split("/");
-                int n = str.length;
-                TrieNode node = root;
-                for(int i=0;i<n;i++){
-                    if(str[i].trim().isEmpty())
-                        continue;
-                    if(str[i].contains("txt")){
-                        File file = node.getFile(str[i]);
-                        if(file == null)
-                            return;
-                        file.isVisited = true;
-                    }
-                    char ch = str[i].charAt(0);
-
-                    if(node.links[ch - 'a'] == null)
-                        return ;
-                    node = node.links[ch - 'a'];
-                }
-            }
-
-            List<String> getResults(String s){
-                StringBuilder sb = new StringBuilder();
-                String[] str = s.split("/");
-                int n = str.length;
-                TrieNode node = root;
-                for(int i=0;i<n-1;i++){
-                    if(str[i].trim().isEmpty())
-                        continue;
-                    char ch = str[i].charAt(0);
-
-                    node = node.links[ch - 'a'];
-                    sb.append(ch).append("/");
-                }
-                String base = sb.toString();
-                List<String> res = new ArrayList<>();
-                for(File file : node.files){
-                    if(file.isVisited){
-                        res.add(base + file.name);
-                    }else
-                        break;
-                }
-                if(res.size() == node.files.size()){
-                    return new ArrayList<>(List.of(sb.substring(0, sb.length()-1)));
-                }else
-                    return res;
-            }
-        }
-
         void func(List<String> directories, List<String> selectedDir){
             Trie trie = new Trie();
 
@@ -2056,6 +1960,108 @@ public class GooglePrevious1 {
             for(String res : set)
                 System.out.println(res);
         }
+
+        class TrieNode{
+            TrieNode[] links = new TrieNode[26];
+            Map<String, Boolean> fileVisMap = new HashMap<>();
+            int pathVisCount = 0;
+            void addFIle(String fileName){
+                fileVisMap.put(fileName, false);
+            }
+            void markFileAsVis(String fileName){
+                if(!fileVisMap.containsKey(fileName))
+                    return;
+                fileVisMap.put(fileName, true);
+            }
+        }
+
+        class Trie{
+
+            TrieNode root;
+            Trie(){
+                root = new TrieNode();
+            }
+
+            void insert(String s){
+                String[] str = s.split("/");
+
+                int n = str.length;
+                TrieNode node = root;
+                for (String dir : str) {
+
+                    if (dir.trim().isEmpty())
+                        continue;
+                    if (dir.contains("txt")) {
+                        node.addFIle(dir);
+                        break;
+                    }
+                    char ch = dir.charAt(0);
+                    if (node.links[ch - 'a'] == null)
+                        node.links[ch - 'a'] = new TrieNode();
+                    node = node.links[ch - 'a'];
+                    node.pathVisCount++;
+                }
+            }
+
+            void visit(String s){
+
+                String[] str = s.split("/");
+                int n = str.length;
+                TrieNode node = root;
+
+                for (String dir : str) {
+                    if (dir.trim().isEmpty())
+                        continue;
+                    if (dir.contains("txt")) {
+                        node.markFileAsVis(dir);
+                        break;
+                    }
+                    char ch = dir.charAt(0);
+
+                    if (node.links[ch - 'a'] == null)
+                        return;
+                    node = node.links[ch - 'a'];
+                    node.pathVisCount--;
+                }
+            }
+
+            List<String> getResults(String s){
+
+                StringBuilder sb = new StringBuilder();
+                String[] str = s.split("/");
+                int n = str.length;
+                TrieNode node = root;
+
+                for (String dir : str) {
+                    if(dir.contains("txt"))
+                        break;
+                    if (dir.trim().isEmpty())
+                        continue;
+                    char ch = dir.charAt(0);
+
+                    node = node.links[ch - 'a'];
+                    sb.append(ch).append("/");
+                    if(node.pathVisCount == 0)
+                        break;
+                }
+
+                String base = sb.toString();
+                List<String> res = new ArrayList<>();
+                if(node.pathVisCount == 0) {
+                    res.add(base.substring(0, base.length() - 1));
+                } else {
+                    for(var entry : node.fileVisMap.entrySet()){
+                        String fileName = entry.getKey();
+                        boolean isVis = entry.getValue();
+                        if(isVis){
+                            res.add(base + fileName);
+                        }
+                    }
+                }
+                return res;
+            }
+        }
+
     }
 
     //42. assume that "byte" contains only "a" to "f"
@@ -2210,7 +2216,7 @@ public class GooglePrevious1 {
         return coins;
     }
     //45. Parallel course II -> https://leetcode.com/problems/parallel-courses-ii/description/
-    class Solution {
+    class Solution45 {
         int totalMask;
         int n;
         int k;
@@ -3336,7 +3342,7 @@ public class GooglePrevious1 {
 
 
 
-    //58.
+    //72.
     //Given below pattern of license plates (Pattern only, not the actual list of license plates), Find the nth license plate
     //All license plates no are of size 5 chars
     //Eg, if n is 3, ans is - 00002
