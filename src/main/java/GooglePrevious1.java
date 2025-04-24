@@ -374,16 +374,16 @@ public class GooglePrevious1 {
         boolean[] vis = new boolean[nums.length];
         return solve(nums, 0, 0, target, vis, k);
     }
-    boolean solve(int[] nums, int i, int curr, int target, boolean[] vis, int k){
+    boolean solve(int[] nums, int i, int currSum, int target, boolean[] vis, int k){
         if(k == 0)
             return true;
-        if(curr == target){
+        if(currSum == target){
             return solve(nums, 0, 0, target, vis, k-1);
         }
         for(int j=i;j<nums.length;j++){
-            if(!vis[j] && curr + nums[j] <= target){
+            if(!vis[j] && currSum + nums[j] <= target){
                 vis[j] = true;
-                if(solve(nums, j+1, curr+ nums[j], target, vis, k))
+                if(solve(nums, j+1, currSum+ nums[j], target, vis, k))
                     return true;
                 vis[j] = false;
             }
@@ -488,67 +488,77 @@ public class GooglePrevious1 {
         return count;
     }
     //14. Justified Text -> https://www.interviewbit.com/problems/justified-text/
-    public ArrayList<String> fullJustify(ArrayList<String> A, int B) {
-        ArrayList<String> res = new ArrayList<>();
-        if (B == 0 || A.size() == 0)
-            return res;
+    public List<String> fullJustify(String[] words, int maxWidth) {
+        int n = words.length;
 
-        ArrayList<String> currWords = new ArrayList<>();
-        int currLen = 0;
+        List<String> res = new ArrayList<>();
+        List<String> currLevel = new ArrayList<>();
+        int wordLengthOfCurrLevel = 0;
+        int i=0;
+        while(i<n){
+            String currWord = words[i];
+            int totalSpace = currLevel.size() == 0 ? 0 : currLevel.size();
+            wordLengthOfCurrLevel += currWord.length();
 
-        for (String word : A) {
-            int wordLen = word.length();
-
-            if (currLen + wordLen + currWords.size() > B) {
-                res.add(func(currWords, B, false));
-                currWords.clear();
-                currLen = 0;
+            if(wordLengthOfCurrLevel + totalSpace > maxWidth){
+                String currLine = build(currLevel, maxWidth, false);
+                res.add(currLine);
+                currLevel.clear();
+                wordLengthOfCurrLevel = currWord.length();
             }
 
-            currWords.add(word);
-            currLen += wordLen;
+            currLevel.add(currWord);
+            i++;
         }
 
-        res.add(func(currWords, B, true));
+        res.add(build(currLevel, maxWidth, true));
         return res;
     }
 
-    String func(ArrayList<String> words, int B, boolean flag) {
+    String build(List<String> currLevel, int maxWidth, boolean isLast){
+        int totalWords = currLevel.size();
+        int totalWordLen = currLevel.stream().map(e -> e.length()).reduce(0, Integer::sum);
+        int totalSpace = maxWidth - totalWordLen;
+        if(totalSpace < 0)
+            return "";
+
+
         StringBuilder sb = new StringBuilder();
-        int n = words.size();
-        int totalChars = 0;
+        if(isLast == true || currLevel.size() == 1){
 
-        for (String word : words) {
-            totalChars += word.length();
-        }
+            for(int i=0;i<totalWords;i++){
+                sb.append(currLevel.get(i));
 
-        int totalSpaces = B - totalChars;
-
-        if (flag || n == 1) {
-            for (int i = 0; i < words.size(); i++) {
-                sb.append(words.get(i));
-                if (i < words.size() - 1) {
+                if(i != totalWords-1){
                     sb.append(" ");
-                    totalSpaces--;
+                    totalSpace--;
                 }
             }
-            while (totalSpaces-- > 0) sb.append(" ");
-        } else {
-            int space = totalSpaces / (n - 1);
-            int extra = totalSpaces % (n - 1);
 
-            for (int i = 0; i < words.size(); i++) {
-                sb.append(words.get(i));
-                if (i < words.size() - 1) {
-                    int spacesToAdd = space + (extra-- > 0 ? 1 : 0);
-                    while (spacesToAdd-- > 0) sb.append(" ");
+            while(totalSpace -- > 0){
+                sb.append(" ");
+            }
+        }else{
+
+            int space = totalSpace/(totalWords-1);
+            int extraSpace = totalSpace % (totalWords-1);
+
+            for(int i=0;i<totalWords;i++){
+                sb.append(currLevel.get(i));
+
+                if(i != totalWords-1){
+                    int currSpace = space + (extraSpace > 0 ? 1 : 0);
+                    extraSpace--;
+                    sb.append(" ".repeat(currSpace));
                 }
             }
         }
+
         return sb.toString();
+
     }
     //15. Order of People Heights -> https://www.interviewbit.com/problems/order-of-people-heights/
-    public ArrayList<Integer> order(ArrayList<Integer> A, ArrayList<Integer> B) {
+    public ArrayList<Integer> order(ArrayList<Integer> A, ArrayList<Integer> B) { //will do
         int n = A.size();
         int[][] arr = new int[n][2];
         for(int i=0;i<n;i++){
@@ -951,7 +961,7 @@ public class GooglePrevious1 {
     //19. Meeting Rooms III
     public int mostBooked(int n, int[][] meetings) {
 
-        Arrays.sort(meetings, (a, b) -> Integer.compare(a[0], b[0]));
+        Arrays.sort(meetings, (a, b) -> a[0] - b[0]);
 
         Queue<long[]> occupiedRooms = new PriorityQueue<>((a, b) -> {
             if(a[1] != b[1]) {
@@ -1297,8 +1307,13 @@ public class GooglePrevious1 {
         }
         return res;
     }
-    //28. Given two strings s1 and s2, find out if they only differ by the insertion of a phrase (more than one word is inserted in between them).
-    static boolean checkIfPhrase(String s1, String s2){ // i am assuming s2 have extra words
+    //28. Given two strings s1 and s2, find out if they only differ by the insertion of a phrase
+    // (more than one word is inserted in between them).
+    static boolean checkIfPhrase(String s1, String s2){
+
+        if(s1.length() > s2.length())
+            return checkIfPhrase(s2, s1);
+
         String[] s11 = s1.split(" ");
         String[] s22 = s2.split(" ");
 
@@ -1760,7 +1775,7 @@ public class GooglePrevious1 {
         while(!q.isEmpty()){
 
             int node = q.peek()[0];
-            int volt= q.remove()[1];
+            int volt = q.remove()[1];
 
             for(int adjNode : adj.get(node)){
 
@@ -1861,6 +1876,7 @@ public class GooglePrevious1 {
         int[] matched = new int[volCount];
         Arrays.fill(matched, -1);
         int totalCount = 0;
+
         for(int ques= 0;ques<quesCount;ques++){
             boolean[] vis = new boolean[volCount];
             if(dfs(ques, adj, matched,vis)){
@@ -1965,7 +1981,7 @@ public class GooglePrevious1 {
             TrieNode[] links = new TrieNode[26];
             Map<String, Boolean> fileVisMap = new HashMap<>();
             int pathVisCount = 0;
-            void addFIle(String fileName){
+            void addFile(String fileName){
                 fileVisMap.put(fileName, false);
             }
             void markFileAsVis(String fileName){
@@ -1992,7 +2008,7 @@ public class GooglePrevious1 {
                     if (dir.trim().isEmpty())
                         continue;
                     if (dir.contains("txt")) {
-                        node.addFIle(dir);
+                        node.addFile(dir);
                         break;
                     }
                     char ch = dir.charAt(0);
@@ -2121,7 +2137,7 @@ public class GooglePrevious1 {
     // executed together & then there is some error or not. If no error then return true other wise false.
     // You have been given N unit tests, and you know that when you run all test cases at a time then it fails.
     // Now you need to find at least one pair of UTs, which fails when executed at the same time using the test runner.
-    //Its easy when we assume that the testRunner takes O(1) to execute any number of test cases.
+    // Its easy when we assume that the testRunner takes O(1) to execute any number of test cases.
     // But for the case when the test runner takes O(n) time to execute n test cases at a time then
     // find the optimal way to find one pair of failed UTs.
     //Note there may be multiple pairs that fail with each other, but need to report only one.
@@ -2160,7 +2176,7 @@ public class GooglePrevious1 {
             int mid = tests.size()/2;
 
             List<Integer> left = tests.subList(0, mid);
-            List<Integer> right = tests.subList(mid, tests.size());
+            List<Integer> right = tests.subList(mid+1, tests.size());
 
             boolean leftTest = testRunner(new HashSet<>(left));
             boolean rightTest = testRunner((new HashSet<>(right)));
@@ -2186,7 +2202,8 @@ public class GooglePrevious1 {
     }
 
     //44. Variation of coin change.
-    //we are given dp array that we created while finding number of ways to make the target sum. We need to find the coins array, using which this dp array is created.
+    //we are given dp array that we created while finding number of ways to make the target sum.
+    // We need to find the coins array, using which this dp array is created.
     //Example:
     //target = 10
     //number of ways to make 10: 3
@@ -2669,7 +2686,7 @@ public class GooglePrevious1 {
         int m = matrix[0].length;
 
         int[][] prefix = new int[n+1][m+1];
-            for(int i=1;i<=n;i++){
+        for(int i=1;i<=n;i++){
             for(int j=1;j<=m;j++){
                 int zero = matrix[i-1][j-1] == 0 ? 1 : 0;
                 int val = prefix[i-1][j] + prefix[i][j-1] - prefix[i-1][j-1] + zero;
@@ -2889,7 +2906,7 @@ public class GooglePrevious1 {
         return dp[i][j] = res;
     }
     //59. 1074. Number of Submatrices That Sum to Target -> https://leetcode.com/problems/number-of-submatrices-that-sum-to-target/description/
-    public int numSubmatrixSumTarget(int[][] matrix, int target) {
+    public int numSubmatrixSumTarget(int[][] matrix, int target) { // we do
         int n = matrix.length;
         int m = matrix[0].length;
         int[][] preSum = new int[n][m];
@@ -2902,7 +2919,6 @@ public class GooglePrevious1 {
                 preSum[i][j] = matrix[i][j] + left + top - topLeft;
             }
         }
-        int k = n * m;
         int count = 0;
         for(int r1 =0;r1 <n;r1++){
             for(int r2=r1;r2<n;r2++){
@@ -3146,7 +3162,7 @@ public class GooglePrevious1 {
         return one;
     }
     //66. Four Keys Keyboard -> https://www.naukri.com/code360/problems/four-keys-keyboard_1092346?topList=top-google-coding-interview-questions&problemListRedirection=true&company%5B%5D=Google&leftPanelTabValue=PROBLEM
-    static Map<Integer, Long> mp = new HashMap<>();
+    static Map<Integer, Long> mp = new HashMap<>(); //need to understand
     static long findMaxAs(int n) {
         if(n <=6)
             return n;
@@ -3266,7 +3282,9 @@ public class GooglePrevious1 {
         }
         return cnt+1;
     }
-    //70. Given an array of non-negative integers, the goal is to travel from the first index to the last index with maximum possible score with as many jumps allowed. Score of a jump is defined as the number of index jumped multiplied by the value on the jumped index.
+    //70. Given an array of non-negative integers, the goal is to travel from the first
+    // index to the last index with maximum possible score with as many jumps allowed.
+    // Score of a jump is defined as the number of index jumped multiplied by the value on the jumped index.
     //e.g. [3,7,9,10]
     //
     //if the jump is from index0 to index2, the score is (2-0)*9 = 18

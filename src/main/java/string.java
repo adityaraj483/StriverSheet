@@ -2,8 +2,6 @@ import java.lang.String;
 import java.util.*;
 
 public class string {
-    public static void main(String[] args) {
-    }
     //1. Remove outermost Paranthesis
     public String removeOuterParentheses1(String s) {
         return solve(s, 0);
@@ -480,15 +478,10 @@ public class string {
         for(int i=m;i<n;i++){
 
             //removing old value
-            long chOut = text.charAt(i - m) - 'a';
-            hashT = (int)((hashT - (chOut * lastIndexHash % mod) + mod) % mod);
-
+            hashT = hashT - (lastIndexHash * (text.charAt(i-m) - 'a') % mod);
             if(hashT < 0)
                 hashT += mod;
-
-            //adding
-            long chIn = text.charAt(i) - 'a';
-            hashT = (hashT * base + chIn) % mod;
+            hashT = (hashT * base + (text.charAt(i) - 'a')) % mod;
 
 
             if(hashT == hashP)

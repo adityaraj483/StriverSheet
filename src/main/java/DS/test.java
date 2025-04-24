@@ -4,14 +4,55 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class test{
-//    You work as a consultant and have clients in cityA and cityB. On a given day,
-//    say i, you can either
-//    work in cityA and make Ai dollars or you can work in cityB and make Bi dollars. You can also spend
-//    the day traveling between cityA and cityB in which case your earnings that day are 0.
-//    Given Al,A2, ....An and B1, B2,....., Bn, return a schedule S of N days which maximizes your earnings,
-//    where S is a string of length N, and Si = A/B/T where A means work in cityA, B means work in cityB
-//    T means travel on day i. You can start either in cityA or cityB.
-//    Example1: A = [23, 4,5 ,10] B = [21,1,10, 100] The optimal schedule S here would be ->"ATBB"
+    public static void main(String[] args) {
+        int amount = 10;
+        int[] coins = {2, 5, 6};
+        System.out.println(change(amount, coins));
+
+    }
+    static public int change(int amount, int[] coins) {
+        int n = coins.length;
+        int[] prev = new int[amount+1];
+        int[] curr = new int[amount+1];
+
+        for(int i=0;i<=amount;i++){
+            if(i % coins[0] == 0)
+                prev[i] = 1;
+        }
+
+        for(int i=1;i<n;i++){
+            for(int j=0;j<=amount;j++){
+                int notTake = prev[j];
+                int take = 0;
+                if(j >= coins[i])
+                    take = curr[j-coins[i]];
+                curr[j] = take + notTake;
+            }
+            prev = curr;
+        }
+        for(int val : prev){
+            System.out.print(val+", ");
+        }
+        return prev[amount];
+    }
+    static int solve(int i, int[] arr, int target, Integer[][] dp){
+       if( i == 0 ){
+           if( target == 0 && arr[i] ==0)
+               return 2;
+           if(target == 0 || target % arr[i] == 0)
+               return 1;
+           return 0;
+       }
+
+       if(dp[i][target] != null) return dp[i][target];
+
+       int notTake = solve(i-1, arr, target, dp);
+       int take = 0;
+       if(arr[i] <= target){
+           take = solve(i, arr, target - arr[i], dp);
+       }
+       return dp[i][target] = take + notTake;
+    }
 
 }
 

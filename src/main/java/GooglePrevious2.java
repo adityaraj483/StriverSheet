@@ -1,4 +1,5 @@
 import DS.DisjointSet;
+import DS.Log;
 import DS.NTree;
 import org.json.JSONObject;
 
@@ -331,7 +332,7 @@ public class GooglePrevious2 {
          void add(int id, JSONObject object){
             history.put(id, new DS(id, object));
         }
-         void modify(int id, JSONObject object){
+         void modify(int id, JSONObject object) {
             DS ds = history.get(id);
             JSONObject diff = findDiff(ds.object, object);
             ds.updates.add(diff);
@@ -442,8 +443,10 @@ public class GooglePrevious2 {
     }
     //8.
     // you are given an array of houses in a neighbourhood in a city.
-    //you have to rearrange houses in such a way that in a single neighbourhood the houses are sorted by number in ascending order and no 2 houses with same number are in same neighbourhood.
-    //you can only rearrange house based on the capacity of each neighbourhood . If neighbourhood "1" in input has 2 houses then at output also it can only have 2 houses.
+    //you have to rearrange houses in such a way that in a single neighbourhood the houses are sorted by number in
+    // ascending order and no 2 houses with same number are in same neighbourhood.
+    //you can only rearrange house based on the capacity of each neighbourhood . If neighbourhood "1" in input has 2
+    // houses then at output also it can only have 2 houses.
     //
     //For example-
     //{
@@ -492,20 +495,19 @@ public class GooglePrevious2 {
                 int[] curr = pq.remove();
                 houses[index] = curr[0];
                 curr[1] --;
-                q.add(curr);
+                if(curr[1] > 0)
+                    q.add(curr);
                 index++;
             }
-            while(!q.isEmpty()){
-                int[] curr = q.remove();
-                if(curr[1] >0)
-                    pq.add(curr);
-            }
+            pq.addAll(q);
             Arrays.sort(houses);
         }
         return neighbours;
     }
     //9.
-    // Given a string, your task is to generate a list of substrings such that while appending all of the substrings in the list should give back the original string. If the resulting substring is not already present in the list, it should be added to the list.
+    // Given a string, your task is to generate a list of substrings such that while appending all of the
+    // substrings in the list should give back the original string. If the resulting substring is not already present
+    // in the list, it should be added to the list.
     //Examples:
     //Input: "GOOOOOOGLE"
     //Output: ["G", "O", "OO", "OOO", "GL", "E"]
@@ -768,12 +770,12 @@ public class GooglePrevious2 {
 //            System.out.print(val +", ");
 //        }
 //    }
-    List<Integer> solve2(NTree root){
+    static List<Integer> solve2(NTree root){
         List<Integer> res = new ArrayList<>();
         Map<NTree, NTree> childParentMap = new HashMap<>();
-        Map<NTree, Integer> parentCount = new HashMap<>();
         Queue<NTree> leafs = new LinkedList<>();
-        buildMapAndFindLeaf(root, null, childParentMap, leafs, parentCount);
+        buildMapAndFindLeaf(root, null, childParentMap, leafs);
+
         while(!leafs.isEmpty()){
 
             NTree leaf = leafs.poll();
@@ -782,29 +784,28 @@ public class GooglePrevious2 {
             res.add(leaf.val);
 
             if(parent != null){
-                parentCount.put(parent, parentCount.getOrDefault(parent, 1)-1);
-                if(parentCount.get(parent) == 0)
+                parent.children.remove(parent.children.size()-1);
+                if(parent.children.isEmpty())
                     leafs.add(parent);
             }
         }
         return res;
     }
-    private void buildMapAndFindLeaf(NTree root, NTree parent, Map<NTree, NTree> childParentMap, Queue<NTree> leafs, Map<NTree, Integer> parentCount) {
+    static private void buildMapAndFindLeaf(NTree root, NTree parent, Map<NTree, NTree> childParentMap, Queue<NTree> leafs) {
         if(root == null)
             return;
 
         childParentMap.put(root, parent);
-        if(parent != null)
-            parentCount.put(parent, parentCount.getOrDefault(parent, 0)+1);
+
         if(isLeaf(root)){
             leafs.add(root);
             return;
         }
         for(NTree child : root.children){
-            buildMapAndFindLeaf(child, root, childParentMap, leafs, parentCount);
+            buildMapAndFindLeaf(child, root, childParentMap, leafs);
         }
     }
-    private boolean isLeaf(NTree root) {
+    static private boolean isLeaf(NTree root) {
         return root.children.isEmpty();
     }
 
@@ -980,7 +981,7 @@ public class GooglePrevious2 {
 
      String solve(Map<String, String> mp, String s, Set<String> seen) throws Exception {
         if(s == null || s.isEmpty())
-            return "";
+            return "Not Found";
         if(seen.contains(s))
             throw new Exception("Circle exist");
         s = s.replace("%%", "%");
@@ -988,7 +989,7 @@ public class GooglePrevious2 {
         StringBuilder sb = new StringBuilder();
         int i=0;
         while(i<n){
-            if(i+1 < n && s.charAt(i) == '%' && s.charAt(i+1) != '%'){
+            if( s.charAt(i) == '%'){
                 i+=1;
                 int j = i;
                 while(j < n && s.charAt(j) != '%')
@@ -1540,10 +1541,10 @@ public class GooglePrevious2 {
     //Example :
     //nums -> 1 2 3 4 5 6 ans -> 3
     //Explanation : the best LIS can be gotten if we take 1 , 2 , 4 ( in this way )
-    public static void main(String[] args) {
-        int[] arr= {1, 3, 6, 10, 15};
-        System.out.println(findLIS(arr));
-    }
+//    public static void main(String[] args) {
+//        int[] arr= {1, 3, 6, 10, 15};
+//        System.out.println(findLIS(arr));
+//    }
 
     static int findLIS(int[] arr){
         int n = arr.length;
@@ -1567,6 +1568,513 @@ public class GooglePrevious2 {
         }
         return res;
     }
+
+    //27. find sum when we can use bracket as well for 1234-> (1+2) *(3+4) = 21
+//    public static void main(String[] args) {
+//        for(int val : solve1("123", 21))
+//            System.out.print(val+", ");
+//    }
+    static Map<String, List<Integer>> memo = new HashMap<>();
+    static public List<Integer> solve1(String exp, int target) {
+        if(memo.containsKey(exp)) return memo.get(exp);
+        List<Integer> res = new ArrayList<>();
+
+        for(int i=1;i<exp.length();i++){
+            List<Integer> left = solve1(exp.substring(0, i), target);
+            List<Integer> right = solve1(exp.substring(i), target);
+            for(int k=0;k<3;k++) {
+
+                char op ;
+                if( k == 0)
+                    op ='+';
+                else if(k== 1)
+                    op = '-';
+                else
+                    op = '*';
+
+                for (int l : left) {
+                    for (int r : right) {
+                        int val = operations(l, r, op);
+                        res.add(val);
+                    }
+                }
+
+            }
+        }
+        if(res.isEmpty() && !exp.isEmpty()){
+            int val = Integer.parseInt(exp);
+            res.add(val);
+        }
+        memo.put(exp, res);
+        return res;
+    }
+    static int operations(int x, int y, char op){
+        switch(op){
+            case '+' :
+                return x + y;
+            case '-' :
+                return x - y;
+            case '*':
+                return x * y;
+        }
+        return 0;
+    }
+
+    //28.
+    // You have a stream of rpc requests coming in. Each log is of the
+    //form {id, timestamp, type(start/end)}. Given a timeout T, you need to figure out at
+    // the earliest possible time if a request
+    //has timed out.
+    //Eg :
+    //id - time - type
+    //0 - 0 - Start
+    //1 - 1 - Start
+    //0 - 2 - End
+    //2 - 6 - Start
+    //1 - 7 - End
+    //Timeout = 3
+    //Ans : {1, 6} ( figured out id 1 had timed out at time 6 )
+//    public static void main(String[] args) {
+//        List<Log> logs = new ArrayList<>();
+//        logs.add(new Log(0, 0, "start"));
+//        logs.add(new Log(1, 1, "start"));
+//        logs.add(new Log(0, 2, "end"));
+//        logs.add(new Log(2, 6, "start"));
+//        logs.add(new Log(1, 7, "end"));
+//
+//        int[] res = findFirstIdTimeOut(logs, 3);
+//        System.out.println(res[0] +" , "+res[1]);
+//    }
+
+    static int[] findFirstIdTimeOut(List<Log> logs, int timeout){
+
+        Queue<Log> currQueue = new LinkedList<>();
+        Set<Integer> processed = new HashSet<>();
+        int i = 0;
+        while(i < logs.size()){
+            Log log = logs.get(i);
+            while(!currQueue.isEmpty() && currQueue.peek().timestamp + timeout < log.timestamp){
+
+                if(!processed.contains(currQueue.peek().id))
+                    return new int[]{currQueue.peek().id, log.timestamp};
+
+                currQueue.remove();
+            }
+
+            if(log.type.equals( "end"))
+                processed.add(log.id);
+            else
+                currQueue.add(log);
+            i++;
+        }
+
+        return new int[]{-1, -1};
+    }
+
+    //28.
+    // You're given a 2D matrix (or grid), where:
+    //"X" represents land
+    //"." represents water
+    //Water cells (".") can be either:
+    //Ocean → if it touches the border of the matrix or can reach the border through other water cells.
+    //Lake → if it’s completely surrounded by land on all sides (i.e., not connected to the border through any path of .)
+    //Now, a cell is a Coast if:
+    //It’s a land cell ("X")
+    //And it is adjacent (4-directionally) to an ocean cell ("." that is unbounded)
+//    public static void main(String[] args) {
+//        char[][] grid = {
+//                {'.', 'X', '.'},
+//                {'X', 'X', 'X'},
+//                {'.', 'X', '.'}
+//        };
+//        solution2 sln = new solution2(grid);
+//        System.out.println(sln.isCost(1,1));
+//    }
+
+    class solution2{
+        char[][] mat;
+        int rows, cols;
+        int[] delRow = {-1, 0, 1,0};
+        int[] delCol = {0, 1, 0, -1};
+        solution2(char[][] mat){
+            //X -land
+            //L- lake
+            //O - ocean
+            this.mat = mat;
+            rows = mat.length;
+            cols = mat[0].length;
+            buildOceanAndLake(mat);
+        }
+
+        boolean isCost(int row , int col){
+            for(int i=0;i<4;i++){
+                int r = delRow[i] + row;
+                int c = delCol[i] + col;
+                if(r >=0 && r < rows && c >=0 && c < cols && mat[r][c] == 'O'){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void buildOceanAndLake(char[][] mat) {
+
+            for(int row=0;row<rows;row++){
+                if(mat[row][0] == '.')
+                    dfs(row, 0);
+
+                if(mat[row][cols-1] == '.')
+                    dfs(row, cols-1);
+            }
+
+            for(int col=0;col<cols;col++){
+                if(mat[0][col] == '.')
+                    dfs(0, col);
+
+                if(mat[rows-1][col] == '.')
+                    dfs(rows-1, col);
+            }
+
+
+            for(int i=0;i<rows;i++){
+                for(int j=0;j<cols;j++){
+                    if(mat[i][j] == '.'){
+                        mat[i][j] = 'L';
+                    }
+                }
+            }
+        }
+
+        void dfs(int row, int col){
+            mat[row][col] = 'O';
+
+
+            for(int i=0;i<4;i++){
+
+                int r = row + delRow[i];
+                int c = col + delCol[i];
+
+                if(r >=0 && r < rows && c >=0 && c < cols && mat[r][c] == '.'){
+                    dfs(r, c);
+                }
+            }
+        }
+    }
+    //29. I got the following question in the phone screen at Google:
+    //
+    //Given is a 2D array that describes the height of a landscape and the
+    // location of 2 cities within this 2D array. I am now looking for the highest
+    // position to place a water tower there so that both cities can be supplied with water.
+    //Rules:
+    //The pipes of the tower are not allowed to run diagonally
+    //The pipes must always slope downwards (i.e. be lower than the previous cell) or be at the same height, otherwise the water would run upwards
+//    public static void main(String[] args) {
+//        int[][] mat = {
+//                {5, 4, 3},
+//                {6, 3, 2},
+//                {7, 4, 1}
+//        };
+//        int[] town1 = {2, 0}; // bottom-left
+//        int[] town2 = {2, 2}; // bottom-right
+//        System.out.println(findHeight(mat, town1, town2));
+//    }
+    static int findHeight(int[][] mat, int[] town1, int[] town2){
+        int n = mat.length;
+        int m = mat[0].length;
+        int[][] vis1 = new int[n][m];
+        int[][] vis2 = new int[n][m];
+        dfs(mat, town1[0], town1[1], vis1);
+        dfs(mat, town2[0], town2[1], vis2);
+        int res = 0;
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                if(vis1[i][j] + vis2[i][j] == 2){
+                    res = Math.max(res, mat[i][j]);
+                }
+            }
+        }
+        return res;
+    }
+    static void dfs(int[][] mat, int row, int col, int[][] vis){
+
+        int n = mat.length;
+        int m = mat[0].length;
+        int[] delRow = {-1,0,1,0};
+        int[] delCol ={0,1,0,-1};
+
+        vis[row][col] = 1;
+        for(int i=0;i<4;i++){
+            int r = row + delRow[i];
+            int c = col + delCol[i];
+
+            if( r >=0 && r < n && c>=0 && c < m && vis[r][c] == 0 && mat[r][c] >= mat[row][col]){
+                dfs(mat, r, c, vis);
+            }
+        }
+    }
+    //30.
+    //Given a string, you have to return the first word in the string having the most number of
+    // repeating characters.
+    //Example:
+    //"Today is the greatest day ever!"
+    //Answer:
+    //"greatest."
+//    public static void main(String[] args) {
+//        String s = "Today is the greatest day ever!";
+//        System.out.println(findWord(s));
+//    }
+    static String findWord(String s){
+        String res = "";
+        int maxTill = 0;
+        String[] arr = s.split(" ");
+        Map<Character, Integer> mp = new HashMap<>();
+        for(String word : arr){
+
+            for(char ch : word.toCharArray()){
+                mp.put(ch, mp.getOrDefault(ch, 0)+1);
+                if(mp.get(ch) > maxTill){
+                    res = word;
+                    maxTill = mp.get(ch);
+                }
+            }
+            mp.clear();
+
+        }
+        return res;
+    }
+    //31.
+    //You are given a struct Block in C++ that represents the time during which a \
+    // person is busy, with attributes: personId, startTime, and endTime. You are also
+    // given an integer totalTime which represents the total duration. The task is to
+    // find the time intervals during which all the persons are free.
+//    public static void main(String[] args) {
+//        List<Person> list = new ArrayList<>();
+//        list.add(new Person(1, 0, 2));
+//        list.add(new Person(2, 0, 4));
+//        list.add(new Person(3, 0, 1));
+//        list.add(new Person(4, 8, 10));
+//        for(int[] arr : findFreeTime(list, 12)){
+//            System.out.println(arr[0] +" -> " + arr[1]);
+//        }
+//    }
+    static class Person{
+        int personId, startTime, endTime;
+        Person(int personId, int startTime, int endTime){
+            this.personId = personId;
+            this.startTime = startTime;
+            this.endTime = endTime;
+        }
+    }
+    static List<int[]> findFreeTime(List<Person> list, int totalTime){
+
+        Queue<int[]> pq = new PriorityQueue<>((a, b) -> {
+            if(a[0] != b[0])
+                return a[0] - b[0];
+            else
+                return a[1]- b[1];
+        });// time, +-1
+
+        for(Person person : list){
+            int startTime = person.startTime;
+            int endTime = person.endTime;
+            pq.add(new int[]{startTime, 1});
+
+            if(endTime <= totalTime){
+                pq.add(new int[]{endTime, -1});
+            }
+
+        }
+
+        List<int[]> res = new ArrayList<>();
+
+        int prevCnt = 0, prevTime = 0;
+
+        while(!pq.isEmpty()){
+            int[] curr = pq.poll();
+            int currTime = curr[0];
+
+            if(prevTime < currTime-1 && prevCnt == 0){
+                res.add(new int[]{prevTime+1,currTime-1});
+            }
+
+            prevTime = currTime;
+            prevCnt += curr[1];
+        }
+
+        if(prevTime < totalTime-1 && prevCnt == 0){
+            res.add(new int[]{prevTime+1,totalTime});
+        }
+        return res;
+    }
+    //32. Given a set of jobs array and max number of cpus, where each
+    // job object contains 3 props {starttime,duration,numberofCpusNeeded},
+    // write a function which returns true if the jobs can be executed with the
+    // given max cpus else return false even if one job can't be executed?
+//    public static void main(String[] args) {
+//        List<int[]> process = new ArrayList<>();
+//        process.add(new int[]{1,2,2});
+//        process.add(new int[]{2,1,1});
+//        process.add(new int[]{5,1,2});
+//        System.out.println(isPossibleToProcess(process, 2));
+//    }
+    static boolean isPossibleToProcess(List<int[]> process, int totalCpu){
+        //startTime, duration, cpu Needed
+
+        for(int[] curr : process){
+            curr[1] = curr[0] + curr[1];
+        }
+
+        process.sort((a, b) -> a[0] - b[0]);
+
+        int cpuNeeded = 0;
+        int prevTime  = 0;
+        Queue<int[]> inprocess = new LinkedList<>();
+
+        for(int[] curr : process){
+            int currTime = Math.max(prevTime, curr[0]);
+
+            if(!inprocess.isEmpty() && inprocess.peek()[1] < currTime){
+                cpuNeeded -= inprocess.peek()[2];
+            }
+
+            inprocess.add(curr);
+            cpuNeeded += curr[2];
+            if(cpuNeeded > totalCpu)
+                return false;
+        }
+        return true;
+    }
+
+    //33. Given a N-array-tree, calculate the maximum ancestor
+    // for all the leaf nodes. Maximum ancestor of a leaf node
+    // is the maximum of it's ancestors and the leaf itself.
+    // It means maximum value in its path from root to leaf
+    Map<Integer, Integer> leafMaxAncester = new HashMap<>();
+    void findMaxLeafAncester(NTree root, int max){
+        if( root == null)
+            return ;
+        if(root.children.size() == 0){
+            leafMaxAncester.put(root.val, max);
+            return;
+        }
+
+        for(NTree child : root.children){
+            findMaxLeafAncester(child, Math.max(max, child.val));
+        }
+    }
+
+    //34. Given an encoded string in form of "ab[cd]{2}def"
+    //You have to return decoded string "abcdcddef"
+//    Example 1:
+//    Input: "ab[cd]{2}"
+//    Output: "abcdcd"
+//    Example 2:
+//    Input: "def[ab[cd]{2}]{3}ghi"
+//    Output: "defabcdcdabcdcdabcdcdghi"
+//    public static void main(String[] args) {
+//        System.out.println(decodeString("def[ab[z]{3}]{2}xx"));
+//    }
+    static String decodeString(String s) {
+        Stack<String> stack = new Stack<>();
+        StringBuilder cur = new StringBuilder();
+        int num = 0;
+
+        for (int i = 0; i < s.length(); i++) {
+            char ch = s.charAt(i);
+
+            if (Character.isDigit(ch)) {
+                num = num * 10 + (ch - '0');
+            } else if (Character.isLetter(ch)) {
+                cur.append(ch);
+            } else if (ch == '[') {
+                stack.push(cur.toString());
+                cur.setLength(0);
+            } else if (ch == '}') {
+                String prev = stack.pop();
+                cur = new StringBuilder(prev + cur.toString().repeat(num));
+                num = 0;
+            }
+        }
+
+        // If anything remains in the stack
+        while (!stack.isEmpty()) {
+            cur.insert(0, stack.pop());
+        }
+
+        return cur.toString();
+    }
+    //35. Given a playlist of songs, you have to design a song shuffler.
+    //This song shuffler is not like the normal song shuffler that shuffles
+    // the complete playlist at the start and returns a shuffled list, but instead
+    // when asked for a next song to be played, returns a random song from the list of songs.
+    //The next random song to be played should satisfy a condition that the song
+    // was not played in the last 'k' turns.
+    //You have to make sure, that at each call, all the eligible
+    // (not played during last k turns) songs have equal probability of being played next.
+//    public static void main(String[] args) {
+//        MusicPlayer player = new MusicPlayer(List.of(1,2,3,4,5), 1);
+//        for(int i=0;i<10;i++){
+//            System.out.print(player.findRandom()+", ");
+//        }
+//    }
+
+    static class MusicPlayer{
+        List<Integer> songs;
+        Queue<Integer> q;
+        int k;
+
+        MusicPlayer(List<Integer> songs, int k){
+            this. k = k;
+            this.songs = new ArrayList<>(songs);
+            this.q = new LinkedList<>();
+        }
+
+        int findRandom(){
+            int n = songs.size();
+            int rand = (int) (Math.random() * songs.size());
+
+            int currSong = songs.get(rand);
+            songs.set(rand, songs.get(n-1));
+            songs.remove(n-1);
+            q.add(currSong);
+            if(q.size() > k){
+                songs.add(q.remove());
+            }
+            return currSong;
+        }
+    }
+    //36.I was asked about reservoir sampling—given a comments link to a
+    // YouTube live stream, find a random user with uniform probability.
+    public class ReservoirSampling {
+        class Comment {
+            String userId;
+            int timestamp;
+
+            public Comment(String userId, int timestamp) {
+                this.userId = userId;
+                this.timestamp = timestamp;
+            }
+        }
+
+        class RandomUserPicker {
+            Random random = new Random();
+            String result = null;
+            int count = 0;
+
+            public void process(Comment comment) {
+                count++;
+                // With 1/count probability, replace the current result
+                if (random.nextInt(count) == 0) {
+                    result = comment.userId;
+                }
+            }
+
+            public String getRandomUser() {
+                return result;
+            }
+        }
+    }
+
 
 
 }

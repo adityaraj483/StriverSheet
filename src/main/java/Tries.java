@@ -193,7 +193,7 @@ class Trie2 {
         return res.isEmpty() ? "None" : res;
     }
     //4. Number of Distinct Substrings in a String
-    int insert(String s, int start){
+    int insert(String s, int start){  // this method is inside trie
         int count = 0;
         Trie1 t  = new Trie1();
         TrieNode node = t.root;
