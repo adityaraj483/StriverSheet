@@ -1,6 +1,4 @@
-import DS.DisjointSet;
-import DS.Log;
-import DS.NTree;
+import DS.*;
 import org.json.JSONObject;
 
 import java.util.*;
@@ -260,9 +258,6 @@ public class GooglePrevious2 {
             min = Math.min(min, arr[i]);
         }
 
-
-        int i=l;
-
         int[] nums = arr.clone();
         int cnt =1;
         for(int k=l;k<=r;k++){
@@ -273,6 +268,7 @@ public class GooglePrevious2 {
         }
 
         int Hstrokes = cnt * min;
+        int i=l;
 
         while(i<=r){
             if(nums[i] == 0) {
@@ -474,7 +470,6 @@ public class GooglePrevious2 {
             if(b[1] != a[1])
                 return b[1] - a[1];
             return a[0] - b[0];
-
         });
 
         for(var entry : mp.entrySet()){
@@ -488,8 +483,10 @@ public class GooglePrevious2 {
         for(int[] houses : neighbours){
             int size = houses.length;
             Queue<int[] > q = new LinkedList<>();
+
             if(pq.size() < size)
                 throw new Exception("Not Possible");
+
             int index = 0;
             while(index < size){
                 int[] curr = pq.remove();
@@ -784,7 +781,7 @@ public class GooglePrevious2 {
             res.add(leaf.val);
 
             if(parent != null){
-                parent.children.remove(parent.children.size()-1);
+                parent.children.remove(leaf);
                 if(parent.children.isEmpty())
                     leafs.add(parent);
             }
@@ -984,6 +981,7 @@ public class GooglePrevious2 {
             return "Not Found";
         if(seen.contains(s))
             throw new Exception("Circle exist");
+
         s = s.replace("%%", "%");
         int n = s.length();
         StringBuilder sb = new StringBuilder();
@@ -2074,7 +2072,745 @@ public class GooglePrevious2 {
             }
         }
     }
+    //37. 952. Largest Component Size by Common Factor
+    public int largestComponentSize(int[] nums) {
+        int n = nums.length;
 
+        DisjointSet dsu = new DisjointSet(n);
+        Map<Integer, Integer> factorIndexMap = new HashMap<>();
+
+        for(int i=0;i<nums.length;i++){
+            int val = nums[i];
+
+            for(int factor : findFactors(val)){
+                if(factorIndexMap.containsKey(factor)){
+                    dsu.unionBySize(i, factorIndexMap.get(factor));
+                }else
+                    factorIndexMap.put(factor, i);
+            }
+
+        }
+
+        int res = 0;
+        for(int i=0;i<n;i++){
+            int upi = dsu.findUParent(i);
+            res = Math.max(res, dsu.size.get(upi));
+        }
+        return res;
+    }
+    List<Integer> findFactors(int val){
+        List<Integer> factors = new ArrayList<>();
+        for(int i=2 ;i*i<=val;i++){
+            if( val % i == 0){
+                factors.add(i);
+                while(val % i == 0){
+                    val = val/i;
+                }
+            }
+        }
+        if( val > 1)
+            factors.add(val);
+        return factors;
+    }
+    //38. Read 4n buffer
+    public class ReadBuffer{
+        char[] myBuf = new char[4];
+        int bufCount = 0;
+        int bufIndex = 0;
+        int solve(char[] buf, int n, Reader4 obj){
+            int idx = 0;
+
+            while(idx < n){
+
+                if(bufIndex == 0)
+                    bufCount = obj.read(myBuf);
+
+                if(bufCount == 0)
+                    break;
+
+                while(idx < n && bufIndex< bufCount){
+                    buf[idx++] = myBuf[bufIndex++];
+                }
+
+                if(bufIndex >= bufCount)
+                    bufIndex = 0;
+            }
+
+            return idx;
+        }
+
+    }
+    //39.  Given set of intervals, find out, if all the intervals have anything in common.
+    int[] findCommonn(List<int[]> intervals){
+
+        int maxStart= 0;
+        int minEnd = (int) 1e9;
+
+        for (int[] interval : intervals) {
+            maxStart = Math.max(maxStart, intervals.get(0)[0]);
+            minEnd = Math.min(minEnd, interval[1]);
+        }
+        if(maxStart <= minEnd)
+            return new int[]{maxStart, minEnd};
+        return new int[]{-1, -1};
+    }
+    //39 -> follow up -> Given intervals, findout minimum set of points S, such that
+    // each interval has at least one point in the S.
+
+    int findMinPoint(List<int[]> intervals) {
+        intervals.sort((a, b) -> Integer.compare(a[1], b[1])); // sort by end
+
+        int count = 0;
+        int lastPoint = -1;
+
+        for (int[] interval : intervals) {
+            if (lastPoint < interval[0]) {
+                lastPoint = interval[1];  // pick the end of this interval
+                count++;
+            }
+        }
+
+        return count;
+    }
+    //40. Given a number N, the task is to count minimum steps to minimize it to
+    // 1 according to the following criteria:
+    //If N is divisible by 2 then you may reduce N to N/2.
+    //If N is divisible by 3 then you may reduce N to N/3.
+    //Otherwise, Decrement N by 1.
+    //
+    //Input: N = 10
+    //Output: 3
+    //Explanation: 10 - 1 = 9 / 3 = 3 / 3 = 1
+    void make1(int n) {
+        int[] dp = new int[n+1];
+        //solve(n, dp);
+        dp[1] = 0;
+        dp[2] = 1;
+        for(int i=3;i<=n;i++){
+            int res = dp[i-1];
+            if( i % 2 == 0)
+                res = Math.min(res, dp[i/2]);
+            if(i %3 == 0)
+                res = Math.min(res, dp[i/3]);
+            dp[i] = 1 + res;
+        }
+        System.out.println(dp[n]);
+    }
+
+    static int solve(int n, int[] dp){
+        if(n == 1)
+            return 0;
+        if(dp[n] != -1)
+            return dp[n];
+        int res = 1 + solve(n-1, dp);
+        if(n % 2 == 0) {
+            res = Math.min(res, 1 + solve(n / 2, dp));
+        }
+
+        if(n % 3 == 0){
+            res = Math.min(res, 1 + solve(n/3, dp));
+        }
+        return dp[n] = res;
+    }
+    //41. You and your friends discuss a pattern of number your teacher has written on blackboard
+    // after class. Return false if there is any contradiction between you and your friends, in
+    // sequencing of numbers, else return true.
+    //For e.g Suppose 4 friends write a sequence of numbers
+    //Friend 1: 1, 3, 4, 2
+    //Friend 2: 3, 4, 9, 10
+    //Friend 3: 11, 49, 13, 3
+    //Friend 4: 19, 3, 13, 4
+    //Ans. False, there is contradiction
+//    public static void main(String[] args) {
+//        List<List<Integer>> seq = new ArrayList<>();
+//        seq.add(List.of( 1, 3, 4, 2));
+//        seq.add(List.of( 4, 9, 10));
+//        seq.add(List.of( 11, 49, 13, 3));
+//        seq.add(List.of( 19, 3,  4));
+//        System.out.println(checkIfValid(seq));
+//
+//    }
+    static boolean checkIfValid(List<List<Integer>> seq){
+        Map<Integer, List<Integer>> graph = new HashMap<>();
+        Set<Integer> numbers = new HashSet<>();
+        for(List<Integer> curr : seq){
+            for(int i=1;i<curr.size();i++){
+                graph.computeIfAbsent(curr.get(i-1), ele -> new ArrayList<>()).add(curr.get(i));
+                numbers.add(curr.get(i-1));
+                numbers.add(curr.get(i));
+            }
+        }
+
+        Set<Integer> vis = new HashSet<>();
+
+        for(int val : numbers){
+            if(vis.contains(val))
+                continue;
+            if(isCyclic(val, graph, vis, new HashSet<>()))
+                return false;
+        }
+        return true;
+    }
+    static boolean isCyclic(int node, Map<Integer, List<Integer>> graph, Set<Integer> vis, Set<Integer> pathVis){
+        vis.add(node);
+        pathVis.add(node);
+
+        for(int adjNode : graph.getOrDefault(node, new ArrayList<>())){
+            if(!vis.contains(adjNode)){
+                if(isCyclic(adjNode, graph, vis, pathVis))
+                    return true;
+            }else if(pathVis.contains(adjNode))
+                return true;
+        }
+        pathVis.remove(node);
+        return false;
+    }
+
+    //42. Suppose you have given a task to schedule meetings in your office.
+    // You have to merge any meeting if they coincides, apart there is a DND
+    // interval in which you can't schedule any meeting. If any meeting has time
+    // overlapping with DND you have to break it.
+    //You have to do it in
+    //Time Complexity: O(n*log(n))
+    //Space Complexity: O(1)
+    //For e.g
+    //Meeting : [[1, 4], [3, 5], [9, 12], [7, 10]]
+    //DND: [3, 8]
+    //Ans. [[1, 3], [7, 12]]
+//    public static void main(String[] args) {
+//        List<int[]> meetings = new ArrayList<>();
+//        meetings.add(new int[]{1,4});
+//        meetings.add(new int[]{3,5});
+//        meetings.add(new int[]{9,12});
+//        meetings.add(new int[]{7,10});
+//        int[] dnd = {3,8};
+//        for(int[] curr : merge(meetings, dnd)){
+//            System.out.println(curr[0]+" "+curr[1]);
+//        }
+//    }
+
+    static List<int[]> merge(List<int[]> meetings, int[] dnd){
+        meetings.sort((a, b) -> a[0] - b[0]);
+
+        List<int[]> merged = new ArrayList<>();
+        int start = meetings.get(0)[0];
+        int end = meetings.get(0)[1];
+        for(int i=1;i<meetings.size();i++){
+
+            if(meetings.get(i)[0] <= end ){
+                end = Math.max(end, meetings.get(i)[1]);
+            }else{
+                merged.add(new int[]{start, end});
+                start = meetings.get(i)[0];
+                end = meetings.get(i)[1];
+            }
+
+        }
+        merged.add(new int[]{start, end});
+        int n = merged.size();
+
+        List<int[]> res = new ArrayList<>();
+        int i=0;
+        while(i < n && merged.get(i)[1] < dnd[0]){
+            res.add(merged.get(i));
+            i++;
+        }
+
+        if( i < n)
+            res.add(new int[]{merged.get(i)[0], dnd[0]});
+
+        while(i < n && merged.get(i)[1] <= dnd[1])
+            i++;
+        if( i < n)
+            res.add(new int[]{Math.max(dnd[1],merged.get(i)[0]), merged.get(i++)[1]});
+
+        while(i < n)
+            res.add(merged.get(i++));
+        return res;
+    }
+    //43. There is a long and thin painting that can be represented by a number line. You are given a
+    // 0-indexed 2D integer array paint of length n, where paint[i] = [start_i, end_i].
+    // This means that on the ith day you need to paint the area between start_i and end_i.
+    //Painting the same area multiple times will create an uneven painting so
+    // you only want to paint each area of the painting at most once.
+    //Return an integer array worklog of length n, where worklog[i] is the amount
+//    public static void main(String[] args) {
+//
+//        List<int[]> paint = new ArrayList<>();
+//        paint.add(new int[]{4,10});//6
+//        paint.add(new int[]{7,13});//3
+//        paint.add(new int[]{6,20});//7
+//        paint.add(new int[]{1,40});//23
+//
+//    }
+    static List<Integer> findSolu(List<int[]> ranges){
+        int max = ranges.stream().map(ele -> ele[1]).reduce(0, Integer::max);
+        int[] painted = new int[max+1];
+
+        List<Integer> res = new ArrayList<>();
+        for(int i=0;i<ranges.size();i++){
+            int start = ranges.get(i)[0];
+            int end = ranges.get(i)[1];
+
+            int cnt = 0;
+            for(int k = start;k<end;k++){
+                if(painted[k] == 0){
+                    cnt ++;
+                    painted[k]=1;
+                }
+            }
+            res.add(cnt);
+        }
+        return res;
+    }
+    //44. A good arithmetic sequence is an arithmetic sequence with a common
+    // difference of either 1 or -1. For example, [4, 5, 6] is a good arithmetic
+    // sequence. So is [6, 5, 4], [10, 9], or [-3, -2, -1]. But, [1, 2, 1]
+    // (no common difference) or [3, 7] (common difference is 4) is NOT.
+    //    Given nums = [7, 4, 5, 6, 5]. Each of the following subarrays is a good arithmetic sequence:
+    //
+    //            [7], [4], [5], [6], [5],
+    //            [4, 5], [5, 6], [6, 5],
+    //            [4, 5, 6]
+    //    The sums of these subarrays are:
+    //            7, 4, 5, 6, 5,
+    //            4 + 5 = 9, 5 + 6 = 11, 6 + 5 = 11,
+    //            4 + 5 + 6 = 15
+    //    Thus, the answer is the sum of all the sums above, which is:
+    //            7 + 4 + 5 + 6 + 5 + 9 + 11 + 11 + 15 = 73.
+//    public static void main(String[] args) {
+//        int[] arr = new int[]{1,2,3};
+//        System.out.println(sumOfGoodSequences(arr));
+//    }
+    public static int sumOfGoodSequences(int[] nums) {
+        int n = nums.length;
+        int ans = 0;
+        for (int i = 0; i < n; i++) {
+            ans += nums[i]; // single element is always good
+            int diff = 0;
+            if (i + 1 < n) diff = nums[i + 1] - nums[i];
+            if (diff != 1 && diff != -1) continue; // if no valid common difference, continue
+
+            int sum = nums[i];
+            for (int j = i + 1; j < n; j++) {
+                if (nums[j] - nums[j - 1] != diff) break;
+                sum += nums[j];
+                ans += sum;
+            }
+        }
+        return ans;
+    }
+    //45. same as ramp but opposite , here we need to check previous element
+    // which is larger and return max distance between them
+    //Given an array of stock prices, find the size of
+    // the widest interval over which the stock has lost value. Lost value is defined as the
+    // initial value of the interval is larger than the final value of the interval.
+    // Intermediate values within the interval may rise above the initial value, but the
+    // interval would still be considered as lost value.
+    //Example :
+    //Time: 00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16
+    //Price: 50, 52, 58, 54, 57, 51, 55, 60, 62, 65, 68, 72, 62, 61, 59, 63, 72
+    //Ans - 7
+    //Explanation - the widest interval with a net loss in value is from the indices 07 to 14 and has length 14 - 7 = 7
+    //Although a peak value of 72 at time index 11 is present in this interval, it is still considered an interval with loss value.
+    void rampSolve(int[] arr, int n){
+        Stack<Integer> st = new Stack<>();
+        for(int i=0;i<n;i++){
+            if(st.isEmpty() || arr[st.peek()] < arr[i])
+                st.add(i);
+
+        }
+        int res = 0;
+        for(int i=n-1;i>=0;i--){
+            while(!st.isEmpty() && arr[st.peek()] > arr[i]){
+                res = Math.max(res, i-st.pop());
+            }
+        }
+        System.out.println(res);
+    }
+    //46. Number of island in a tree
+
+        static Set<TreeNode> vis;  // Set to track visited nodes
+        static int count;  // Counter for the islands
+
+        // Main function to count islands
+        static int numberOfIslands(TreeNode root) {
+            vis = new HashSet<>();  // Initialize the visited set
+            count = 0;  // Initialize the island count
+            iterate(root);  // Start the iteration
+            return count;  // Return the final count
+        }
+
+        // Iterate function to traverse the tree and detect isolated islands
+        static void iterate(TreeNode root) {
+            if (root == null) return;  // Base case to end recursion
+
+            // Masked part: If the node is unvisited and land (1), we start DFS
+            if (!vis.contains(root) && root.val == 1) {
+                dfs(root);  // Call DFS to mark the entire island as visited
+                count++;  // Increment the island count
+            }
+
+            // Continue recursion to left and right children
+            iterate(root.left);  // Left subtree recursion
+            iterate(root.right);  // Right subtree recursion
+        }
+
+        // DFS function to explore all connected land nodes
+        static void dfs(TreeNode root) {
+            if (root == null || root.val == 0 || vis.contains(root)) return;  // Base case
+
+            vis.add(root);  // Mark the current node as visited
+
+            // Masked part: Recurse through all neighboring connected nodes
+            dfs(root.left);  // Explore the left child
+            dfs(root.right);  // Explore the right child
+        }
+
+        // Method to create a test case for the tree
+        public static TreeNode testCase() {
+            TreeNode root = new TreeNode(1);  // Create root
+            root.left = new TreeNode(1);  // Left child
+            root.right = new TreeNode(0);  // Right child (water)
+            root.left.left = new TreeNode(1);  // Left child's left child (land)
+            root.left.right = new TreeNode(1);  // Left child's right child (land)
+            return root;  // Return the constructed tree
+        }
+
+    //        public static void main(String[] args) {
+    //            TreeNode root = testCase();  // Create a test case
+    //            int result = numberOfIslands(root);  // Get the number of islands
+    //            System.out.println("Number of Islands: " + result);  // Output the result
+    //        }
+
+    //47. Number of ways to partition an array into segments s.t each segment has atleast 2 negative numbers
+//    public static void main(String[] args) {
+//        int[] arr ={-1, 2, -3, 4, 5};
+//        System.out.println(countWays(arr));
+//    }
+    static private int[] nums1;
+    static private Integer[] dp1;
+
+    static public int countWays(int[] nums) {
+        nums1 = nums;
+        dp1 = new Integer[nums.length + 1];
+        return helper(0);
+    }
+
+    static private int helper(int i) {
+        if (i == nums1.length) return 1;
+        if (dp1[i] != null) return dp1[i];
+
+        int count = 0;
+        int neg = 0;
+
+        for (int j = i; j < nums1.length; j++) {
+            if (nums1[j] < 0) neg++;
+            if (neg >= 2) {
+                count += helper(j + 1);
+            }
+        }
+
+        dp1[i] = count;
+        return count;
+    }
+    //48. https://leetcode.com/problems/my-calendar-i/description/
+    class MyCalendar {
+        List<int[]> book;
+        public MyCalendar() {
+            book = new ArrayList<>();
+        }
+
+        public boolean book(int startTime, int endTime) {
+            for(int[] curr : book){
+                if(Math.max(startTime, curr[0]) < Math.min(curr[1], endTime))
+                    return false;
+            }
+            book.add(new int[]{startTime, endTime});
+            return true;
+        }
+    }
+    //49. Minimum Area Rectangle -> https://leetcode.com/problems/minimum-area-rectangle/description/
+    public int minAreaRect(int[][] points) {
+        int n = points.length;
+
+        Set<String> seen = new HashSet<>();
+        for(int i=0;i<n;i++){
+            seen.add(points[i][0] +","+ points[i][1]);
+        }
+
+        int res = (int) 1e9;
+        for(int i=0;i<n;i++){
+            int x1 = points[i][0];
+            int y1 = points[i][1];
+            for(int j=i+1;j<n;j++){
+                int x2 = points[j][0];
+                int y2 = points[j][1];
+                if(x1 != x2 && y1 != y2){
+                    if(seen.contains(x1+","+y2) && seen.contains(x2+","+y1)){
+                        int area = Math.abs(x1-x2) * Math.abs(y1-y2);
+                        res = Math.min(res, area);
+                    }
+                }
+            }
+        }
+        return res == 1e9 ? 0 : res;
+    }
+    //50 Minimum Area Rectangle II -> https://leetcode.com/problems/minimum-area-rectangle-ii/description/
+    public double minAreaFreeRect(int[][] points) {
+        int n = points.length;
+        Set<String> seen = new HashSet<>();
+        for(int i=0;i<n;i++){
+            seen.add(points[i][0] +","+points[i][1]);
+        }
+        double res = Double.MAX_VALUE;
+
+        for(int i=0;i<n;i++){
+            int[] p1 = points[i];
+            for(int j=0;j<n;j++){
+                if(i==j)
+                    continue;
+
+                int[] p2 = points[j];
+
+                for(int k=0;k<n;k++){
+                    if( k == i || k == j)
+                        continue;
+
+                    int[] p3  = points[k];
+
+                    if(isRightAngled(p1, p2, p3)){
+
+                        int p4x = p2[0] + p3[0] - p1[0];
+                        int p4y = p2[1] + p3[1] - p1[1];
+
+                        if(seen.contains(p4x+","+p4y)){
+                            double area = distance(p1, p2) * distance(p1, p3);
+                            if(area > 0 && area < res)
+                                res = area;
+                        }
+                    }
+                }
+            }
+        }
+
+        return res == Double.MAX_VALUE ? 0 : res;
+    }
+    double distance(int[] p1, int[] p2){
+        return Math.sqrt(Math.pow(p1[0]-p2[0],2) + Math.pow(p1[1] -p2[1], 2));
+    }
+    boolean isRightAngled(int[] p1, int[] p2, int[] p3){
+        int val = (p2[0] - p1[0])*(p3[0] - p1[0]) + (p2[1] - p1[1] )*(p3[1] -p1[1]);
+        return val == 0;
+    }
+
+    //51. We have a vector of strings. Each index has exactly 3 strings which are in a group.
+    //We can group the common strings at different indexes and print the number of groups.
+    //
+    //example
+    //[
+    //["sam","man","peach"],
+    //["man","qwer","wsx"],
+    //["jko","pcd","qwe"]
+    //]
+    //since "man" is common for index 0 and index 1 we can say all strings
+    // in index 0 and index 1 are in same group .
+    //
+    //therefore we will have 2 groups
+    //["sam","man","peach","qwer","wsx"] and ["jko","pcd","qwe"]
+//    public static void main(String[] args) {
+//        List<List<String>> arr = new ArrayList<>();
+//        arr.add(List.of("sam","man","peach"));
+//        arr.add(List.of("man","qwer","wsx"));
+//        arr.add(List.of("jko","pcd","qwe"));
+//        findCommon(arr);
+//
+//    }
+
+    static void findCommon(List<List<String>> arr){
+        int n = arr.size();
+        DisjointSet set = new DisjointSet(n);
+        Map<String, Integer> stringIndexMap = new HashMap<>();
+        for(int i=0;i<n;i++){
+            for(String s : arr.get(i)){
+
+                if(stringIndexMap.containsKey(s)) {
+                    set.unionBySize(i, stringIndexMap.get(s));
+                }
+                stringIndexMap.put(s, i);
+            }
+        }
+
+
+        Map<Integer, Set<String>> indexStringMap = new HashMap<>();
+        for(var entry : stringIndexMap.entrySet()){
+            String s = entry.getKey();
+            int index = entry.getValue();
+            int upIndex = set.findUParent(index);
+            if(!indexStringMap.containsKey(upIndex))
+                indexStringMap.put(upIndex, new HashSet<>());
+            indexStringMap.get(upIndex).add(s);
+
+        }
+        List<List<String>> res = new ArrayList<>();
+        for(var entry : indexStringMap.entrySet()){
+            Set<String> strs = entry.getValue();
+            res.add(new ArrayList<>(strs));
+        }
+
+        for(List<String> list : res){
+            for (String s : list){
+                System.out.print(s +", ");
+            }
+            System.out.println();
+        }
+    }
+
+    //52. we have a square table and we have n numbers of cakes on the table.
+    // we have to divide the table horizontally in such a way that the area of cake in
+    // top part of table is exactly equal to area of cake in lower part.
+    //Separate Squares I -> https://leetcode.com/problems/separate-squares-i/description/
+    public double separateSquares(int[][] squares) {
+        double epi = 1e-6;
+        double low = 0.0, high = 1e10;
+
+        double res = 0.0;
+        while((high-low) > epi){
+            double mid = (low + high)/2;
+
+            if(valid(squares, mid)){
+                res = mid;
+                high = mid;
+            }else
+                low = mid;
+        }
+        return res;
+    }
+    boolean valid(int[][] squares, double mid){
+        double down = 0, up = 0;
+        for(int[] curr : squares){
+            double x = curr[0];
+            double y = curr[1];
+            double l = curr[2];
+
+            if(y + l <= mid){
+                down += l * l;
+            }else if(y >= mid){
+                up += l *l;
+            }else{
+                up += (y+l-mid)*(y+l-mid);
+                down += (mid-y)*(mid-y);
+            }
+        }
+        return down>= up;
+    }
+    //53. decode string
+//    public static void main(String[] args) {
+//        decodeString2("3[a2[b]]a");
+//    }
+    static void decodeString2(String s){
+
+        Stack<Integer> countStack = new Stack<>();
+        Stack<String> stringStack = new Stack<>();
+        int num = 0;
+        StringBuilder curr = new StringBuilder();
+        for(char ch : s.toCharArray()){
+            if(Character.isDigit(ch)){
+                num = num * 10 + (ch - '0');
+            }else if(ch == '['){
+                countStack.add(num);
+                stringStack.add(curr.toString());
+                num = 0;
+                curr = new StringBuilder();
+            }else if(ch == ']'){
+                int count = countStack.pop();
+                String str = curr.toString();
+                curr = new StringBuilder(stringStack.pop() + str.repeat(count));
+            }else if(Character.isLetter(ch))
+                curr.append(ch);
+        }
+        while(!stringStack.isEmpty()){
+            curr.insert(0, stringStack.pop());
+        }
+        System.out.println(curr);
+    }
+    //54. You are given an array ‘ARR’ of integers. Your task is to find the
+    // length of the longest alternating subsequence.
+    //Note:
+    //A sequence a1, a2, .... an is called an alternating
+    // sequence if its elements satisfy one of the following relations :
+    // a1 < a2 > a3 < a4 > a5..... or  a1 > a2 < a3 > a4 < a5.
+    //For Example:
+    //'ARR' = {3, 10, 1, 2, 30}, the longest alternating
+    // subsequence for this array can be {3, 10, 1, 30} or {3, 10, 2, 30}.
+    // Therefore, the answer will be 4.
+//    public static void main(String[] args) {
+//        int[] arr = {3, 10, 1, 29, 30};
+//        longestAlternatingSubsequence(arr);
+//    }
+
+    public static void longestAlternatingSubsequence(int[] arr) {
+        if (arr.length == 0) return;
+
+        int n = arr.length;
+        int up = 1, down = 1; // min length is 1 (each element is a subsequence)
+
+        for (int i = 1; i < n; i++) {
+            if (arr[i] > arr[i - 1]) {
+                up = down + 1;
+            } else if (arr[i] < arr[i - 1]) {
+                down = up + 1;
+            }
+            // if equal, do nothing
+        }
+
+        System.out.println( Math.max(up, down));
+    }
+
+    //55. 1007. Minimum Domino Rotations For Equal Row
+    public int minDominoRotations(int[] tops, int[] bottoms) {
+        int count1 = solve(tops, bottoms, tops[0]);
+        if(count1 != -1)
+            return count1;
+        return solve(tops, bottoms, bottoms[0]);
+
+    }
+    int solve(int[] tops, int[] bottoms, int target){
+        int flipTop = 0;
+        int flipBottom = 0;
+        int n = tops.length;
+
+        for(int i=0;i<n;i++){
+            if(tops[i] != target && bottoms[i] != target)
+                return -1;
+            else if(tops[i] != target){
+                flipTop++;
+            }else if(bottoms[i] != target){
+                flipBottom++;
+            }
+        }
+        return  Math.min(flipTop, flipBottom);
+    }
+    //56. You have n dice.
+    //	Each dice can roll any number between 1 to 6 (inclusive).
+    //	Find the number of ways to achieve a target sum.
+    public static void main(String[] args) {
+        findSumUsingDice(17, 3);
+    }
+    static void findSumUsingDice(int target, int n){
+        int[][] dp = new int[n+1][target+1];
+        dp[0][0] = 1;
+
+        for(int dice =1;dice<=n;dice++){
+            for(int tar = 0;tar<=target;tar++){
+                for(int face =1;face<=6;face++){
+                    if(tar-face >= 0)
+                        dp[dice][tar] += dp[dice-1][tar-face];
+                }
+            }
+        }
+        System.out.println(dp[n][target]);
+    }
 
 
 }

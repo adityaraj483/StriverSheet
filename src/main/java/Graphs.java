@@ -1028,44 +1028,43 @@ public class Graphs {
     }
     //32. Cheapest Flights Within K Stops
     public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
-        List<List<Pair>> adj = new ArrayList<>();
-        int[] res = new int[n];
-
-        for(int i=0;i<n;i++){
+        List<List<int[]>> adj = new ArrayList<>();
+        for(int i=0;i<n;i++)
             adj.add(new ArrayList<>());
-            res[i] = Integer.MAX_VALUE;
-        }
 
-        for(int[] flight: flights){
+        for(int[] flight : flights){
             int u = flight[0];
             int v = flight[1];
             int cost = flight[2];
-            adj.get(u).add(new Pair<>(v, cost));
+            adj.get(u).add(new int[]{v, cost});
         }
 
-        Queue<Pair<Integer, Pair<Integer,Integer>>> q = new LinkedList<>();
-        q.add(new Pair<>(src, new Pair<>(0, 0)));
-        res[src] = 0;
+        int[] dist = new int[n];
+        Arrays.fill(dist, (int) 1e9);
+
+        dist[src] = 0;
+        Queue<int[]> q = new LinkedList<>();
+        q.add(new int[]{src, 0, 0});
 
         while(!q.isEmpty()){
+            int node = q.peek()[0];
+            int cost = q.peek()[1];
+            int steps = q.remove()[2];
 
-            Pair<Integer, Pair<Integer,Integer>> p = q.remove();
-            int node = p.first;
-            int cost = p.second.first;
-            int k1 = p.second.second;
-            if(k1 > k || node == dst)
+            if(node == dst)
                 continue;
 
-            for(Pair<Integer,Integer> curr : adj.get(node)){
-                int currNode = curr.first;
-                int currCost = curr.second + cost;
-                if(k1 <= k && res[currNode] > currCost){
-                    q.add(new Pair<>(currNode, new Pair<>(currCost, k1+1)));
-                    res[currNode] =  currCost;
+            for(int[] adjNode : adj.get(node)){
+
+                int currNode = adjNode[0];
+                int currCost = adjNode[1] + cost;
+                if(currCost < dist[currNode] && steps <= k){
+                    q.add(new int[]{currNode, currCost, steps +1});
+                    dist[currNode] = currCost;
                 }
             }
         }
-        return res[dst] == Integer.MAX_VALUE ? -1 : res[dst];
+        return dist[dst] == 1e9 ? -1 : dist[dst];
     }
     //33. Network Delay Time -> http://leetcode.com/problems/network-delay-time/description/
     public int networkDelayTime(int[][] times, int n, int k) {
@@ -1698,17 +1697,16 @@ public class Graphs {
 
             if(vis[child] == 0){
                 dfs(child, node, adj, vis, toin, low, bridge);
-                low[node] = Math.min(low[child], low[node]);
 
                 if(low[child] > toin[node]){
                     bridge.add(new ArrayList<>(List.of(node, child)));
                 }
-            }else{
-                low[node] = Math.min(low[child], low[node]);
             }
+            low[node] = Math.min(low[child], low[node]);
+
         }
     }
-    //47. Articulation Points 1
+    //47. Articulation Points 1 -> https://www.geeksforgeeks.org/problems/articulation-point2616/1
     public ArrayList<Integer> articulationPoints(int V,ArrayList<ArrayList<Integer>> adj){
         int[] vis = new int[V];
         int[] min = new int[V];
@@ -1731,16 +1729,14 @@ public class Graphs {
         int noOfChildren = 0;
         for(int child : adj.get(node)){
             if(child == parent) continue;
-            if(vis[child] == 0){
+            if(vis[child] == 0) {
                 noOfChildren++;
                 dfs(child, node, adj, vis, min, toin, ans);
 
-                min[node] = Math.min(min[node], min[child]);
-                if(min[child] >= toin[node] && parent != -1)
+                if (min[child] >= toin[node] && parent != -1)
                     ans[node] = 1;
-            }else{
-                min[node] = Math.min(min[node], toin[child]);
             }
+            min[node] = Math.min(min[node], min[child]);
         }
         if(noOfChildren > 1 && parent == -1){
             ans[0] = 1;

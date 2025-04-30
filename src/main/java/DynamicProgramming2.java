@@ -355,6 +355,42 @@ public class DynamicProgramming2 {
         }
         return maxLen;
     }
+    //---------------------------OR----------------
+    public int lengthOfLIS(int[] nums) {
+
+        List<Integer> list = new ArrayList<>();
+        int n = nums.length;
+
+        for(int i=0;i<n;i++){
+
+            int pos = search(list, nums[i]);
+            if(pos < 0){
+                pos = pos * -1 -1;
+            }
+
+            if(pos == list.size())
+                list.add(nums[i]);
+            else
+                list.set(pos, nums[i]);
+        }
+        return list.size();
+    }
+    int search(List<Integer> list, int target){
+        int idx = list.size();
+
+        int low = 0, high = list.size()-1;
+        while(low <= high){
+
+            int mid = (low+high)/2;
+            if(target <= list.get(mid)){
+                high = mid-1;
+                idx = mid;
+            }else{
+                low = mid+1;
+            }
+        }
+        return idx;
+    }
     //41. print Longest Increasing Subsequence |(DP-42)
     public ArrayList<Integer> longestIncreasingSubsequence1(int n, int arr[]) {
         // Code here

@@ -1,5 +1,7 @@
 package DS;
 
+import java.util.Arrays;
+
 public class SegmentTree {
     int[] tree;
     int[] arr;
@@ -64,3 +66,27 @@ public class SegmentTree {
     }
 
 }
+class solun{// next greater elements to the right
+    public static void main(String[] args) {
+        int[] arr = {1,5,4,6,2};
+        int n = arr.length;
+        int[][] brr = new int[n][2];
+        for(int i=0;i<n;i++){
+            brr[i][0] = arr[i];
+            brr[i][1] = i;
+        }
+        Arrays.sort(brr, (a, b) -> b[0] - a[0]);
+        SegmentTree tree = new SegmentTree(n);
+        int[] res = new int[n];
+        for(int i=0;i<n;i++){
+            int index = brr[i][1];
+            int val = brr[i][0];
+            int totalEle = tree.findSumInRange(index, n-1);
+            res[i] = totalEle;
+            tree.updateSumAtIndex(index, 1);
+        }
+        for(int val : res)
+            System.out.print(val +", ");
+    }
+}
+

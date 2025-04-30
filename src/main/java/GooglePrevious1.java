@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public class GooglePrevious1 {
 
-    //1. Sum of bit differences -> https://practice.geeksforgeeks.org/problems/sum-of-bit-differences-1587115620/1
+    //1. Sum of bit differences ->
     long sumBitDifferences(int[] arr, int n) {
         // code here
         long res = 0;
@@ -22,7 +22,7 @@ public class GooglePrevious1 {
         }
         return res;
     }
-    //2. Travelling Salesman Problem -> https://practice.geeksforgeeks.org/problems/0-1-knapsack-problem0945/1
+    //2. Travelling Salesman Problem ->
     public int tsp(int[][] cost) {
         // Code here
         int n = cost.length;
@@ -497,7 +497,7 @@ public class GooglePrevious1 {
         int i=0;
         while(i<n){
             String currWord = words[i];
-            int totalSpace = currLevel.size() == 0 ? 0 : currLevel.size();
+            int totalSpace = currLevel.size();
             wordLengthOfCurrLevel += currWord.length();
 
             if(wordLengthOfCurrLevel + totalSpace > maxWidth){
@@ -1025,7 +1025,7 @@ public class GooglePrevious1 {
         int maxHeight = height[root.val];
 
         int[] ans = new int[queries.length];
-        int k= 0;
+        int k = 0;
         for(int q : queries){
 
             int currLevel = level[q];
@@ -1184,7 +1184,7 @@ public class GooglePrevious1 {
         }
         return res;
     }
-    //24.  The Earliest Moment When Everyone Become Friends
+    //24. The Earliest Moment When Everyone Become Friends
     public static int minTime(int[][] logs, int n) {
        DisjointSet set = new DisjointSet(n);
 
@@ -1702,7 +1702,7 @@ public class GooglePrevious1 {
             for(int j=0;j<n;j++){
 
                 if((i & (1 << j)) >0){
-                    sum1+= nums[j];
+                    sum1 += nums[j];
                     sum2 += nums[n+j];
                     cnt++;
                 }
@@ -2234,13 +2234,11 @@ public class GooglePrevious1 {
     }
     //45. Parallel course II -> https://leetcode.com/problems/parallel-courses-ii/description/
     class Solution45 {
-        int totalMask;
         int n;
         int k;
         Map<String, Integer> memo;
         public int minNumberOfSemesters(int n, int[][] relations, int k) {
             this.n = n;
-            this.totalMask = (1 << n) -1;
             this.k = k;
 
             memo = new HashMap<>();
@@ -2286,6 +2284,7 @@ public class GooglePrevious1 {
             List<List<Integer>> allCombi = getCombi(avl, Math.min(k, avl.size()));
             int res = (int) 1e9;
             for(List<Integer> combi : allCombi){
+
                 int newMask = mask;
                 int[] newIndegree = Arrays.copyOf(indegree, n);
                 for(int node : combi){
@@ -2360,6 +2359,7 @@ public class GooglePrevious1 {
             }
 
         }
+
         int[] vis = new int[n];
         int chainSum = 0, maxCircle = 0;
         for(int i=0;i<n;i++){
@@ -2612,35 +2612,30 @@ public class GooglePrevious1 {
     // the maximum number of gifts the uncle can afford from the list, adhering to the financial
     // constraints and timing.
 
-    int solve(int[][] gifts, int k){
-        Queue<Integer>  pq = new PriorityQueue<>((a, b) -> b - a);
-        Arrays.sort(gifts, (a, b) -> a[1] - b[1]);
-        int totalCost = 0;
-        List<Integer> list = new LinkedList<>();
-        for(int[] edge : gifts){
-            int cost = edge[0];
-            int day = edge[1];
-            if(cost > k)
-                break;
+    static int maxGifts(int[][] gifts, int k) {
+        // Sort gifts by the deadline (day the gift must be bought by)
+        Arrays.sort(gifts, (a,b) -> a[1]-b[1]);
 
-            totalCost += cost;
-            pq.add(cost);
-            k-=cost;
-            if(totalCost > day){
-                int currCost = pq.remove();
+        PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a, b) -> b-a);
+        int totalMoneySaved = 0;
+        int prevDay = 0;
+        for (int[] gift : gifts) {
+            int cost = gift[0];
+            int giftDay = gift[1];
+            int currDay = giftDay;
+            totalMoneySaved += currDay-prevDay;
 
-                totalCost -= currCost;
-                list.add(currCost);
-                k+= currCost;
+            // The gift must be bought before or on day k
+            if (giftDay > k) break;
+
+            // Can the uncle afford this gift on time?
+            if (cost <= totalMoneySaved) {
+                totalMoneySaved -= cost;
+                maxHeap.offer(cost); // Track the gift bought
             }
         }
-        int i= 0;
-        while(i < list.size() && list.get(i) <= k ){
-            k -= list.get(i);
-            pq.add(list.get(i));
-            i++;
-        }
-        return pq.size();
+
+        return maxHeap.size(); // Number of gifts bought
     }
     //53. I was given a binary matrix and asked to find the upper-left corner
     // of the largest square of 1's.
@@ -2705,12 +2700,12 @@ public class GooglePrevious1 {
             for(int i = 0;i <= n-size;i++){
                 for(int j = 0;j <= m-size;j++){
 
-                    int prevRow = i+1, prevCol = j+1;
+                    int firstRow = i+1, firstCol = j+1;
                     int lastRow = i + size, lastCol = j + size;
                     int cnt = prefix[lastRow][lastCol]
-                            - prefix[lastRow][prevCol-1]
-                            - prefix[prevRow-1][lastCol]
-                            + prefix[prevRow-1][prevCol-1];
+                            - prefix[lastRow][firstCol-1]
+                            - prefix[firstRow-1][lastCol]
+                            + prefix[firstRow-1][firstCol-1];
                     if(cnt <= k){
                         maxSize = size;
                         flag = true;
@@ -2933,7 +2928,6 @@ public class GooglePrevious1 {
                         count += mp.get(currSum-target);
                     }
                     mp.put(currSum, mp.getOrDefault(currSum, 0) +1);
-
                 }
             }
         }
@@ -3021,7 +3015,7 @@ public class GooglePrevious1 {
         }
         int[] dist = new int[n];
         Arrays.fill(dist, -1);
-        int [][] vis = new int[n][2];
+        int[][] vis = new int[n][2];
         Queue<int[]> q = new LinkedList<>();//node, steps, color
 
         q.add(new int[]{0, 0, -1});
@@ -3361,20 +3355,63 @@ public class GooglePrevious1 {
 
 
     //72.
-    //Given below pattern of license plates (Pattern only, not the actual list of license plates), Find the nth license plate
+    //Given below pattern of license plates (Pattern only, not the actual list of license plates),
+    // Find the nth license plate
     //All license plates no are of size 5 chars
     //Eg, if n is 3, ans is - 00002
     //
-    //00000
-    //00001
-    //99999
-    //0000A
-    //0001A
+    //    00000
+    //    00001
+    //    99999
+    //    0000A
+    //    0001A
     //........
     //9999Z
     //000AA
     //001AA
     //........
     //ZZZZZ
+//    public static void main(String[] args) {
+//        System.out.println(makeNumberPlate(11_881_376));//zzzzz
+//    }
+    public static void main(String[] args) {
+        System.out.println(makeNumberPlate(11881376));
+    }
+    static String makeNumberPlate(int n) {
+        n--; // Make zero-based
+        if (n < 100000) {
+            return String.format("%05d", n);
+        }
+
+        n -= 100000; // Shift after 00000-99999
+        for (int letter = 1; letter <= 5; letter++) {
+            long count = (long) Math.pow(10, 5 - letter) * (long) Math.pow(26, letter);
+            if (n < count) {
+                long numpart = n % (long) Math.pow(10, 5 - letter);
+                long charPart = n / (long) Math.pow(10, 5 - letter);
+                String numStr = makeNumStr(numpart, 5 - letter);
+                String charStr = makeCharStr(charPart, letter);
+                return numStr + charStr;
+            } else {
+                n -= count;
+            }
+        }
+        return "Not Possible";
+    }
+
+    private static String makeCharStr(long charPart, int letter) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < letter; i++) {
+            sb.append((char) ('A' + (int) (charPart % 26)));
+            charPart /= 26;
+        }
+        return sb.reverse().toString();
+    }
+
+    private static String makeNumStr(long numpart, int size) {
+        if (size == 0) return "";
+        String num = Long.toString(numpart);
+        return "0".repeat(Math.max(0, size - num.length())) + num;
+    }
 
 }

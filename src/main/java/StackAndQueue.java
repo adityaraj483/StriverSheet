@@ -1,9 +1,6 @@
 import java.util.*;
 
 public class StackAndQueue {
-    public static void main(String[] args) {
-
-    }
     //1. Implement Stack using Arrays
     class MyStack {
         private int[] arr;
@@ -122,7 +119,7 @@ public class StackAndQueue {
         for(char ch : str.toCharArray()){
             if(ch == '(' || ch == '{' || ch == '[')
                 st.add(ch);
-            else if(st.size() > 0){
+            else if(!st.isEmpty()){
                 if(ch == ')' && st.peek() == '(')
                     st.pop();
                 else if(ch == '}' && st.peek() == '{')
@@ -582,6 +579,7 @@ public class StackAndQueue {
     }
     //23. Sum of Subarray Ranges
     public long subArrayRanges(int[] nums) {
+
         int n = nums.length;
         int[] leftMin = new int[n];
         int[] rightMin= new int[n];
@@ -873,12 +871,14 @@ public class StackAndQueue {
     }
     //30 LFU cache
     class DLLNode{
-        int key, value, fre;
+        int val, key, fre;
         DLLNode prev, next;
-        DLLNode(int key, int value, int fre){
+        DLLNode(int key, int val,int fre){
             this.key = key;
-            this.value = value;
+            this.val = val;
             this.fre = fre;
+            prev = null;
+            next = null;
         }
     }
 
@@ -886,22 +886,13 @@ public class StackAndQueue {
         DLLNode start, end;
         int size;
         DLLNodeList(){
-            size = 0;
             start = new DLLNode(-1, -1, -1);
             end = new DLLNode(-1, -1, -1);
-
             start.next = end;
             end.prev = start;
+            size = 0;
         }
 
-        void removeNode(DLLNode node){
-            DLLNode prev = node.prev;
-            DLLNode next = node.next;
-
-            prev.next = node.next;
-            next.prev = node.prev;
-            size--;
-        }
         void addNode(DLLNode node){
             node.next = start.next;
             start.next = node;
@@ -910,74 +901,84 @@ public class StackAndQueue {
             size++;
         }
 
+        void removeNode(DLLNode node){
+            DLLNode next = node.next;
+            DLLNode prev = node.prev;
+            prev.next = next;
+            next.prev = prev;
+            size--;
+        }
+
     }
 
     class LFUCache {
-        int minFre;
-        int currSize, totalSize;
         Map<Integer, DLLNode> cache;
-        Map<Integer, DLLNodeList> freMap;
+        Map<Integer, DLLNodeList> freListMap;
+        int currSize , totalSize;
+        int minFre;
 
         public LFUCache(int capacity) {
-            minFre = 0;
+            cache = new HashMap<>();
+            freListMap = new HashMap<>();
             currSize = 0;
             totalSize = capacity;
-            cache = new HashMap<>();
-            freMap = new HashMap<>();
+            minFre = 0;
         }
 
         public int get(int key) {
-            if(!cache.containsKey(key)){
-                return -1;
-            }else{
+            if(cache.containsKey(key)){
                 DLLNode node = cache.get(key);
-                update(node);
-                return node.value;
+                updateNode(node);
+                return node.val;
             }
+            return -1;
         }
 
         public void put(int key, int value) {
             if(cache.containsKey(key)){
                 DLLNode node = cache.get(key);
-                node.value = value;
-                update(node);
-            }else {
+                node.val = value;
+                updateNode(node);
+            }else{
                 currSize ++;
                 if(currSize > totalSize){
                     removeLast();
                     currSize--;
                 }
-                minFre = 1;
-                DLLNode node = new DLLNode(key, value, 1);
-                DLLNodeList list = freMap.getOrDefault(1, new DLLNodeList());
-                list.addNode(node);
-                freMap.put(1, list);
-                cache.put(key, node);
+                minFre = 0;
+                addNode(new DLLNode(key, value, 0));
             }
         }
 
-        private void removeLast(){
-            DLLNodeList currList = freMap.get(minFre);
-            DLLNode node = currList.end.prev;
-            currList.removeNode(node);
+        void updateNode(DLLNode node){
+            removeNode(node);
+            node.fre++;
+            addNode(node);
+
+        }
+        void removeLast(){
+            DLLNode last = freListMap.get(minFre).end.prev;
+            removeNode(last);
+        }
+        void removeNode(DLLNode node){
+            int fre = node.fre ;
+            DLLNodeList oldList = freListMap.get(fre);
+
+            oldList.removeNode(node);
+            if(oldList.size == 0 && fre == minFre)
+                minFre++;
+
+            freListMap.put(fre, oldList);
             cache.remove(node.key);
         }
+        void addNode(DLLNode node){
 
-        private void update(DLLNode node){
+            int fre = node.fre ;
+            DLLNodeList list = freListMap.getOrDefault(fre, new DLLNodeList());
 
-            int currFre = node.fre;
-            DLLNodeList currList = freMap.get(currFre);
-            currList.removeNode(node);
-
-            if(currFre == minFre && currList.size == 0){
-                minFre++;
-            }
-            node.fre++;
-            currFre++;
-
-            DLLNodeList newList = freMap.getOrDefault(currFre, new DLLNodeList());
-            newList.addNode(node);
-            freMap.put(currFre, newList);
+            list.addNode(node);
+            cache.put(node.key, node);
+            freListMap.put(fre, list);
         }
     }
 

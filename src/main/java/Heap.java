@@ -196,42 +196,35 @@ public class Heap {
 
     //16. Find Median from Data Stream
     class MedianFinder {
-        Queue<Integer> maxPQ, minPQ;
+        Queue<Integer> left, right;
         public MedianFinder() {
-            maxPQ = new PriorityQueue<>((a, b) -> b-a);
-            minPQ = new PriorityQueue<>((a, b) -> a-b);
+            left = new PriorityQueue<>((a, b) -> b - a);
+            right = new PriorityQueue<>((a, b) -> a - b);
         }
 
         public void addNum(int num) {
-            if(maxPQ.isEmpty())
-                maxPQ.add(num);
-            else{
-                if(maxPQ.size() == minPQ.size()){
+            if(left.size() <= right.size()){
+                left.add(num);
+            }else{
+                right.add(num);
+            }
 
-                    if(minPQ.peek() >= num){
-                        maxPQ.add(num);
-                    }else{
-                        maxPQ.add(minPQ.remove());
-                        minPQ.add(num);
-                    }
-                }else{
-                    if(maxPQ.peek() > num){
-                        minPQ.add(maxPQ.remove());
-                        maxPQ.add(num);
-                    }else{
-                        minPQ.add(num);
-                    }
+            if(!left.isEmpty()  && !right.isEmpty()){
+
+                if(left.peek() > right.peek()){
+                    right.add(left.poll());
+                    left.add(right.poll());
                 }
             }
         }
+
         public double findMedian() {
-            int n = maxPQ.size(), m = minPQ.size();
-            if((n+m)%2 ==0){
-                double val = (minPQ.peek() + maxPQ.peek())/2.0;
-                return val;
-            } else {
-                return maxPQ.peek();
-            }
+            int n = left.size() + right.size();
+
+            if( n % 2 == 0){
+                return 1D * (left.peek() + right.peek())/2.0;
+            }else
+                return left.peek();
         }
     }
     //17. Top k frequent elements

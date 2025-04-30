@@ -210,7 +210,7 @@ public class DynamicProgramming1 {
         }
         return prev;
     }
-    //6. Ninja's Training (DP 7)
+    //6. Ninja's Training (DP 7) -> https://www.naukri.com/code360/problems/ninja-s-training_3621003
     public int maximumPoints1(int arr[][]) {
         int n =arr.length;
         int m = arr[0].length;
@@ -863,7 +863,7 @@ public class DynamicProgramming1 {
         int target = sum/2;
         return isSubsetSum3(nums, target); // Just above same logic.
     }
-    //15. Partition Set Into 2 Subsets With Min Absolute Sum Diff (DP- 16)
+    //15. Partition Set Into 2 Subsets With Min Absolute Sum Diff (DP- 16) , meet in the middle
     public int minimumDifference(int[] nums) {
 
         int totalSum = Arrays.stream(nums).sum();
