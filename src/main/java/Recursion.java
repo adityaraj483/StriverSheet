@@ -515,20 +515,13 @@ public class Recursion {
         vis[row][col] = 0;
         int[] delRow = new int[]{1, 0, 0, -1};
         int[] delCol = new int[]{0, -1, 1, 0};
+        char[] delPath = new char[]{'D', 'L', 'R', 'U'};
 
         for(int i=0;i<4;i++){
             int r = row + delRow[i];
             int c = col + delCol[i];
             if(r < n && c <n && r >=0 && c >=0 && mat.get(r).get(c) == 1 && vis[r][c] ==1){
-
-                if(i == 0)
-                    solve(mat, r, c, n, path + "D", res, vis);
-                if(i == 1)
-                    solve(mat, r, c, n, path + "L", res, vis);
-                if(i == 2)
-                    solve(mat, r, c, n, path + "R", res, vis);
-                if(i == 3)
-                    solve(mat, r, c, n, path + "U", res, vis);
+                solve(mat, r, c, n, path + delPath[i], res, vis);
             }
         }
         vis[row][col] = 1;

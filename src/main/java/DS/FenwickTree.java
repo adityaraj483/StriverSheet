@@ -7,7 +7,7 @@ public class FenwickTree {
         this.arr = new int[n+1];
         this.n = n+1;
     }
-    int query(int id){
+    public int query(int id){
         int res = 0;
         while(id > 0){
             res += arr[id];
@@ -15,7 +15,7 @@ public class FenwickTree {
         }
         return res;
     }
-    void update(int id, int val){
+    public void update(int id, int val){
         while(id < n){
             arr[id] += val;
             id += (id & - id);

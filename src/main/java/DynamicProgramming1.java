@@ -36,7 +36,7 @@ public class DynamicProgramming1 {
         if(index + 2 < n)
             right = Math.abs(arr[index] - arr[index+2]) + solve(arr, index+2, n, dp);
         if(left == right && left == Integer.MAX_VALUE)
-            return dp[index]= 0;
+            return dp[index] = 0;
         return dp[index] = Math.min(left, right);
     }
     //---------------------------or--------------------------------
@@ -513,8 +513,6 @@ public class DynamicProgramming1 {
     }
     //10. Minimum path sum in Triangular Grid (DP 11)
     public int minimumTotal1(List<List<Integer>> triangle) {
-        List<Integer> list = new ArrayList<>();
-        list.sort((a, b) -> a-b);
         int n = triangle.size();
         int[][] dp = new int[n][n];
         for(int[] a: dp)
@@ -1228,23 +1226,24 @@ public class DynamicProgramming1 {
     //21. Coin Change 2 (DP - 22)
     public int change(int amount, int[] coins) {
         int n = coins.length;
-        int[][] dp = new int[n][amount+1];
-        for(int[] a: dp)
-            Arrays.fill(a, -1);
+        Integer[][] dp = new Integer[n][amount+1];
         return solve4(coins, n-1, amount, dp);
     }
-    int solve4(int[] coins, int index, int amount, int[][] dp){
-        if(amount == 0)
-            return 1;
-        if(index < 0)
+    int solve4(int[] coins, int i, int amount, Integer[][] dp){
+        if(i == 0 || amount == 0){
+            if(amount == 0 || amount % coins[i] == 0)
+                return 1;
             return 0;
-        if(dp[index][amount] != -1) return dp[index][amount];
+        }
 
-        int notTake = solve4(coins, index-1, amount, dp);
+        if(dp[i][amount] != null) return dp[i][amount];
+
+        int notTake = solve4(coins, i-1, amount, dp);
         int take = 0;
-        if(amount >= coins[index])
-            take = solve4(coins, index, amount-coins[index], dp);
-        return dp[index][amount] = take + notTake;
+        if(amount >= coins[i]){
+            take = solve4(coins, i, amount - coins[i], dp);
+        }
+        return dp[i][amount] = take + notTake;
     }
     //---------------------------or--------------------------------
     public int change2(int amount, int[] coins) {

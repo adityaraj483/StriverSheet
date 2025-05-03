@@ -2143,23 +2143,23 @@ public class GooglePrevious1 {
     //Note there may be multiple pairs that fail with each other, but need to report only one.
     // Also all the UTs are running ok when executed individually.
 
-//    public static void main(String[] args) {
-//        List<Integer> testCases = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
-//        TestRunner testRunner = new TestRunner();
-//        int[] failingPair = testRunner.findFailingPairs(testCases);
-//        if (failingPair != null) {
-//            System.out.println("Failing Pair: " + failingPair[0] + ", " + failingPair[1]);
-//        } else {
-//            System.out.println("No failing pair found");
-//        }
-//    }
+    public static void main(String[] args) {
+        List<Integer> testCases = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
+        TestRunner testRunner = new TestRunner();
+        int[] failingPair = testRunner.findFailingPairs(testCases);
+        if (failingPair != null) {
+            System.out.println("Failing Pair: " + failingPair[0] + ", " + failingPair[1]);
+        } else {
+            System.out.println("No failing pair found");
+        }
+    }
 
     static class TestRunner{
         boolean testRunner(Set<Integer> testSet){
 
             Set<Set<Integer>> failingPairs = new HashSet<>();
             failingPairs.add(new HashSet<>(List.of(2,5)));
-            failingPairs.add(new HashSet<>(List.of(3, 7)));
+            //failingPairs.add(new HashSet<>(List.of(3, 7)));
 
             for(Set<Integer> pair : failingPairs){
                 if(testSet.containsAll(pair))
@@ -2171,19 +2171,18 @@ public class GooglePrevious1 {
         int[] findFailingPairs(List<Integer> tests){
 
             if(tests.size() <= 1)
-                return new int[0];
+                return new int[]{-1, -1};
 
-            int mid = tests.size()/2;
+            int mid = tests.size() / 2;
 
             List<Integer> left = tests.subList(0, mid);
-            List<Integer> right = tests.subList(mid+1, tests.size());
+            List<Integer> right = tests.subList(mid, tests.size());
 
-            boolean leftTest = testRunner(new HashSet<>(left));
-            boolean rightTest = testRunner((new HashSet<>(right)));
+            if (testRunner(new HashSet<>(left)))
+                return findFailingPairs(left);
 
-            if(leftTest) return findFailingPairs(left);
-            if(rightTest) return findFailingPairs(right);
-
+            if (testRunner(new HashSet<>(right)))
+                return findFailingPairs(right);
 
             return findCross(left, right);
 
@@ -2197,7 +2196,7 @@ public class GooglePrevious1 {
                         return new int[]{l, r};
                 }
             }
-            return new int[0];
+            return new int[]{-1, -1};
         }
     }
 
@@ -2219,12 +2218,12 @@ public class GooglePrevious1 {
 //    }
     static List<Integer> constructOriginalArray(int[] dp, int target) {
         List<Integer> coins = new ArrayList<>();
-        int i, j, n = dp.length; // dp array should be equal to target+1
+        int n = dp.length; // dp array should be equal to target+1
         if(target > n)
             return coins;
-        for(i=1;i<=target;i++) {
+        for(int i=1;i<=target;i++) {
             if (dp[i] == 1) {
-                for(j=target;j>=i;j--) {
+                for(int j=target;j>=i;j--) {
                     dp[j] = dp[j] - dp[j-i];
                 }
                 coins.add(i);
@@ -2281,7 +2280,7 @@ public class GooglePrevious1 {
                 avl.add(i);
             }
 
-            List<List<Integer>> allCombi = getCombi(avl, Math.min(k, avl.size()));
+            List<List<Integer>> allCombi = getCombi(avl, k);
             int res = (int) 1e9;
             for(List<Integer> combi : allCombi){
 
@@ -2827,6 +2826,7 @@ public class GooglePrevious1 {
 
     static int solve(List<Integer> startTimes, int m, int t){
 
+        Collections.sort(startTimes);
         PriorityQueue<Integer> cpu = new PriorityQueue<>((a, b) -> a -b);
         for(int i=0;i<m;i++)
             cpu.add(0);
@@ -2881,16 +2881,16 @@ public class GooglePrevious1 {
         return dist;
     }
     //58.  Longest Repeating Subsequence -> https://www.naukri.com/code360/problems/longest-repeating-subsequence_1118110?topList=top-google-coding-interview-questions&problemListRedirection=true&company%5B%5D=Google&leftPanelTabValue=PROBLEM
-    public static int longestRepeatingSubsequence(String st, int n)
+    public static int longestRepeatingSubsequence(String s, int n)
     {
         int[][] dp = new int[n+1][n+1];
         for(int[] cols : dp){
             Arrays.fill(cols, -1);
         }
-        return solve(st, n, n, dp);
+        return solve(s, n, n, dp);
     }
     static int solve(String s, int i, int j, int[][] dp){
-        if( i ==0 || j== 0)
+        if( i == 0 || j == 0)
             return 0;
         if(dp[i][j] != -1) return dp[i][j];
         int res = 0;
@@ -3056,19 +3056,21 @@ public class GooglePrevious1 {
     }
     //62. All Unique Permutations -> https://www.naukri.com/code360/problems/all-unique-permutations_1094902?topList=top-google-coding-interview-questions&problemListRedirection=true&leftPanelTabValue=PROBLEM
     public static ArrayList<ArrayList< Integer >> uniquePermutations(ArrayList<Integer> arr, int n) {
-        Set<ArrayList<Integer>> res = new HashSet<>();
+        ArrayList<ArrayList<Integer>> res = new ArrayList<>();
         solve(arr, 0, arr.size(), res);
         return new ArrayList<>(res);
     }
-    static void solve(List<Integer> arr, int i, int n, Set<ArrayList<Integer>> res){
+    static void solve(List<Integer> arr, int i, int n, ArrayList<ArrayList<Integer>> res){
 
-        if(i== n){
+        if(i == n){
             res.add(new ArrayList<>(arr));
             return;
         }
-
+        Set<Integer> seen = new HashSet<>();
         for(int k=i;k<n;k++){
-
+            if(seen.contains(arr.get(k)))
+                continue;
+            seen.add(arr.get(k));
             swap(arr, i, k);
             solve(arr, i+1, n, res);
             swap(arr, i, k);
@@ -3121,10 +3123,6 @@ public class GooglePrevious1 {
                 deltaY /= gcd;
                 deltaX /= gcd;
 
-                if (deltaX < 0) {
-                    deltaX = -deltaX;
-                    deltaY = -deltaY;
-                }
 
                 String slope = deltaY + "/" + deltaX;
                 slopes.put(slope, slopes.getOrDefault(slope, 0) + 1);
@@ -3188,7 +3186,7 @@ public class GooglePrevious1 {
         if(cnt == size){
             return 0;
         }
-        String key = cnt +","+copy;
+        String key = cnt + "," + copy;
         if(mp1.containsKey(key))
             return mp1.get(key);
 
@@ -3228,7 +3226,7 @@ public class GooglePrevious1 {
             int count = curr[2];
 
             if(curr[1] == (1 << V) -1)
-                return curr[2];
+                return count;
 
             for(int adjNode : adj.get(node)){
 
@@ -3374,44 +3372,50 @@ public class GooglePrevious1 {
 //    public static void main(String[] args) {
 //        System.out.println(makeNumberPlate(11_881_376));//zzzzz
 //    }
-    public static void main(String[] args) {
-        System.out.println(makeNumberPlate(11881376));
-    }
-    static String makeNumberPlate(int n) {
-        n--; // Make zero-based
-        if (n < 100000) {
-            return String.format("%05d", n);
-        }
+//    public static void main(String[] args) {
+//        System.out.println(makeNumberPlate(11881376));
+//    }
+    private static final char[] LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
-        n -= 100000; // Shift after 00000-99999
-        for (int letter = 1; letter <= 5; letter++) {
-            long count = (long) Math.pow(10, 5 - letter) * (long) Math.pow(26, letter);
-            if (n < count) {
-                long numpart = n % (long) Math.pow(10, 5 - letter);
-                long charPart = n / (long) Math.pow(10, 5 - letter);
-                String numStr = makeNumStr(numpart, 5 - letter);
-                String charStr = makeCharStr(charPart, letter);
-                return numStr + charStr;
-            } else {
-                n -= count;
+    public static String getNthID(long n, int maxLength) {
+        long index = n;
+
+        for (int letterCount = 0; letterCount <= maxLength; letterCount++) {
+            int digitCount = maxLength - letterCount;
+
+            long blockSize = (long) Math.pow(10, digitCount) * (long) Math.pow(26, letterCount);
+
+            if (index < blockSize) {
+                // Found the block where the index belongs
+                int digitIndex = (int) index / (int) Math.pow(26, letterCount);
+                int letterIndex = (int) index % (int) Math.pow(26, letterCount);
+
+                String digitPart = getDigitPart(digitCount, digitIndex);
+                String letterPart = getLetterPart(letterCount, letterIndex);
+
+                return digitPart + letterPart;
             }
+
+            index -= blockSize;
         }
-        return "Not Possible";
+
+        return "OUT_OF_RANGE";
+    }
+    private static String getDigitPart(int length, int val){
+        String s = String.valueOf(val);
+        length = length - s.length();
+        if(length > 0)
+            return "0".repeat(length) + s;
+        return s;
     }
 
-    private static String makeCharStr(long charPart, int letter) {
+    private static String getLetterPart(int length, int index) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < letter; i++) {
-            sb.append((char) ('A' + (int) (charPart % 26)));
-            charPart /= 26;
+        for (int i = 0; i < length; i++) {
+            sb.insert(0, LETTERS[index % 26]);
+            index /= 26;
         }
-        return sb.reverse().toString();
-    }
-
-    private static String makeNumStr(long numpart, int size) {
-        if (size == 0) return "";
-        String num = Long.toString(numpart);
-        return "0".repeat(Math.max(0, size - num.length())) + num;
+        return sb.toString();
     }
 
 }

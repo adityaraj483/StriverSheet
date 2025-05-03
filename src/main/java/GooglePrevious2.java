@@ -1,6 +1,7 @@
 import DS.*;
 import org.json.JSONObject;
 
+import java.beans.IntrospectionException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -140,23 +141,60 @@ public class GooglePrevious2 {
     //        set.add(8.0);
     //        checkTriplets(set, 8, 5);
     //    }
-    private static void checkTriplets(TreeSet<Double> set, double x, double D) {
-        NavigableSet<Double> inRange = set.subSet(x - D, true, x + D, true);
+//    public static void main(String[] args) {
+//        System.out.println("start");
+//        TripletFinder tripletFinder = new TripletFinder(5);
+//        Scanner sc = new Scanner(System.in);
+//        float val = 0;
+//        while((val = sc.nextFloat()) != -1){
+//            tripletFinder.addNumber(val);
+//        }
+//    }
+    class TripletFinder{
+        float distance;
+        TreeMap<Float, Integer> stream;
+        TripletFinder(float distance){
+            this.distance = distance;
+            this.stream = new TreeMap<>();
+        }
 
-        if (inRange.size() >= 3) {
-            Iterator<Double> it = inRange.iterator();
-            double a = it.next();
-            double b = it.next();
-            double c = it.next();
+        void addNumber(float num){
+            stream.put(num, stream.getOrDefault(num, 0)+1);
+            checkTripletWithDistance(num);
+        }
 
-            double min = Math.min(a, Math.min(b, c));
-            double max = Math.max(a, Math.max(b, c));
+        private void checkTripletWithDistance(Float num) {
+            float from = num - 2 * distance;
+            float to = num + 2 * distance;
+            var list = stream.subMap(from, true, to, true);
+            if(list.size() >=3){
+                Iterator<Float> it = list.keySet().iterator();
+                float first = it.next();
+                float middle = it.next();
+                float last = 0;
 
-            if (max - min <= D) {
-                System.out.println("Triplet: " + a + ", " + b + ", " + c);
-                set.remove(a);
-                set.remove(b);
-                set.remove(c);
+                while(it.hasNext()){
+
+                    last = it.next();
+
+                    if(middle - distance <= first && last <= middle + distance) {
+
+                        System.out.println(first + ", " + middle + ", " + last);
+                        stream.put(first, stream.getOrDefault(first, 1) - 1);
+                        stream.put(middle, stream.getOrDefault(middle, 1) - 1);
+                        stream.put(last, stream.getOrDefault(last, 1) - 1);
+
+                        if (stream.get(first) == 0)
+                            stream.remove(first);
+                        if (stream.get(middle) == 0)
+                            stream.remove(middle);
+                        if (stream.get(last) == 0)
+                            stream.remove(last);
+                    } else {
+                        first = middle;
+                        middle = last;
+                    }
+                }
             }
         }
     }
@@ -230,16 +268,16 @@ public class GooglePrevious2 {
     // represent gaps in the fence. We have to paint the fence with horizontal and
     // vertical strokes what is the min number of strokes required to paint the fence
 
-    //    public static void main(String[] args) {
-    //        Scanner scn = new Scanner(System.in);
-    //        int n = scn.nextInt();
-    //        int[] arr = new int[n];
-    //        for(int i=0;i<n;i++){
-    //            arr[i] = scn.nextInt();
-    //        }
-    //        System.out.println(solve(arr, 0, n-1));
-    //    }
-    static int solve(int[] arr, int l, int r){
+//    public static void main(String[] args) {
+//        Scanner scn = new Scanner(System.in);
+//        int n = scn.nextInt();
+//        int[] arr = new int[n];
+//        for(int i=0;i<n;i++){
+//            arr[i] = scn.nextInt();
+//        }
+//        System.out.println(paintFence(arr, 0, n-1));
+//    }
+    static int paintFence(int[] arr, int l, int r){
         if( l > r)
             return 0;
 
@@ -259,33 +297,24 @@ public class GooglePrevious2 {
         }
 
         int[] nums = arr.clone();
-        int cnt =1;
+        int cnt = 1;
+        int prev = -1;
         for(int k=l;k<=r;k++){
-            if(nums[k] == 0)
-                cnt++;
-            else
+            if(nums[k] != 0)
                 nums[k] -= min;
+
+            if(prev != 0 && nums[k] == 0){
+                cnt++;
+            }
+
+            prev = nums[k];
         }
 
         int Hstrokes = cnt * min;
-        int i=l;
+        Hstrokes += paintFence(nums, l, r);
 
-        while(i<=r){
-            if(nums[i] == 0) {
-                i++;
-                continue;
-            }
-            int j = i;
-
-            while(j<=r && nums[j] != 0){
-                j++;
-            }
-
-            Hstrokes += solve(nums, i, j-1);
-            i=j;
-        }
         int Vstrokes = 0;
-        for(i=l;i<=r;i++){
+        for(int i=l;i<=r;i++){
             if(arr[i] == 0)
                 continue;
             Vstrokes++;
@@ -518,6 +547,7 @@ public class GooglePrevious2 {
         List<List<String>> res = new ArrayList<>();
         Set<String> seen = new HashSet<>();
         solve(0, s, new ArrayList<>(), res, seen);
+
         for(List<String> curr : res){
             for (String str : curr){
                 System.out.print(str +", ");
@@ -1029,19 +1059,20 @@ public class GooglePrevious2 {
 //        }
 //    }
     List<String> findAllUsers1(List<int[]> timestamp, int n){
-        int[] diff = new int[n+1];
+        int[] diff = new int[n];
         for(int[] time : timestamp){
             int start = time[0];
             int end = time[1];
             diff[start] +=1;
-            diff[end+1] =-1;
+            if(end < n)
+                diff[end+1] =-1;
         }
 
-        for(int i=1;i<=n;i++){
+        for(int i=1;i<n;i++){
             diff[i] += diff[i-1];
         }
         List<String> res = new ArrayList<>();
-        for(int i=0;i<=n;i++){
+        for(int i=0;i<n;i++){
             if(diff[i] > 0)
                 res.add(i+" -> "+ diff[i]);
         }
@@ -1322,7 +1353,6 @@ public class GooglePrevious2 {
     }
 
     static Set<Integer> dfs(int node, List<List<Integer>> adj, int[] salary, int[] emp){
-
         emp[node] = 0;
         Set<Integer> employeesSalary = new HashSet<>();
         employeesSalary.add(node);
@@ -1335,7 +1365,7 @@ public class GooglePrevious2 {
 
         int cnt = employeesSalary.size();
 
-        if(cnt > 0 && salary[node] < 1D*sum / cnt){
+        if(salary[node] < 1D*sum / cnt){
             emp[node] = 1;
         }
 
@@ -1569,7 +1599,7 @@ public class GooglePrevious2 {
 
     //27. find sum when we can use bracket as well for 1234-> (1+2) *(3+4) = 21
 //    public static void main(String[] args) {
-//        for(int val : solve1("123", 21))
+//        for(int val : solve1("22", 21))
 //            System.out.print(val+", ");
 //    }
     static Map<String, List<Integer>> memo = new HashMap<>();
@@ -1594,6 +1624,8 @@ public class GooglePrevious2 {
                     for (int r : right) {
                         int val = operations(l, r, op);
                         res.add(val);
+//                        if(val == target)
+//                            res = true;
                     }
                 }
 
@@ -1758,9 +1790,7 @@ public class GooglePrevious2 {
             }
         }
     }
-    //29. I got the following question in the phone screen at Google:
-    //
-    //Given is a 2D array that describes the height of a landscape and the
+    //29.Given is a 2D array that describes the height of a landscape and the
     // location of 2 cities within this 2D array. I am now looking for the highest
     // position to place a water tower there so that both cities can be supplied with water.
     //Rules:
@@ -1841,7 +1871,7 @@ public class GooglePrevious2 {
         return res;
     }
     //31.
-    //You are given a struct Block in C++ that represents the time during which a \
+    // You are given a struct Block in C++ that represents the time during which a \
     // person is busy, with attributes: personId, startTime, and endTime. You are also
     // given an integer totalTime which represents the total duration. The task is to
     // find the time intervals during which all the persons are free.
@@ -1865,12 +1895,7 @@ public class GooglePrevious2 {
     }
     static List<int[]> findFreeTime(List<Person> list, int totalTime){
 
-        Queue<int[]> pq = new PriorityQueue<>((a, b) -> {
-            if(a[0] != b[0])
-                return a[0] - b[0];
-            else
-                return a[1]- b[1];
-        });// time, +-1
+        Queue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);// time, +-1
 
         for(Person person : list){
             int startTime = person.startTime;
@@ -1922,16 +1947,24 @@ public class GooglePrevious2 {
             curr[1] = curr[0] + curr[1];
         }
 
-        process.sort((a, b) -> a[0] - b[0]);
+        Queue<int[]> pq = new PriorityQueue<>((a, b) -> {
+            if(a[0] != b[0])
+                return a[0] - b[0];
+            else if(a[1] != b[1])
+                return a[1] - b[1];
+            return a[2] - b[2];
+        });//start, end, cpu
+
+        pq.addAll(process);
 
         int cpuNeeded = 0;
-        int prevTime  = 0;
         Queue<int[]> inprocess = new LinkedList<>();
 
-        for(int[] curr : process){
-            int currTime = Math.max(prevTime, curr[0]);
+        while(!pq.isEmpty()){
+            int[] curr = pq.remove();
+            int currStartTime = curr[0];
 
-            if(!inprocess.isEmpty() && inprocess.peek()[1] < currTime){
+            if(!inprocess.isEmpty() && inprocess.peek()[1] < currStartTime){
                 cpuNeeded -= inprocess.peek()[2];
             }
 
@@ -2485,7 +2518,7 @@ public class GooglePrevious2 {
 
     //47. Number of ways to partition an array into segments s.t each segment has atleast 2 negative numbers
 //    public static void main(String[] args) {
-//        int[] arr ={-1, 2, -3, 4, 5};
+//        int[] arr ={-1, -3, 4, 5};
 //        System.out.println(countWays(arr));
 //    }
     static private int[] nums1;
@@ -2715,6 +2748,7 @@ public class GooglePrevious2 {
         int num = 0;
         StringBuilder curr = new StringBuilder();
         for(char ch : s.toCharArray()){
+
             if(Character.isDigit(ch)){
                 num = num * 10 + (ch - '0');
             }else if(ch == '['){
@@ -2794,9 +2828,9 @@ public class GooglePrevious2 {
     //56. You have n dice.
     //	Each dice can roll any number between 1 to 6 (inclusive).
     //	Find the number of ways to achieve a target sum.
-    public static void main(String[] args) {
-        findSumUsingDice(17, 3);
-    }
+//    public static void main(String[] args) {
+//        findSumUsingDice(17, 3);
+//    }
     static void findSumUsingDice(int target, int n){
         int[][] dp = new int[n+1][target+1];
         dp[0][0] = 1;
@@ -2812,5 +2846,265 @@ public class GooglePrevious2 {
         System.out.println(dp[n][target]);
     }
 
+    //57 Question 2: Minimum Flips to Alternate Binary String (With K Flip Window)
+    //You are given a binary string s. In one operation, you can flip a
+    // subarray of length exactly k (flip all bits in that subarray).
+    // Return the minimum number of such operations needed to make the string
+    // alternating (i.e., no two adjacent bits are the same). If it's not possible, return -1.
+    //Test Case: s = "00010111"
+    //k = 3
+    //Expected Output : 2
+
+//    public static void main(String[] args) {
+//        System.out.println(minFlips("00010111", 3, "10101010101")); // Expected output: 3
+//    }
+
+    static public int minFlips(String s, int k, String tar) {
+        int n = s.length();
+        int flips = 0;
+        int[] flipped = new int[n];
+        int totalFlips = 0;
+
+        for (int i = 0; i <= n - k; i++) {
+            if(s.charAt(i) != tar.charAt(i)  && flipped[i] %2 == 0){
+                if(i + k > n)
+                    return (int) 1e9;
+                for(int j=i;j<i+k;j++){
+                    flipped[j] += 1;
+                }
+            }
+
+            totalFlips += flipped[i] % 2;
+        }
+
+
+        return totalFlips;
+    }
+
+    //58. A number is called lucky if:
+    //Reading from left to right, each digit is less than or equal to the next digit.
+    // Examples of Lucky Numbers:
+    //1234 → 1 ≤ 2 ≤ 3 ≤ 4 →
+    //1225 → 1 ≤ 2 ≤ 2 ≤ 5 →
+    //1268 → 1 ≤ 2 ≤ 6 ≤ 8 →
+    //Examples of Unlucky Numbers:
+    //2134 → 2 > 1 →
+    //2331 → 3 > 1 →
+    //Problem has 3 questions:
+    //1. Check if a number is lucky
+    //Input: num = 1233
+    //Output: True (because 1 ≤ 2 ≤ 3 ≤ 3)
+    //2. Find the next lucky number greater than the given number
+    //Input: num = 1233
+    //Output: 1234
+    //(The smallest number greater than 1233 that satisfies the lucky condition.)
+    //
+    //3. List all lucky numbers in a given range
+    //Input: low = 1200, high = 1250
+    //Output: [1222, 1223, 1224, 1225, ..., 1233, 1234, ...]
+    //(All numbers between 1200 and 1250 that are lucky.)
+
+
+
+
+    //59.//Write a class that does the following:
+    //    //insert range
+    //    //query for a point
+    //    //Example:
+    //    //insert(2,3)
+    //    //insert(9,15)
+    //    //query(0) -> false
+    //    //query(3) -> true
+    //    //Note: ranges can be overlapping
+    void findRanges(int[][] ranges, int[] query){
+        int max = Arrays.stream(ranges).map(e -> e[0]).reduce(0, Integer::max);
+        FenwickTree tree = new FenwickTree(max+2);
+        for(int[] curr : ranges){
+            int x = curr[0];
+            int y= curr[1];
+            tree.update(x, 1);
+            tree.update(y+1, -1);
+        }
+
+        for(int q : query){
+            if(tree.query(q) > 0){
+                System.out.println("range available");
+            }
+        }
+    }
+    //60. Consider an infinite binary tree with the following structure:
+    //At each odd level, each node has two children.
+    //At each even level, each node has only one child.
+    //The tree nodes have consecutive values starting from 1.
+    //                     1
+    //                /        \
+    //                2           3
+    //                /                \
+    //                4                   5
+    //            /      \            /        \
+    //          6           7       8           9
+    //         |            |        |            |
+    //Write a function find_path(n: int) -> List[int] that takes a node value
+    // n as input and returns the path from the given node to the root of the tree.
+    // The path should be a list of node values, starting from the given node and
+    // going up to the root.
+
+//    public static void main(String[] args) {
+//        for(long val : findPath(11))
+//            System.out.print(val +", ");
+//    }
+
+    public static List<Integer> findPath(int n) {
+        List<Integer> path = new ArrayList<>();
+
+        int totalNodes = 0;
+        int level = 0;
+
+        //we will first find the elevel of the node
+        while (totalNodes < n) {
+            level++;
+            totalNodes += Math.pow(2, level/2);
+        }
+        System.out.println(level);
+
+        // we will process this by observation
+        while(n > 0){
+            path.add(n);
+
+            if(level % 2 == 1){
+                n -= (int) Math.pow(2, level/2);
+            }else{
+                n = (int) Math.ceil((n+1)/2.0);
+            }
+            if( n == 2) {
+                path.add(2);
+                break;
+            }else if(n == 3) {
+                path.add(3);
+                break;
+            }
+            level--;
+        }
+        path.add(1);
+        return path;
+    }
+
+    //61. There are n men , ith mean can create 1 chair, in arr[i] days,
+    // what is the minimum number of days required to complete c chairs
+//    public static void main(String[] args) {
+//
+//        int[] arr = {2,2};
+//        int n = arr.length;
+//        int c = 3;
+//        int res = solve(arr, 0, c);
+//        System.out.println(res);
+//    }
+    static int solve(int[] arr, int i,  int c){
+       int max = Arrays.stream(arr).reduce(0, Integer::max);
+
+       int low = 0, high = max * c;
+
+       while(low <= high){
+           int mid = (low + high)/2;
+
+           if(isPossible(arr, c, mid)){
+               high = mid-1;
+           }else
+               low = mid+1;
+       }
+       return low;
+    }
+    static boolean isPossible(int[] arr, int c, int mid){
+        int count = 0;
+        for (int selfId : arr) {
+            count += mid / selfId;
+        }
+        return count >= c;
+    }
+    //62. 2013. Detect Squares
+
+
+    //64. Find the number of partitions of an array such that each contiguous
+    // partition consists of atleast one negative number.
+    //eg. [-1,-2,-3,-4] has these possible partitions :
+    //[-1],[-2],[-3],[-4];
+    //[-1,-2],[-3,-4];
+    //[-1,-2,-3] ,[-4];
+    //[-1],[-2,-3,-4];
+    //[-1][-2,-3],[-4];
+
+    public static void main(String[] args) {
+        int[] arr = {1,-2,-3,-4, -6};
+
+        System.out.println(findAllPartisions1(arr));
+        System.out.println(findAllPartisions(0, arr));
+    }
+    static int findAllPartisions(int i, int[] arr){
+        if(i == arr.length)
+            return 1;
+
+        int res = 0;
+        int neg = 0;
+        for(int j=i;j<arr.length;j++){
+            if(arr[j] < neg)
+                neg++;
+            if(neg >= 1)
+                res += findAllPartisions(j+1, arr);
+        }
+        return res;
+    }
+
+    static int findAllPartisions1(int[] nums){
+        int n = nums.length;
+        int[] dp = new int[n];
+        int currsum = 0;
+        for(int i = 0; i<n; i++) {
+            if(nums[i] < 0) dp[i] = currsum + 1;
+            else dp[i] =  i > 0 ? dp[i-1] : 0;
+            currsum += dp[i];
+        }
+        return dp[n-1];
+    }
+
+    //65. 1834. Single-Threaded CPU -> https://leetcode.com/problems/single-threaded-cpu/description/
+    public int[] getOrder(int[][] tasks) {
+        int n = tasks.length;
+        List<int[]> newTask = new ArrayList<>();
+        int index = 0;
+        for(int[] curr : tasks){
+            newTask.add(new int[]{curr[0], curr[1], index++});
+        }
+
+        newTask.sort((a, b) -> a[0] - b[0]);
+
+        Queue<int[]> pq = new PriorityQueue<>((a, b) ->{
+            if(a[1] != b[1])
+                return a[1] - b[1];
+            else
+                return a[2] - b[2];
+        });
+
+        int j = 0, i = 0, time = 0;
+        int[] res = new int[n];
+
+        while( j < n){
+
+            while(i < n && newTask.get(i)[0] <= time){
+                pq.add(newTask.get(i++));
+
+            }
+            if(pq.isEmpty()){
+                time = newTask.get(i)[0];
+                continue;
+            }
+
+            res[j++] = pq.peek()[2];
+            time += pq.peek()[1];
+
+            pq.remove();
+        }
+        return res;
+    }
 
 }
+

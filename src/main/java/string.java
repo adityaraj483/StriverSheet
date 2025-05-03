@@ -264,7 +264,7 @@ public class string {
     long res;
     public int myAtoi(String s) {
         s = s.trim();
-        if(s.length() == 0)
+        if(s.isEmpty())
             return 0;
         int index = 0;
         int sign = 1;
@@ -388,7 +388,7 @@ public class string {
             }
 
             if(close > open){
-                open =0;
+                open = 0;
                 close = 0;
             }
 
@@ -441,11 +441,11 @@ public class string {
             if(ans.charAt(i-1) == ans.charAt(i))
                 cnt++;
             else{
-                sb.append(""+cnt).append(ans.charAt(i-1));
+                sb.append(cnt).append(ans.charAt(i-1));
                 cnt = 1;
             }
         }
-        sb.append(""+cnt).append(ans.charAt(len-1));
+        sb.append(cnt).append(ans.charAt(len-1));
         return sb.toString();
     }
     //18. Rabin Karp algorithm

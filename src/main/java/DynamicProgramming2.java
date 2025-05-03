@@ -750,31 +750,31 @@ public class DynamicProgramming2 {
         }
         return solve(n, k, dp);
     }
-    static int solve(int n , int k, int[][] dp){
-        if( k <= 1)
-            return k;
-        if( n == 1)
-            return k;
-        if(dp[n][k] != -1) return dp[n][k];
+    static int solve(int eggs , int floors, int[][] dp){
+        if( floors <= 1)
+            return floors;
+        if( eggs == 1)
+            return floors;
+        if(dp[eggs][floors] != -1) return dp[eggs][floors];
         int res = (int) 1e9;
-        for(int j=1;j<=k;j++){
-            int val = 1 + Math.max(solve(n-1, j-1, dp), solve(n, k-j, dp));
+        for(int j=1;j<=floors;j++){
+            int val = 1 + Math.max(solve(eggs-1, j-1, dp), solve(eggs, floors-j, dp));
             res = Math.min(res, val);
         }
-        return dp[n][k] = res;
+        return dp[eggs][floors] = res;
     }
     //-------------------OR-------------------
-    static int eggDrop(int n, int k) {
-        int[][] dp = new int[n+1][k+1];
-        for(int i=0;i<=n;i++){
+    static int eggDrop(int eggs, int floors) {
+        int[][] dp = new int[eggs+1][floors+1];
+        for(int i=0;i<=eggs;i++){
             dp[i][1] = 1;
         }
-        for(int i=0;i<=k;i++){
+        for(int i=0;i<=floors;i++){
             dp[1][i] = i;
         }
 
-        for(int i=2;i<=n;i++){
-            for(int j=2;j<=k;j++){
+        for(int i=2;i<=eggs;i++){
+            for(int j=2;j<=floors;j++){
                 // if(j <= 1 || i == 1){ // either include this or prev base case
                 //     dp[i][j] = j;
                 //     continue;
@@ -787,7 +787,7 @@ public class DynamicProgramming2 {
                 dp[i][j] = res;
             }
         }
-        return dp[n][k];
+        return dp[eggs][floors];
     }
 
     //51. Evaluate Boolean Expression to True|(DP-52)

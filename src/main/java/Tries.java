@@ -341,4 +341,84 @@ class Trie2 {
             return res;
         }
     }
+    //8. 1268. Search Suggestions System -> https://leetcode.com/problems/search-suggestions-system/description/
+    class TrieNodee{
+        TrieNodee[] links;
+        PriorityQueue<String> words;
+        TrieNodee(){
+            links = new TrieNodee[26];
+            words = new PriorityQueue<>((a, b) -> b.compareTo(a));
+        }
+        void put(char ch){
+            links[ch - 'a'] = new TrieNodee();
+        }
+
+        boolean containsKey(char ch){
+            return links[ch - 'a'] != null;
+        }
+
+        TrieNodee get(char ch){
+            return links[ch - 'a'];
+        }
+        void addWord(String word){
+            words.add(word);
+            if(words.size() > 3)
+                words.remove();
+        }
+        List<String> getWords(){
+            Iterator<String> it = words.iterator();
+            List<String> res = new ArrayList<>();
+            while(it.hasNext())
+                res.add(it.next());
+            Collections.sort(res);
+            return res;
+        }
+    }
+    class Trie{
+        TrieNodee root;
+        Trie(){
+            root = new TrieNodee();
+        }
+        void insert(String s){
+            TrieNodee node = root;
+
+            for(char ch : s.toCharArray()){
+                if(!node.containsKey(ch)){
+                    node.put(ch);
+                }
+                node = node.get(ch);
+                node.addWord(s);
+            }
+        }
+
+        List<List<String>> get(String s){
+            TrieNodee node = root;
+            List<List<String>> res = new ArrayList<>();
+            for(char ch : s.toCharArray()){
+
+                if(node != null){
+                    node = node.get(ch);
+                }
+
+                if(node != null)
+                    res.add(node.getWords());
+                else
+                    res.add(new ArrayList<>());
+
+            }
+            return res;
+        }
+    }
+    class Solution {
+        public List<List<String>> suggestedProducts(String[] products, String searchWord) {
+            Trie trie = new Trie();
+            for(String s : products){
+                trie.insert(s);
+            }
+
+            return trie.get(searchWord);
+        }
+    }
+
+
 }

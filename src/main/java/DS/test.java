@@ -1,22 +1,26 @@
 package DS;
 
-import javax.swing.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
 
 public class test {
-    //34. Given an encoded string in form of "ab[cd]{2}def"
-    //You have to return decoded string "abcdcddef"
-//    Example 1:
-//    Input: "ab[cd]{2}"
-//    Output: "abcdcd"
-//    Example 2:
-//    Input: "def[ab[cd]{2}]{3}ghi"
-//    Output: "defabcdcdabcdcdabcdcdghi"
-//    public static void main(String[] args) {
-//        System.out.println(decodeString("def[ab[z]{3}]{2}xx"));
-//    }
+
+    public static void main(String[] args) {
+        FenwickTree tree = new FenwickTree(15);
+        tree.update(2, 1);
+        tree.update(5, -1);
+
+        tree.update(4, 1);
+        tree.update(7, -1);
+
+        System.out.println(tree.query(7));
+
+//        for(int val : tree.arr){
+//            System.out.print(val +", ");
+//        }
+
+    }
 
 
 }
