@@ -18,7 +18,6 @@ public class SegmentTreeAndFenwickTree {
         public void update(int index, int val) {
             tree.updateSumAtIndex(index, val);
         }
-
         public int sumRange(int left, int right) {
             return tree.findSumInRange(left, right);
         }
@@ -43,8 +42,7 @@ public class SegmentTreeAndFenwickTree {
 
             int cnt = index < n-1 ? tree.findSumInRange(index+1, n-1) : 0;
             res[index] = cnt;
-            int prevCnt = tree.findSumInRange(index, index);
-            tree.updateSumAtIndex(index, prevCnt+1);
+            tree.updateSumAtIndex(index, 1);
         }
         return Arrays.asList(res);
     }
@@ -69,9 +67,7 @@ public class SegmentTreeAndFenwickTree {
             int c = index < n-1 ? tree.findSumInRange(index +1, n-1) : 0;
 
             mp.put(index, c);
-            int preSum = tree.findSumInRange(index, index);
-            tree.updateSumAtIndex(index, 1 + preSum);
-
+            tree.updateSumAtIndex(index, 1);
         }
         int[] res = new int[query.length];
         for(int i=0;i<query.length;i++){

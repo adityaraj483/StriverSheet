@@ -188,7 +188,6 @@ public class Graphs {
     }
     //9. Cycle Detection in Undirected Graph (DFS)
     public boolean isCycle(ArrayList<ArrayList<Integer>> adj) {
-        // Code here
         int v = adj.size();
         int[] vis = new int[v];
         for(int i=0;i<v;i++){
@@ -1706,7 +1705,7 @@ public class Graphs {
 
         }
     }
-    //47. Articulation Points 1 -> https://www.geeksforgeeks.org/problems/articulation-point2616/1
+    //47. Articulation Points 1 -> https://www.geeksforg    eeks.org/problems/articulation-point2616/1
     public ArrayList<Integer> articulationPoints(int V,ArrayList<ArrayList<Integer>> adj){
         int[] vis = new int[V];
         int[] min = new int[V];
@@ -1756,6 +1755,7 @@ public class Graphs {
         ArrayList<ArrayList<Integer>> newAdj = new ArrayList<>();
         for(int i=0;i<n;i++)
             newAdj.add(new ArrayList<>());
+
         for(int i=0;i<n;i++){
             for(int child : adj.get(i)){
                 newAdj.get(child).add(i);

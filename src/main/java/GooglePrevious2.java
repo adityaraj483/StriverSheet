@@ -3033,12 +3033,12 @@ public class GooglePrevious2 {
     //[-1],[-2,-3,-4];
     //[-1][-2,-3],[-4];
 
-    public static void main(String[] args) {
-        int[] arr = {1,-2,-3,-4, -6};
-
-        System.out.println(findAllPartisions1(arr));
-        System.out.println(findAllPartisions(0, arr));
-    }
+//    public static void main(String[] args) {
+//        int[] arr = {1,-2,-3,-4, -6};
+//
+//        System.out.println(findAllPartisions1(arr));
+//        System.out.println(findAllPartisions(0, arr));
+//    }
     static int findAllPartisions(int i, int[] arr){
         if(i == arr.length)
             return 1;
@@ -3104,6 +3104,100 @@ public class GooglePrevious2 {
             pq.remove();
         }
         return res;
+    }
+    //66. 983. Minimum Cost For Tickets
+    public int mincostTickets(int[] days, int[] costs) {
+        Arrays.sort(days);
+        int n = days.length;
+        Integer[] dp = new Integer[n];
+        return solve(days, costs, 0, dp);
+    }
+    int solve(int[] days, int[] costs, int i, Integer[] dp){
+        if( i >= days.length)
+            return 0;
+        if(dp[i] != null) return dp[i];
+        int i1 = upperBound(days, days[i]);
+        int i2 = upperBound(days, days[i] + 7-1);
+        int i3 = upperBound(days, days[i] + 30-1);
+
+        int cost1 = costs[0] + solve(days, costs, i1, dp);
+        int cost2 = costs[1] + solve(days, costs, i2, dp);
+        int cost3 = costs[2] + solve(days, costs, i3, dp);
+        return dp[i] = Math.min(cost1, Math.min(cost2, cost3));
+    }
+    int upperBound(int[] arr, int target){
+        int low = 0, high = arr.length-1;
+
+        while(low <= high){
+            int mid = (low + high)/2;
+            if(arr[mid] <= target){
+                low = mid+1;
+            }else
+                high = mid-1;
+        }
+        return low;
+    }
+
+    //77.  DATE maker
+    public void FindDates() {
+        String s = "?4:0?";
+        List<String> res = new ArrayList<>();
+
+        for (int h = 0; h < 24; h++) {
+            for (int m = 0; m < 60; m++) {
+                String time = String.format("%02d:%02d", h, m);
+                if (matchesPattern(time, s)) {
+                    res.add(time);
+                }
+            }
+        }
+
+        for (String ss : res) {
+            System.out.println(ss);
+        }
+        System.out.println("Total valid times: " + res.size());
+    }
+
+    private static boolean matchesPattern(String time, String pattern) {
+        for (int i = 0; i < 5; i++) {
+            if (pattern.charAt(i) == '?' || pattern.charAt(i) == time.charAt(i)) {
+                continue;
+            }else
+                return false;
+        }
+        return true;
+    }
+    //78. How many employee working at a time
+//    public static void main(String[] args) {
+//        Abby 1 10
+//        Ben 5 7
+//        Carla 6 12
+//        David 15 17
+//        Abby 8 13
+//        List<String> list = new ArrayList<>();
+//        list.add("Abby 1 10");
+//        list.add("Ben 5 7");
+//        list.add("Carla 6 12");
+//        list.add("David 15 17");
+//        list.add("Abby 8 13");
+//        findAllEmployees(list);
+//    }
+    static void findAllEmployees(List<String> list){
+        List<Set<String>> line = new ArrayList<>();
+        for(int i=0;i<20;i++)
+            line.add(new HashSet<>());
+
+        for(String s : list){
+            String[] curr = s.split(" ");
+            int start = Integer.parseInt(curr[1]);
+            int end = Integer.parseInt(curr[2]);
+
+            for(int i=start;i<=end;i++){
+                line.get(i).add(curr[0]);
+            }
+        }
+
+        System.out.println(line.get(9));
     }
 
 }

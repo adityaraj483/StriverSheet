@@ -1,6 +1,6 @@
 package DS;
 
-public class FenwickTree {
+public class FenwickTree { // we can only add something or subtract something but did not update something.
     int[] arr;
     int n;
     public FenwickTree(int n){

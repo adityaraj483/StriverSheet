@@ -1678,7 +1678,7 @@ public class GooglePrevious1 {
                 }
             }
         }
-        return dp[0][0] > 0 ? 1 : dp[0][0] * -1 + 1;
+        return dp[0][0] * -1 + 1;
     }
     //37. 2035. Partition Array Into Two Arrays to Minimize Sum Difference || meet in the middle algorithm-> https://leetcode.com/problems/partition-array-into-two-arrays-to-minimize-sum-difference/description/
     public int minimumDifference(int[] nums) {
@@ -2001,7 +2001,6 @@ public class GooglePrevious1 {
             void insert(String s){
                 String[] str = s.split("/");
 
-                int n = str.length;
                 TrieNode node = root;
                 for (String dir : str) {
 
@@ -2045,7 +2044,6 @@ public class GooglePrevious1 {
 
                 StringBuilder sb = new StringBuilder();
                 String[] str = s.split("/");
-                int n = str.length;
                 TrieNode node = root;
 
                 for (String dir : str) {
@@ -2143,16 +2141,16 @@ public class GooglePrevious1 {
     //Note there may be multiple pairs that fail with each other, but need to report only one.
     // Also all the UTs are running ok when executed individually.
 
-    public static void main(String[] args) {
-        List<Integer> testCases = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
-        TestRunner testRunner = new TestRunner();
-        int[] failingPair = testRunner.findFailingPairs(testCases);
-        if (failingPair != null) {
-            System.out.println("Failing Pair: " + failingPair[0] + ", " + failingPair[1]);
-        } else {
-            System.out.println("No failing pair found");
-        }
-    }
+//    public static void main(String[] args) {
+//        List<Integer> testCases = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8);
+//        TestRunner testRunner = new TestRunner();
+//        int[] failingPair = testRunner.findFailingPairs(testCases);
+//        if (failingPair != null) {
+//            System.out.println("Failing Pair: " + failingPair[0] + ", " + failingPair[1]);
+//        } else {
+//            System.out.println("No failing pair found");
+//        }
+//    }
 
     static class TestRunner{
         boolean testRunner(Set<Integer> testSet){
@@ -2241,7 +2239,6 @@ public class GooglePrevious1 {
             this.k = k;
 
             memo = new HashMap<>();
-
 
             List<List<Integer>> adj = new ArrayList<>();
             for(int i=0;i<n;i++)
@@ -2482,18 +2479,6 @@ public class GooglePrevious1 {
                 this.expr = expr;
             }
         }
-        int operations(int x, int y, char op){
-            switch(op){
-                case '+' :
-                    return x + y;
-                case '-' :
-                    return x - y;
-                case '*':
-                    return x * y;
-            }
-            return 0;
-        }
-
         public List<Integer> diffWaysToCompute(String exp) {
             List<ExprResult> res = solve(exp);
 
@@ -2526,6 +2511,17 @@ public class GooglePrevious1 {
                 res.add(new ExprResult(val, exp));
             }
             return res;
+        }
+        int operations(int x, int y, char op){
+            switch(op){
+                case '+' :
+                    return x + y;
+                case '-' :
+                    return x - y;
+                case '*':
+                    return x * y;
+            }
+            return 0;
         }
     }
     // 51. You're given a list of elements. Each element has a unique id and 3 properties. Two elements are
@@ -2584,14 +2580,12 @@ public class GooglePrevious1 {
             int upi = set.findUParent(index);
 
             if(indexPropertyMap.containsKey(upi)){
-                Set<Integer> a = indexPropertyMap.get(upi);
-                a.add(index);
-                indexPropertyMap.put(upi, a);
+                indexPropertyMap.get(upi).add(index);
             }else
                 indexPropertyMap.put(upi, new HashSet<>(List.of(index)));
         }
 
-        List<List<String  >> res = new ArrayList<>();
+        List<List<String>> res = new ArrayList<>();
         for(var entry : indexPropertyMap.entrySet()){
 
             List<String> list = new ArrayList<>();
@@ -2618,19 +2612,24 @@ public class GooglePrevious1 {
         PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a, b) -> b-a);
         int totalMoneySaved = 0;
         int prevDay = 0;
+        int totalSpent = 0;
         for (int[] gift : gifts) {
             int cost = gift[0];
             int giftDay = gift[1];
             int currDay = giftDay;
-            totalMoneySaved += currDay-prevDay;
 
             // The gift must be bought before or on day k
             if (giftDay > k) break;
 
+
+            totalMoneySaved += currDay-prevDay;
+            totalSpent += cost;
+
+            maxHeap.add(cost);
+
             // Can the uncle afford this gift on time?
-            if (cost <= totalMoneySaved) {
-                totalMoneySaved -= cost;
-                maxHeap.offer(cost); // Track the gift bought
+            if (totalSpent > totalMoneySaved) {
+                totalSpent -= maxHeap.poll();
             }
         }
 
@@ -2827,7 +2826,7 @@ public class GooglePrevious1 {
     static int solve(List<Integer> startTimes, int m, int t){
 
         Collections.sort(startTimes);
-        PriorityQueue<Integer> cpu = new PriorityQueue<>((a, b) -> a -b);
+        PriorityQueue<Integer> cpu = new PriorityQueue<>((a, b) -> a - b);
         for(int i=0;i<m;i++)
             cpu.add(0);
 
@@ -3225,7 +3224,7 @@ public class GooglePrevious1 {
             int mask = curr[1];
             int count = curr[2];
 
-            if(curr[1] == (1 << V) -1)
+            if(mask == (1 << V) -1)
                 return count;
 
             for(int adjNode : adj.get(node)){
@@ -3350,8 +3349,6 @@ public class GooglePrevious1 {
         return true;
     }
 
-
-
     //72.
     //Given below pattern of license plates (Pattern only, not the actual list of license plates),
     // Find the nth license plate
@@ -3372,9 +3369,9 @@ public class GooglePrevious1 {
 //    public static void main(String[] args) {
 //        System.out.println(makeNumberPlate(11_881_376));//zzzzz
 //    }
-//    public static void main(String[] args) {
-//        System.out.println(makeNumberPlate(11881376));
-//    }
+    public static void main(String[] args) {
+        System.out.println(getNthID(26*26*26*26*26-1, 5));
+    }
     private static final char[] LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
     public static String getNthID(long n, int maxLength) {
@@ -3387,33 +3384,32 @@ public class GooglePrevious1 {
 
             if (index < blockSize) {
                 // Found the block where the index belongs
-                int digitIndex = (int) index / (int) Math.pow(26, letterCount);
-                int letterIndex = (int) index % (int) Math.pow(26, letterCount);
+                int digits = (int) index / (int) Math.pow(26, letterCount);
+                int letters = (int) index % (int) Math.pow(26, letterCount);
 
-                String digitPart = getDigitPart(digitCount, digitIndex);
-                String letterPart = getLetterPart(letterCount, letterIndex);
+                String digitPart = getDigitPart(digitCount, digits);
+                String letterPart = getLetterPart(letterCount, letters);
 
                 return digitPart + letterPart;
             }
-
-            index -= blockSize;
         }
 
         return "OUT_OF_RANGE";
     }
     private static String getDigitPart(int length, int val){
+        if(length == 0)
+            return "";
         String s = String.valueOf(val);
         length = length - s.length();
-        if(length > 0)
-            return "0".repeat(length) + s;
-        return s;
+
+        return "0".repeat(length) + s;
     }
 
-    private static String getLetterPart(int length, int index) {
+    private static String getLetterPart(int length, int val) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < length; i++) {
-            sb.insert(0, LETTERS[index % 26]);
-            index /= 26;
+            sb.insert(0, LETTERS[val % 26]);
+            val /= 26;
         }
         return sb.toString();
     }
