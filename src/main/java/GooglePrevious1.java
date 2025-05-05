@@ -276,10 +276,10 @@ public class GooglePrevious1 {
         if (carry > 0) sb.insert(0, '1'); // Handle carry overflow (e.g., "999" to "1000")
         return sb.toString();
     }
-
     private static boolean allNines(String num) {
         return num.chars().allMatch(ch -> ch == '9');
     }
+
     //9. Word Search board
     public int exist(ArrayList<String> A, String B) {
         int n = A.size(), m = A.get(0).length();

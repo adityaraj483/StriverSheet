@@ -1,69 +1,63 @@
 package DS;
 
+import java.sql.Statement;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
+class Person{
+    int personId, startTime, endTime;
+    Person(int personId, int startTime, int endTime){
+        this.personId = personId;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+}
 public class test {
+    //34. Given an encoded string in form of "ab[cd]{2}def"
+    //You have to return decoded string "abcdcddef"
+//    Example 1:
+//    Input: "ab[cd]{2}"
+//    Output: "abcdcd"
+//    Example 2:
+//    Input: "def[ab[cd]{2}]{3}ghi"
+//    Output: "defabcdcdabcdcdabcdcdghi"
     public static void main(String[] args) {
-        int[] arr = {1,2,3,3};
-        int res = findSpecialInteger(arr);
-        System.out.println(res);
+        System.out.println(decodeString("3[a2[b]]a"));
+//        System.out.println(decodeString("3[a2[z]]b"));
     }
 
-    static public int findSpecialInteger(int[] arr) {
-        int n = arr.length;
-        int k = n/4;
-        int n1 = n-1;
+    private static String decodeString(String s) {
 
-        List<Integer> pos = new ArrayList<>();
-        while(n1 >= k){
-            if(pos.isEmpty() || pos.get(pos.size()-1) != arr[n1])
-                pos.add(arr[n1]);
-            n1 -= k;
-        }
+        Stack<String> stringStack = new Stack<>();
+        Stack<Integer> countStack = new Stack<>();
+        int count = 0;
+        StringBuilder sb = new StringBuilder();
+        int i=0, n = s.length();
 
-        for(int i=0;i<pos.size();i++){
-            int val = pos.get(i);
-            int a = lowerBound(arr, val, n);
-            int b = upperBound(arr, val, n);
-            if(b - a + 1 > k){
-                return val;
-            }
-        }
-        return -1;
-    }
-    static int lowerBound(int[] arr, int target, int n){
-        int low = 0, high = n-1;
-        int res = -1;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            if (arr[mid] == target) {
-                res = mid;
-                high = mid - 1;
-            } else if (arr[mid] < target) {
-                low = mid + 1;
+        while(i < n){
+            char ch = s.charAt(i);
+            if(Character.isDigit(ch)){
+                count = count * 10 + ch - '0';
+            }else if (ch == '['){
+                countStack.add(count);
+                stringStack.add(sb.toString());
+                sb = new StringBuilder();
+                count = 0;
+            } else if(Character.isLetter(ch)){
+                sb.append(ch);
             } else {
-                high = mid - 1;
+               String prev =  stringStack.pop();
+               int cnt = countStack.pop();
+               String curr = prev + sb.toString().repeat(cnt);
+               sb = new StringBuilder(curr);
             }
+            i++;
         }
-        return res;
-    }
-    static int upperBound(int[] arr, int target, int n){
-        int low = 0, high = n-1;
-        int res = -1;
-        while (low <= high) {
-            int mid = (low + high) / 2;
-            if (arr[mid] == target) {
-                res = mid;
-                low = mid + 1; // keep searching on the right
-            } else if (arr[mid] < target) {
-                low = mid + 1;
-            } else {
-                high = mid - 1;
-            }
+        while(!stringStack.isEmpty()){
+            sb.insert(0, stringStack.pop());
         }
-        return res;
+        return sb.toString();
     }
+
 
 }

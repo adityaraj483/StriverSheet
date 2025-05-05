@@ -283,11 +283,18 @@ public class GooglePrevious2 {
 
         while(l <=r && arr[l] == 0)
             l++;
-        while(r>= l && arr[r] == 0)
+        while(r >= l && arr[r] == 0)
             r--;
 
         if( l > r)
             return 0;
+
+        int Vstrokes = 0;
+        for(int i=l;i<=r;i++){
+            if(arr[i] == 0)
+                continue;
+            Vstrokes++;
+        }
 
         int min = (int ) 1e9;
         for(int i=l;i<=r;i++){
@@ -296,29 +303,23 @@ public class GooglePrevious2 {
             min = Math.min(min, arr[i]);
         }
 
-        int[] nums = arr.clone();
+//        int[] nums = arr.clone();
         int cnt = 1;
         int prev = -1;
         for(int k=l;k<=r;k++){
-            if(nums[k] != 0)
-                nums[k] -= min;
+            if(arr[k] != 0)
+                arr[k] -= min;
 
-            if(prev != 0 && nums[k] == 0){
+            if(prev != 0 && arr[k] == 0){
                 cnt++;
             }
 
-            prev = nums[k];
+            prev = arr[k];
         }
 
         int Hstrokes = cnt * min;
-        Hstrokes += paintFence(nums, l, r);
+        Hstrokes += paintFence(arr, l, r);
 
-        int Vstrokes = 0;
-        for(int i=l;i<=r;i++){
-            if(arr[i] == 0)
-                continue;
-            Vstrokes++;
-        }
         return Math.min(Vstrokes, Hstrokes);
     }
     //6.You have a backend system that stores all versions of a JSON object. You need to reduce the
@@ -509,6 +510,7 @@ public class GooglePrevious2 {
                 throw new Exception("Not possible");
         }
 
+        List<int[]> res = new ArrayList<>();
         for(int[] houses : neighbours){
             int size = houses.length;
             Queue<int[] > q = new LinkedList<>();
@@ -517,18 +519,20 @@ public class GooglePrevious2 {
                 throw new Exception("Not Possible");
 
             int index = 0;
+            int[] newHouse = new int[size];
             while(index < size){
                 int[] curr = pq.remove();
-                houses[index] = curr[0];
+                newHouse[index] = curr[0];
                 curr[1] --;
                 if(curr[1] > 0)
                     q.add(curr);
                 index++;
             }
             pq.addAll(q);
-            Arrays.sort(houses);
+            Arrays.sort(newHouse);
+            res.add(newHouse);
         }
-        return neighbours;
+        return res;
     }
     //9.
     // Given a string, your task is to generate a list of substrings such that while appending all of the
@@ -1012,7 +1016,7 @@ public class GooglePrevious2 {
         if(seen.contains(s))
             throw new Exception("Circle exist");
 
-        s = s.replace("%%", "%");
+        s = s.replace("%%", "#");
         int n = s.length();
         StringBuilder sb = new StringBuilder();
         int i=0;
@@ -1029,7 +1033,7 @@ public class GooglePrevious2 {
                 sb.append(s.charAt(i));
             i++;
         }
-        return sb.toString();
+        return sb.toString().replace("#", "%%");
     }
     //18.
     // You are given a list of user sessions where each user session has start and end times
@@ -1039,11 +1043,11 @@ public class GooglePrevious2 {
     //Input:
     //[(0,3), (1,4) ] N=7
     //Output:
-    //0->1
-    //1->2
-    //2->2
-    //3->2
-    //4->1
+    //0 -> 1
+    //1 -> 2
+    //2 -> 2
+    //3 -> 2
+    //4 -> 1
 //    public static void main(String[] args) {
 //        List<int[]> timestamps = List.of(
 //                new int[]{0, 1},
@@ -1094,7 +1098,7 @@ public class GooglePrevious2 {
         List<String> res = new ArrayList<>();
         int prevTime = 0, prevCount = 0;
 
-        for(int[] entry : list){
+        for(int[] entry : list) {
             int time = entry[0];
             for(int i= prevTime; i< time && prevCount> 0;i++){
                 res.add(i+" -> "+ prevCount);
@@ -1235,12 +1239,12 @@ public class GooglePrevious2 {
 //    public static void main(String[] args) {
 //        String[] arr = {"abcde", "fghij", "klmno", "pqrst", "uvwxy", "zabcd", "apple", "zebra", "ocean", "quick", "world", "jumps", "foxes", "liver"};
 //        List<String> ds = new ArrayList<>();
-//        System.out.println(solve(arr, 5,ds, new HashSet<>()));
+//        System.out.println(solve(arr, 5, ds, new HashSet<>()));
 //        for(String s: ds){
 //            System.out.print(s +", ");
 //        }
 //    }
-    boolean solve(String[] arr, int count, List<String> ds, Set<Character> seen){
+    static boolean solve(String[] arr, int count, List<String> ds, Set<Character> seen){
         if( count == 0)
             return true;
 
@@ -1258,17 +1262,17 @@ public class GooglePrevious2 {
         return false;
 
     }
-    void removeFromSeen(Set<Character> seen, String s){
+    static void removeFromSeen(Set<Character> seen, String s){
         for(char ch : s.toCharArray()){
             seen.remove(ch);
         }
     }
-    void addToSeen(Set<Character> seen, String s){
+    static void addToSeen(Set<Character> seen, String s){
         for(char ch : s.toCharArray()){
             seen.add(ch);
         }
     }
-    boolean isValid(String s, Set<Character> set){
+    static boolean isValid(String s, Set<Character> set){
         for(char ch : s.toCharArray()){
             if(set.contains(ch))
                 return false;
@@ -1578,11 +1582,11 @@ public class GooglePrevious2 {
         int n = arr.length;
         int[] dp = new int[n];
         int[] lastDiff = new int[n];
+        Arrays.fill(lastDiff, -1);
         int res = 1;
 
         for (int i = 0; i < n; i++) {
             dp[i] = 1;
-            lastDiff[i] = -1;
             for (int j = 0; j < i; j++) {
                 int diff = arr[i] - arr[j];
                 if (arr[i] > arr[j] && (lastDiff[j] == -1 || diff > lastDiff[j])) {
@@ -1841,7 +1845,7 @@ public class GooglePrevious2 {
         }
     }
     //30.
-    //Given a string, you have to return the first word in the string having the most number of
+    // Given a string, you have to return the first word in the string having the most number of
     // repeating characters.
     //Example:
     //"Today is the greatest day ever!"
@@ -1902,8 +1906,8 @@ public class GooglePrevious2 {
             int endTime = person.endTime;
             pq.add(new int[]{startTime, 1});
 
-            if(endTime <= totalTime){
-                pq.add(new int[]{endTime, -1});
+            if(endTime+1 <= totalTime){
+                pq.add(new int[]{endTime+1, -1});
             }
 
         }
@@ -1916,7 +1920,7 @@ public class GooglePrevious2 {
             int[] curr = pq.poll();
             int currTime = curr[0];
 
-            if(prevTime < currTime-1 && prevCnt == 0){
+            if(prevTime+1 <= currTime-1 && prevCnt == 0){
                 res.add(new int[]{prevTime+1,currTime-1});
             }
 
@@ -1925,7 +1929,7 @@ public class GooglePrevious2 {
         }
 
         if(prevTime < totalTime-1 && prevCnt == 0){
-            res.add(new int[]{prevTime+1,totalTime});
+            res.add(new int[]{prevTime+1,totalTime-1});
         }
         return res;
     }
@@ -2091,6 +2095,7 @@ public class GooglePrevious2 {
             Random random = new Random();
             String result = null;
             int count = 0;
+
 
             public void process(Comment comment) {
                 count++;
@@ -2312,9 +2317,9 @@ public class GooglePrevious2 {
     //Ans. [[1, 3], [7, 12]]
 //    public static void main(String[] args) {
 //        List<int[]> meetings = new ArrayList<>();
-//        meetings.add(new int[]{1,4});
-//        meetings.add(new int[]{3,5});
-//        meetings.add(new int[]{9,12});
+//        meetings.add(new int[]{1,2});
+//        meetings.add(new int[]{4,6});
+//
 //        meetings.add(new int[]{7,10});
 //        int[] dnd = {3,8};
 //        for(int[] curr : merge(meetings, dnd)){
@@ -2349,7 +2354,7 @@ public class GooglePrevious2 {
             i++;
         }
 
-        if( i < n)
+        if( i < n && merged.get(i)[0] < dnd[0])
             res.add(new int[]{merged.get(i)[0], dnd[0]});
 
         while(i < n && merged.get(i)[1] <= dnd[1])
@@ -2374,8 +2379,32 @@ public class GooglePrevious2 {
 //        paint.add(new int[]{7,13});//3
 //        paint.add(new int[]{6,20});//7
 //        paint.add(new int[]{1,40});//23
+//        for(int val : findSolu1(paint)){
+//            System.out.println(val);
+//        }
 //
 //    }
+    static List<Integer> findSolu1(List<int[]> ranges){
+       Map<Integer, Integer> mp = new HashMap<>();
+       List<Integer> res = new ArrayList<>();
+       for(int[] curr : ranges){
+           int start = curr[0];
+           int end = curr[1];
+
+           int work = 0;
+           while(start < end){
+               if(mp.containsKey(start)){
+                   start = mp.get(start);
+               }else{
+                   work++;
+                   mp.put(start, end);
+                   start ++;
+               }
+           }
+           res.add(work);
+       }
+       return res;
+    }
     static List<Integer> findSolu(List<int[]> ranges){
         int max = ranges.stream().map(ele -> ele[1]).reduce(0, Integer::max);
         int[] painted = new int[max+1];
@@ -2580,6 +2609,7 @@ public class GooglePrevious2 {
                 int x2 = points[j][0];
                 int y2 = points[j][1];
                 if(x1 != x2 && y1 != y2){
+
                     if(seen.contains(x1+","+y2) && seen.contains(x2+","+y1)){
                         int area = Math.abs(x1-x2) * Math.abs(y1-y2);
                         res = Math.min(res, area);
@@ -2916,7 +2946,12 @@ public class GooglePrevious2 {
     //    //query(0) -> false
     //    //query(3) -> true
     //    //Note: ranges can be overlapping
-    void findRanges(int[][] ranges, int[] query){
+//    public static void main(String[] args) {
+//        int[][] arr = {{2, 5}, {9, 15}};
+//        int[] query = {1, 7, 10, 3};
+//        findRanges(arr, query);
+//    }
+    static void findRanges(int[][] ranges, int[] query){
         int max = Arrays.stream(ranges).map(e -> e[0]).reduce(0, Integer::max);
         FenwickTree tree = new FenwickTree(max+2);
         for(int[] curr : ranges){
@@ -2928,8 +2963,9 @@ public class GooglePrevious2 {
 
         for(int q : query){
             if(tree.query(q) > 0){
-                System.out.println("range available");
-            }
+                System.out.println(q +" -> range available");
+            }else
+                System.out.println(q +" -> not available");
         }
     }
     //60. Consider an infinite binary tree with the following structure:
@@ -3033,12 +3069,12 @@ public class GooglePrevious2 {
     //[-1],[-2,-3,-4];
     //[-1][-2,-3],[-4];
 
-//    public static void main(String[] args) {
-//        int[] arr = {1,-2,-3,-4, -6};
-//
-//        System.out.println(findAllPartisions1(arr));
-//        System.out.println(findAllPartisions(0, arr));
-//    }
+    public static void main(String[] args) {
+        int[] arr = {1,-2,-3,-4, -6};
+
+        System.out.println(findAllPartisions1(arr));
+        System.out.println(findAllPartisions(0, arr));
+    }
     static int findAllPartisions(int i, int[] arr){
         if(i == arr.length)
             return 1;
@@ -3106,7 +3142,7 @@ public class GooglePrevious2 {
         return res;
     }
     //66. 983. Minimum Cost For Tickets
-    public int mincostTickets(int[] days, int[] costs) {
+    public int minCostTickets(int[] days, int[] costs) {
         Arrays.sort(days);
         int n = days.length;
         Integer[] dp = new Integer[n];
