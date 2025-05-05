@@ -82,7 +82,7 @@ class solun{// next greater elements to the right
             int index = brr[i][1];
             int val = brr[i][0];
             int totalEle = tree.findSumInRange(index, n-1);
-            res[i] = totalEle;
+            res[index] = totalEle;
             tree.updateSumAtIndex(index, 1);
         }
         for(int val : res)
