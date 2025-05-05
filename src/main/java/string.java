@@ -577,7 +577,7 @@ public class string {
         int m = pat.length();
         int[] lps = new int[m];
 
-        int i= 1, prevLps = 0;
+        int i = 1, prevLps = 0;
 
         while(i < m){
             if(pat.charAt(i) == pat.charAt(prevLps)){

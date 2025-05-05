@@ -98,7 +98,6 @@ public class GooglePrevious2 {
 
 
             return apartmentPersonMap;
-
         }
 
         void assign(List<Apartment> apartments, AtomicInteger apartmentIndex, List<Person> persons, AtomicInteger personIndex) {
@@ -126,7 +125,7 @@ public class GooglePrevious2 {
     //We need to find a set of 3 values which satisfy condition -
     // |a - b| <= D, |b - c| <= D, |a - c| <= D, assuming a,b,c are 3 float values.
     // Print these 3 values and remove them and continue ....
-    //Constraints -
+    // Constraints -
     //All values in stream will be unique.
     //D -> [0, inf)
     //Eg:
@@ -325,8 +324,7 @@ public class GooglePrevious2 {
     //6.You have a backend system that stores all versions of a JSON object. You need to reduce the
     //amount of data stored, how would you design the API.
     //I assumed they wanted to write a function to do a JSON diff of current state vs new state so
-    //we only store the diff. Had no feedback whatsoever from the interviewer while working on it,
-    //so I have no idea what they expected.
+    //we only store the diff.
 
     class Solution{
         class DS{
@@ -625,7 +623,7 @@ public class GooglePrevious2 {
     //Bank starts with customer with deposit of 5
     //1+ 5 = 6
     //6 - 2 = 4
-    //4 + 1 =5
+    //4 + 1 = 5
     //If bank starts at in index 0 can only serve 1 customer
     //1+1 =2
     //2-3 = -1 not possible
@@ -1229,7 +1227,7 @@ public class GooglePrevious2 {
 
     //21.Give a list of string, where every string in the list is of size 5.
     // Return the list of 5 string such that all the characters in each of the strings are unique
-    //i.e if we combine all the strings(not nnecessary) we will have 25 unique characters)
+    //i.e if we combine all the strings(not necessary) we will have 25 unique characters)
     //eg
     //Input explanation
     //List of string with length of 5 each
@@ -1342,6 +1340,7 @@ public class GooglePrevious2 {
         }
         int[] emp = new int[V];
         Arrays.fill(emp, -1);
+
         for(int i=0;i<V;i++){
             if(emp[i] == -1){
                 dfs(i, adj, salary, emp);
@@ -1358,22 +1357,22 @@ public class GooglePrevious2 {
 
     static Set<Integer> dfs(int node, List<List<Integer>> adj, int[] salary, int[] emp){
         emp[node] = 0;
-        Set<Integer> employeesSalary = new HashSet<>();
-        employeesSalary.add(node);
+        Set<Integer> employeesList = new HashSet<>();
+        employeesList.add(node);
         for(int adjNode : adj.get(node)){
             Set<Integer> list = dfs(adjNode, adj, salary, emp);
-            employeesSalary.addAll(list);
+            employeesList.addAll(list);
         }
 
-        int sum = employeesSalary.stream().map(ele -> salary[ele]).reduce(0, Integer::sum);
+        int sum = employeesList.stream().map(ele -> salary[ele]).reduce(0, Integer::sum);
 
-        int cnt = employeesSalary.size();
+        int cnt = employeesList.size();
 
         if(salary[node] < 1D*sum / cnt){
             emp[node] = 1;
         }
 
-        return employeesSalary;
+        return employeesList;
     }
     //24. There is a robot at location (0, 0) of a 10x10 grid of tiles.
     // Each tile can be one of 8 different colors: (0, 1, ... 7). There is a star at a known location
@@ -1385,75 +1384,65 @@ public class GooglePrevious2 {
 
 //    public static void main(String[] args) throws Exception {
 //        int[][] mat = {
-//                {0, 1, 2, 3},
-//                {4, 5, 6, 7},
-//                {0, 1, 2, -1}
+//                {0, 1, 0, 0},
+//                {3,2,-1,3},
+//                {0,0,0,2},
+//                {0,0,0,4}
 //        };
-//        Map<Integer, String> lookup = new HashMap<>();
-//        lookup.put(0, "R");
-//        lookup.put(1, "R");
-//        lookup.put(2, "D");
-//        lookup.put(4, "R");
-//        lookup.put(5, "R");
-//        lookup.put(6, "R");
+//        Map<Integer, String> dir = new HashMap<>();
+//        int[][] vis = new int[4][4];
+//        boolean res = solve(mat, 0,0, 4, dir, vis);
 //
-//        int n = mat.length;
-//        int m = mat[0].length;
-//
-//        int[][] path = new int[n][m];
-//        boolean res = findPath(mat, 0, 0, n, m, lookup, path);
-//        if(res ) {
-//            for (int[] col : path) {
-//                for (int val : col) {
-//                    System.out.print(val + ", ");
-//                }
-//                System.out.println();
+//        if(res) {
+//            for (var entry : dir.entrySet()) {
+//                System.out.println(entry.getKey() + " -> " + entry.getValue());
 //            }
-//        }else{
-//            System.out.println(-1);
 //        }
 //    }
 
-    private boolean findPath(int[][] mat, int row, int col, int n, int m, Map<Integer, String> lookup, int[][] path) throws Exception {
-        if(row >= n || row < 0 || col >= m || col < 0 || mat[row][col] == -10)
+    static boolean solve(int[][] mat, int row, int col, int n, Map<Integer, String> mp, int[][] vis) throws Exception {
+        if(row >= n || row < 0 || col >= n || col < 0 || vis[row][col] == 1)
             return false;
-
-        path[row][col] = 1;
-        if(mat[row][col] == -1) {
-            return true;
-        }
-
         int currVal = mat[row][col];
-        mat[row][col] = -10;
+        if(currVal == -1)
+            return true;
+        vis[row][col] = 1;
 
-        String dir = lookup.getOrDefault(currVal, "ALL");
+        if(mp.containsKey(currVal)){
+            String dir = mp.get(currVal);
+            if(dir.equals( "U"))
+                return solve(mat, row-1, col, n, mp, vis);
+            else if(dir.equals("D"))
+                return solve(mat, row+1, col, n, mp, vis);
+            else if(dir.equals("L"))
+                return solve(mat, row, col-1, n, mp, vis);
+            else if(dir.equals("R"))
+                return solve(mat, row, col+1, n, mp, vis);
+            throw new Exception("Invalid");
+        }else{
 
-        switch (dir) {
-            case "ALL":
+            mp.put(currVal, "R");
+            if(solve(mat, row, col+1, n, mp, vis))
+                return true;
+            mp.remove(currVal);
 
-                if (findPath(mat, row - 1, col, n, m, lookup, path)) return true;
-                if (findPath(mat, row, col + 1, n, m, lookup, path)) return true;
-                if (findPath(mat, row + 1, col, n, m, lookup, path)) return true;
-                if (findPath(mat, row, col - 1, n, m, lookup, path)) return true;
-                break;
-            case "U":
-                if (findPath(mat, row - 1, col, n, m, lookup, path)) return true;
-                break;
-            case "R":
-                if (findPath(mat, row, col + 1, n, m, lookup, path)) return true;
-                break;
-            case "D":
-                if (findPath(mat, row + 1, col, n, m, lookup, path)) return true;
-                break;
-            case "L":
-                if (findPath(mat, row, col - 1, n, m, lookup, path)) return true;
-                break;
-            default:
-                throw new Exception("Invalid Direction");
+            mp.put(currVal, "D");
+            if(solve(mat, row+1, col, n, mp, vis))
+                return true;
+            mp.remove(currVal);
+
+            mp.put(currVal, "U");
+            if(solve(mat, row-1, col, n, mp, vis))
+                return true;
+            mp.remove(currVal);
+
+            mp.put(currVal, "L");
+            if(solve(mat, row, col-1, n, mp, vis))
+                return true;
+            mp.remove(currVal);
+
         }
-
-        path[row][col] = 0;
-        mat[row][col] = currVal;
+        vis[row][col] = 1;
         return false;
     }
 
@@ -1474,7 +1463,6 @@ public class GooglePrevious2 {
 //        }
 //        System.out.println(sln.findMean());
 //    }
-
     class Solution11{
         int totalSize;
         int k;
@@ -1485,6 +1473,7 @@ public class GooglePrevious2 {
         TreeMap<Integer, Integer> rightMap;// small elements on top
         Queue<Integer> stream;
         Solution11(int n, int k){
+
             this.k = k;
             this.totalSize = n;
             leftMap = new TreeMap<>((a, b) -> b-a);
@@ -1495,60 +1484,53 @@ public class GooglePrevious2 {
             stream = new LinkedList<>();
         }
 
-        void add(int num){
+        Double add(int num){
 
             stream.add(num);
-            leftMap.put(num, leftMap.getOrDefault(num, 0)+1);
-            leftCount++;
-            leftSum += num;
+            rightMap.put(num, rightMap.getOrDefault(num, 0)+1);
+            rightCount++;
 
             if(stream.size() > totalSize){
                 int lastVal = stream.remove();
                 remove(lastVal);
             }
             balance();
+            return findMean();
         }
 
         void balance() {
-            int keepSize = Math.max(0, stream.size() - k); // Avoid negative size
 
-            // Move from leftMap to rightMap if top of leftMap > top of rightMap
-            while (!leftMap.isEmpty() && !rightMap.isEmpty() && leftMap.firstKey() > rightMap.firstKey()) {
+            while(rightCount < k && leftCount > 0){
                 int val = leftMap.firstKey();
-                move(leftMap, rightMap, val);
-                leftSum -= val;
+                leftMap.put(val, leftMap.get(val)-1);
+                if(leftMap.get(val) ==0)
+                    leftMap.remove(val);
+
                 leftCount--;
+                leftSum -= val;
+
+                rightMap.put(val, rightMap.getOrDefault(val, 0)+1);
                 rightCount++;
             }
 
-            // Ensure leftMap has `keepSize` elements
-            while (leftCount < keepSize && !rightMap.isEmpty()) {
+            while(rightCount > k){
                 int val = rightMap.firstKey();
-                move(rightMap, leftMap, val);
-                leftSum += val;
+                rightMap.put(val, rightMap.get(val)-1);
+                if(rightMap.get(val) == 0)
+                    rightMap.remove(val);
                 rightCount--;
+
+                leftMap.put(val, leftMap.getOrDefault(val, 0)+1);
+                leftSum += val;
                 leftCount++;
             }
 
-            while (leftCount > keepSize) {
-                int val = leftMap.firstKey();
-                move(leftMap, rightMap, val);
-                leftSum -= val;
-                leftCount--;
-                rightCount++;
-            }
-
-        }
-        void move(TreeMap<Integer, Integer> from, TreeMap<Integer, Integer> to, int val) {
-            from.put(val, from.get(val) - 1);
-            if (from.get(val) == 0) from.remove(val);
-            to.put(val, to.getOrDefault(val, 0) + 1);
         }
 
         double findMean() {
             if(stream.size() < k)
                 return -1;
-            return 1D*leftSum/(stream.size() - k);
+            return 1D*leftSum/(leftCount);
         }
         void remove(int num) {
             if(leftMap.containsKey(num)){
@@ -1565,10 +1547,11 @@ public class GooglePrevious2 {
                 }
                 rightCount--;
             }
+            balance();
         }
     }
-    //26.
-    // Find the length of longest increasing subsequence such that the difference between
+
+    //26. Find the length of longest increasing subsequence such that the difference between
     // consecutive elements in LIS is an increasing sequence
     //Example :
     //nums -> 1 2 3 4 5 6 ans -> 3
@@ -1601,7 +1584,7 @@ public class GooglePrevious2 {
         return res;
     }
 
-    //27. find sum when we can use bracket as well for 1234-> (1+2) *(3+4) = 21
+    //27. find sum when we can use bracket as well for 1234-> (1+2) * (3+4) = 21
 //    public static void main(String[] args) {
 //        for(int val : solve1("22", 21))
 //            System.out.print(val+", ");
@@ -1942,39 +1925,32 @@ public class GooglePrevious2 {
 //        process.add(new int[]{1,2,2});
 //        process.add(new int[]{2,1,1});
 //        process.add(new int[]{5,1,2});
-//        System.out.println(isPossibleToProcess(process, 2));
+//        System.out.println(isPossibleToProcess(process, 3));
 //    }
-    static boolean isPossibleToProcess(List<int[]> process, int totalCpu){
+    static boolean isPossibleToProcess(List<int[]> processs, int totalCpu){
         //startTime, duration, cpu Needed
-
-        for(int[] curr : process){
-            curr[1] = curr[0] + curr[1];
-        }
-
-        Queue<int[]> pq = new PriorityQueue<>((a, b) -> {
+        processs.sort((a, b) -> {
             if(a[0] != b[0])
                 return a[0] - b[0];
-            else if(a[1] != b[1])
+            else
                 return a[1] - b[1];
-            return a[2] - b[2];
-        });//start, end, cpu
+        });
 
-        pq.addAll(process);
 
         int cpuNeeded = 0;
         Queue<int[]> inprocess = new LinkedList<>();
 
-        while(!pq.isEmpty()){
-            int[] curr = pq.remove();
+        for (int[] curr : processs) {
             int currStartTime = curr[0];
 
-            if(!inprocess.isEmpty() && inprocess.peek()[1] < currStartTime){
-                cpuNeeded -= inprocess.peek()[2];
-            }
+            while (!inprocess.isEmpty() && inprocess.peek()[1] < currStartTime) {
+                cpuNeeded -= inprocess.remove()[2];
 
+            }
+            curr[1] = curr[0] + curr[1];
             inprocess.add(curr);
             cpuNeeded += curr[2];
-            if(cpuNeeded > totalCpu)
+            if (cpuNeeded > totalCpu)
                 return false;
         }
         return true;
@@ -2369,7 +2345,7 @@ public class GooglePrevious2 {
     //43. There is a long and thin painting that can be represented by a number line. You are given a
     // 0-indexed 2D integer array paint of length n, where paint[i] = [start_i, end_i].
     // This means that on the ith day you need to paint the area between start_i and end_i.
-    //Painting the same area multiple times will create an uneven painting so
+    // Painting the same area multiple times will create an uneven painting so
     // you only want to paint each area of the painting at most once.
     //Return an integer array worklog of length n, where worklog[i] is the amount
 //    public static void main(String[] args) {
@@ -2546,10 +2522,10 @@ public class GooglePrevious2 {
     //        }
 
     //47. Number of ways to partition an array into segments s.t each segment has atleast 2 negative numbers
-//    public static void main(String[] args) {
-//        int[] arr ={-1, -3, 4, 5};
-//        System.out.println(countWays(arr));
-//    }
+    public static void main(String[] args) {
+        int[] arr ={-1, -3, -1,-4};
+        System.out.println(countWays(arr));
+    }
     static private int[] nums1;
     static private Integer[] dp1;
 
@@ -2910,7 +2886,50 @@ public class GooglePrevious2 {
 
         return totalFlips;
     }
+    //------------------------------------------------oR
+    public static int minFlips(String s, int k) {
+        int n = s.length();
+        String target1 = generateTarget(n, "0");
+        String target2 = generateTarget(n, "1");
+        int res = Math.min(helper(s, k, target1), helper(s, k, target2));
+        if(res == 1e9)
+            return -1;
+        return res;
+    }
+    private static int helper(String s, int k, String target) {
+        int n = s.length();
+        int res = 0;
+        int flip = 0;
+        int[] diff = new int[n + 1];
 
+        for (int i = 0; i < n; i++) {
+            flip += diff[i]; // update current flip status
+            int expected = target.charAt(i) - '0';
+            int current = s.charAt(i) - '0';
+            int actual = (flip % 2 == 0) ? current : 1 - current;
+
+            // If after applying flip, current does not match expected, we must flip here
+            if (actual != expected) {
+                if (i + k > n) return (int)1e9; // can't flip outside
+                res++;
+
+                flip ++; // adding here
+                diff[i + k] --; // removing here
+            }
+        }
+        return res;
+    }
+    private static String generateTarget(int n, String ch1) {
+        String ch2 = ch1.equals("1") ? "0": "1";
+        StringBuilder sb = new StringBuilder();
+        for(int i=0;i<n;i++){
+            if(i % 2 == 0)
+                sb.append(ch1);
+            else
+                sb.append(ch2);
+        }
+        return sb.toString();
+    }
     //58. A number is called lucky if:
     //Reading from left to right, each digit is less than or equal to the next digit.
     // Examples of Lucky Numbers:
@@ -3069,12 +3088,12 @@ public class GooglePrevious2 {
     //[-1],[-2,-3,-4];
     //[-1][-2,-3],[-4];
 
-    public static void main(String[] args) {
-        int[] arr = {1,-2,-3,-4, -6};
-
-        System.out.println(findAllPartisions1(arr));
-        System.out.println(findAllPartisions(0, arr));
-    }
+//    public static void main(String[] args) {
+//        int[] arr = {1,-2,-3,-4, -6};
+//
+//        System.out.println(findAllPartisions1(arr));
+//        System.out.println(findAllPartisions(0, arr));
+//    }
     static int findAllPartisions(int i, int[] arr){
         if(i == arr.length)
             return 1;

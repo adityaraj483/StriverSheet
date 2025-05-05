@@ -106,15 +106,15 @@ class Trie2 {
         TrieNode node = root;
         for(int i=0;i<word.length();i++){
             char ch = word.charAt(i);
-            node.totalPrefix++;
+
             if(node.links[ch - 'a'] != null){
                 node = node.links[ch - 'a'];
             }else {
                 node.links[ch- 'a'] = new TrieNode();
                 node = node.links[ch - 'a'];
             }
+            node.totalPrefix++;
         }
-        node.totalPrefix++;
         node.wordsEndWith++;
     }
 
@@ -151,8 +151,9 @@ class Trie2 {
         TrieNode node = root;
         for(int i=0;i<word.length();i++){
             char ch = word.charAt(i);
-            node.totalPrefix--;
+
             node = node.links[ch - 'a'];
+            node.totalPrefix--;
         }
         node.totalPrefix--;
         node.wordsEndWith--;
