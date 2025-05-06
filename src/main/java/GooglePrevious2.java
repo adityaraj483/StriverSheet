@@ -2522,10 +2522,10 @@ public class GooglePrevious2 {
     //        }
 
     //47. Number of ways to partition an array into segments s.t each segment has atleast 2 negative numbers
-    public static void main(String[] args) {
-        int[] arr ={-1, -3, -1,-4};
-        System.out.println(countWays(arr));
-    }
+//    public static void main(String[] args) {
+//        int[] arr ={-1, -3, -1,-4};
+//        System.out.println(countWays(arr));
+//    }
     static private int[] nums1;
     static private Integer[] dp1;
 
@@ -2952,8 +2952,28 @@ public class GooglePrevious2 {
     //Input: low = 1200, high = 1250
     //Output: [1222, 1223, 1224, 1225, ..., 1233, 1234, ...]
     //(All numbers between 1200 and 1250 that are lucky.)
+    public static void main(String[] args) {
+        List<String> res = new ArrayList<>();
+        dfs("", "1200", "1255", res);
+        for(String s : res){
+            System.out.print(s +", ");
+        }
+    }
 
+    static void dfs(String curr, String low, String high, List<String> res) {
+        if (!curr.isEmpty()) {
+            if (curr.length() > high.length() ||
+                    (curr.length() == high.length() && curr.compareTo(high) > 0)) return;
+            if ((curr.length() > low.length() ||
+                    (curr.length() == low.length() && curr.compareTo(low) >= 0)))
+                res.add(curr);
+        }
 
+        char startDigit = curr.isEmpty() ? '1' : curr.charAt(curr.length() - 1);
+        for (char d = startDigit; d <= '9'; d++) {
+            dfs(curr + d, low, high, res);
+        }
+    }
 
 
     //59.//Write a class that does the following:
@@ -3101,7 +3121,7 @@ public class GooglePrevious2 {
         int res = 0;
         int neg = 0;
         for(int j=i;j<arr.length;j++){
-            if(arr[j] < neg)
+            if(arr[j] < 0)
                 neg++;
             if(neg >= 1)
                 res += findAllPartisions(j+1, arr);
@@ -3114,8 +3134,12 @@ public class GooglePrevious2 {
         int[] dp = new int[n];
         int currsum = 0;
         for(int i = 0; i<n; i++) {
-            if(nums[i] < 0) dp[i] = currsum + 1;
-            else dp[i] =  i > 0 ? dp[i-1] : 0;
+            if(nums[i] < 0)
+                dp[i] = currsum + 1;
+            else {
+                dp[i] = i > 0 ? dp[i - 1] : 0;
+            }
+
             currsum += dp[i];
         }
         return dp[n-1];
