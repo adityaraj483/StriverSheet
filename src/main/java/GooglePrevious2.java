@@ -1,7 +1,5 @@
 import DS.*;
-import org.json.JSONObject;
 
-import java.beans.IntrospectionException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -326,74 +324,59 @@ public class GooglePrevious2 {
     //I assumed they wanted to write a function to do a JSON diff of current state vs new state so
     //we only store the diff.
 
-    class Solution{
-        class DS{
-            JSONObject object;
-            int id;
-            List<JSONObject> updates;
-            DS(int id, JSONObject object){
-                this.id = id;
-                this.object = object;
-                this.updates = new ArrayList<>();
-            }
+//    public static void main(String[] args) {
+//        Map<String, String> curr = new HashMap<>();
+//
+//        curr.put("Aditya", "Raj");
+//        Solution sln = new Solution(curr, 10);
+//
+//        Map<String, String> curr1 = new HashMap<>();
+//        curr1.put("Aditya", "Kishan");
+//        curr1.put("age", "20");
+//
+//        sln.pushChanges(curr1);
+//        System.out.println(sln.getLatestVersion());
+//    }
+
+    static class Solution{
+       List<Map<String, String>> data;
+       int fullVersion;
+       Solution(Map<String, String> currState, int fullVersion){
+           this.data = new ArrayList<>();
+           this.fullVersion = fullVersion;
+           this.data.add(currState);
+       }
+
+       void pushChanges(Map<String, String> changes){
+           this.data.add(changes);
+
+           if(data.size() > 1 && data.size() % fullVersion == 0){
+               buildFullVersion((data.size()/ fullVersion -1) * fullVersion);
+           }
+       }
+
+        private void buildFullVersion(int i) {
+           Map<String, String> fullVersionMap = new HashMap<>();
+           while(i < data.size()){
+               fullVersionMap.putAll(data.get(i++));
+           }
+           data.remove(data.size() -1);
+           data.add(fullVersionMap);
         }
-         Map<Integer, DS> history = new HashMap<>();
-    //        public  void main(String[] args) {
-    //            JSONObject a = new JSONObject();
-    //            JSONObject b = new JSONObject();
-    //            a.put("name", "Aditya");
-    //            a.put("id", 1);
-    //
-    //            add(1, a);
-    //
-    //            b.put("name", "Aditya");
-    //            b.put("id", 2);
-    //
-    //            modify(1, b);
-    //            System.out.println(getLatestVersion(1));
-    //
-    //        }
-         void add(int id, JSONObject object){
-            history.put(id, new DS(id, object));
-        }
-         void modify(int id, JSONObject object) {
-            DS ds = history.get(id);
-            JSONObject diff = findDiff(ds.object, object);
-            ds.updates.add(diff);
-        }
-         JSONObject getLatestVersion(int id){
-            JSONObject object = history.get(id).object;
-            List<JSONObject> changes = history.get(id).updates;
-            JSONObject latest = new JSONObject(object.toString());
 
-            for(JSONObject curr : changes){
-                for(Iterator<String> it = curr.keys();it.hasNext();){
-                    String key = it.next();
-                    latest.put(key, curr.get(key));
-                }
-            }
-            return latest;
-        }
-        JSONObject findDiff(JSONObject a, JSONObject b){
-            JSONObject curr = new JSONObject();
-            for (Iterator<String> it = a.keys(); it.hasNext(); ) {
-                String key = it.next();
+        Map<String, String> getLatestVersion(){
+           if(data.isEmpty())
+               return Collections.emptyMap();
 
-                if (b.has(key) && !a.get(key).equals(b.get(key))) {
+           int index = (data.size() / fullVersion) * 10;
 
-                    curr.put(key, b.get(key));
-                }
+           Map<String, String> currState = new HashMap<>();
+           for(int i=index;i<data.size();i++){
+               currState.putAll(data.get(i));
+           }
+           return currState;
+       }
 
-            }
-
-            for (Iterator<String> it = b.keys(); it.hasNext(); ) {
-                String key = it.next();
-                if(a.get(key) == null)
-                    curr.put(key, b.get(key));
-            }
-
-            return curr;
-        }
     }
     //7. 24 game with expr-> https://leetcode.com/problems/24-game/
     class Solution1 {
@@ -446,7 +429,6 @@ public class GooglePrevious2 {
                     }
                 }
             }
-
         }
         List<Expr> getAllExprCombinations(Expr a, Expr b) {
             List<Expr> results = new ArrayList<>();
@@ -467,9 +449,9 @@ public class GooglePrevious2 {
     }
     //8.
     // you are given an array of houses in a neighbourhood in a city.
-    //you have to rearrange houses in such a way that in a single neighbourhood the houses are sorted by number in
+    // you have to rearrange houses in such a way that in a single neighbourhood the houses are sorted by number in
     // ascending order and no 2 houses with same number are in same neighbourhood.
-    //you can only rearrange house based on the capacity of each neighbourhood . If neighbourhood "1" in input has 2
+    // you can only rearrange house based on the capacity of each neighbourhood . If neighbourhood "1" in input has 2
     // houses then at output also it can only have 2 houses.
     //
     //For example-
@@ -498,7 +480,7 @@ public class GooglePrevious2 {
             if(b[1] != a[1])
                 return b[1] - a[1];
             return a[0] - b[0];
-        });
+        });//house, count
 
         for(var entry : mp.entrySet()){
             int key = entry.getKey();
@@ -518,6 +500,7 @@ public class GooglePrevious2 {
 
             int index = 0;
             int[] newHouse = new int[size];
+
             while(index < size){
                 int[] curr = pq.remove();
                 newHouse[index] = curr[0];
@@ -579,36 +562,33 @@ public class GooglePrevious2 {
     }
     //10.
     // Given an array of integers, find a subarray with maximum sum?
-    //Solved using Kadane's Algorithm
-    //Follow up:
-    //Given an array of integers nums, find indexes [i, j] such that the
+    // Solved using Kadane's Algorithm
+    // Follow up:
+    // Given an array of integers nums, find indexes [i, j] such that the
     // subarray sum nums[i] + nums[i+1] ... nums[j-1] + nums[j] is maximum and nums[i] is equal to nums[j]
 
 //    public static void main(String[] args) {
 //        solve(new int[]{5, -100, -200, 5, 10});
 //    }
-    int solve(int[] arr){
-        int n = arr.length;
-        Map<Integer, int[]> mp = new HashMap<>();//num, prefixsum, index;
-        int[] res = new int[]{-1, -1};
+    static int solve(int[] arr){
+        Map<Integer, List<Integer>> valueIndexPrefixMap = new HashMap<>();//val, preSum
 
-        int sum = 0, maxsum = (int) -1e9;
-        for(int i=0;i<n;i++){
-           sum += arr[i];
-           if(mp.containsKey(arr[i])){
-               int[] curr = mp.get(arr[i]);
-               int ss = sum - curr[0] + arr[i];//removing prev sums
-               if(maxsum < ss){
-                   maxsum = ss;
-                   res[0] = curr[1];
-                   res[1] = i;
-               }
-           }else
-               mp.put(arr[i], new int[]{sum, i});
+        int sum = 0;
+        int res = 0;
+
+        for(int i=0;i<arr.length;i++){
+            sum += arr[i];
+            if(valueIndexPrefixMap.containsKey(arr[i])){
+
+                for(int prevSum : valueIndexPrefixMap.get(arr[i])){
+                    int currSum = sum - prevSum + arr[i];
+                    res = Math.max(currSum, res);
+                }
+            }
+            valueIndexPrefixMap.computeIfAbsent(arr[i] , e -> new ArrayList<>()).add(sum);
         }
-        System.out.println(maxsum);
-        System.out.println(res[0]+" "+res[1]);
-        return maxsum;
+
+        return res;
     }
     //11.
     // Consider a bank with some initial amount of money. Consider an array which represents
@@ -625,7 +605,7 @@ public class GooglePrevious2 {
     //6 - 2 = 4
     //4 + 1 = 5
     //If bank starts at in index 0 can only serve 1 customer
-    //1+1 =2
+    //1+1 = 2
     //2-3 = -1 not possible
 //    public static void main(String[] args) {
 //        int[] arr = new int[]{1, -3, 5, -2, 1};
@@ -676,39 +656,52 @@ public class GooglePrevious2 {
 //        System.out.println(solve1(arr, s, x));
 //
 //    }
-    int solve1(int[] arr, int s, int x){
-        int n = arr.length;
+    static int solve1(int[] arr, int s, int x){
+        Map<Integer, TreeSet<Integer>> map = new HashMap<>();
+        for(int i=0;i<arr.length;i++)
+            map.computeIfAbsent(arr[i], e -> new TreeSet<>()).add(i);
 
         Set<String> vis = new HashSet<>();
         String key = "";
-        char direction = 'l';
-        while(!vis.contains(key)){
-            boolean found = false;
-            vis.add(s + ","+ arr[s]);
-            if(direction == 'l'){
-                for(int i=s-1;i>=0;i--){
-                    if(arr[i] == arr[s]+1){
-                        found = true;
-                        arr[s] = x;
-                        s = i;
-                        direction = 'r';
-                        break;
-                    }
-                }
-            }else{
-                for(int i=s+1;i<n;i++){
-                    if(arr[i] == arr[s]+1){
-                        found = true;
-                        arr[s] = x;
-                        s = i;
-                        direction = 'l';
-                        break;
-                    }
-                }
-            }
 
-            if(!found)
-                return s;
+        boolean left  = true;
+        while(!vis.contains(key)){
+
+
+            vis.add(key);
+            key = left +", "+ s;
+
+
+            if(left){
+                if(map.containsKey(arr[s]+1)){
+                    Integer newS = map.get(arr[s]+1).floor(s);
+                    if(newS == null || newS.equals(s))
+                        return s;
+
+                    map.get(arr[s]).remove(s);
+                    map.computeIfAbsent(x, e -> new TreeSet<>()).add(s);
+                    arr[s] =  x;
+                    s = newS;
+                }else
+                    return s;
+
+                left = false;
+            }else{
+
+                if(map.containsKey(arr[s]+1)){
+                    Integer newS = map.get(arr[s]+1).ceiling(s);
+                    if(newS == null || newS.equals(s))
+                        return s;
+
+                    map.get(arr[s]).remove(s);
+                    map.computeIfAbsent(x, e -> new TreeSet<>()).add(s);
+                    arr[s] = x;
+                    s = newS;
+
+                }else
+                    return s;
+                left = true;
+            }
 
         }
         return -1;
@@ -927,7 +920,7 @@ public class GooglePrevious2 {
                 cache = new HashMap<>();
             }
 
-            public void addNode(DLLNode node){
+            List<String> addNode(DLLNode node){
                 if(cache.containsKey(node.data)){
                     DLLNode curr = cache.get(node.data);
                     removeNode(curr);
@@ -943,6 +936,7 @@ public class GooglePrevious2 {
                     node.next.prev = node;
                     cache.put(node.data, node);
                 }
+                return getAllUrls();
             }
 
             public void removeNode(){
@@ -985,6 +979,9 @@ public class GooglePrevious2 {
             DLLNode node = new DLLNode(s);
             lru.addNode(node);
         }
+        public void clickSearchBar(){
+            lru.getAllUrls();
+        }
         public List<String > search(){
             return lru.getAllUrls();
         }
@@ -992,7 +989,8 @@ public class GooglePrevious2 {
     //17. Given map {X=>123, Y=456}
     //Input: %X%_%Y%
     //Output: 123_456
-    //Given map {USER=>admin, HOME=>/%USER%/home} Input: I am %USER% My home is %HOME% Output: I am admin My home is /admin/home
+    //Given map {USER=>admin, HOME=>/%USER%/home} Input: I am %USER% My home is %HOME% Output:
+    // I am admin My home is /admin/home
     //USER= bob
     //HOME= /home/%USER% should be substituted as : /home/bob ex2:
     //home/ %USER% -> /home/bob
@@ -1128,6 +1126,8 @@ public class GooglePrevious2 {
 
     static int[] seperateStudents(List<Integer> arr) throws Exception {
         int n = arr.size();
+        if(n == 0)
+            return new int[0];
         Map<Integer, Integer> mp = new HashMap<>();
         for(int val : arr){
             mp.put(val, mp.getOrDefault(val, 0)+1);
@@ -1141,17 +1141,16 @@ public class GooglePrevious2 {
 
             pq.add(new int[]{val, cnt});
         }
-        if(pq.isEmpty())
-            throw new Exception("Not possible");
 
         int[] res = new int[n];
-        res[0] = pq.peek()[0];
-        pq.peek()[1]--;
+        int prev = -1;
 
-        for(int i=1;i<n && !pq.isEmpty();i++){
+        for(int i=0;i<n && !pq.isEmpty();i++){
+
             int[] first = pq.poll();
             int[] second = pq.poll();
-            if(res[i-1] == first[0]){
+
+            if(prev == first[0]){
                 if(second == null)
                     throw new Exception("Not possible");
                 res[i] = second[0];
@@ -1164,6 +1163,7 @@ public class GooglePrevious2 {
                 pq.add(first);
             if(second != null && second[1] > 0)
                 pq.add(second);
+            prev = res[i];
         }
         return res;
     }
@@ -1194,6 +1194,7 @@ public class GooglePrevious2 {
 //    }
     Integer[][] dp;
     String[][] pathdp;
+
     int solve(int index, int[] arr1, int[] arr2, int n, int currArray){
 
         if(index >=n)
@@ -1202,24 +1203,21 @@ public class GooglePrevious2 {
         if(dp[index][currArray] != null) return dp[index][currArray];
 
         int currVal = currArray == 1 ? arr1[index] : arr2[index];
+        int option1 = currVal + solve(index+1, arr1, arr2, n, currArray);// We go to same array
 
-        int option1 = currVal + solve(index+1, arr1, arr2, n, currArray);
-        String path1 = (currArray ==1 ? "A": "B") + (pathdp[index+1][currArray] == null ? "" : pathdp[index+1][currArray]);
-
-
-        int option2 = currVal;
-        String path2 = (currArray == 1 ? "A" : "B") + "T";
+        int otherArray = currArray ==1 ? 2 : 1;
+        int option2 = currVal;// we try to go to next array
         if(index+2 <= n) {
-            int otherArray = currArray ==1 ? 2 : 1;
             option2 += solve(index+2, arr1, arr2, n, otherArray);
-            path2 = path2 + (pathdp[index+2][otherArray] == null ? "" : pathdp[index+2][otherArray]);
         }
 
         if(option1 >= option2){
             dp[index][currArray] = option1;
+            String path1 = (currArray == 1 ? "A": "B") + (pathdp[index+1][currArray] == null ? "" : pathdp[index+1][currArray]);
             pathdp[index][currArray] = path1;
         }else {
             dp[index][currArray] = option2;
+            String path2 = (currArray == 1 ? "A" : "B") + "T" + (pathdp[index+2][otherArray] == null ? "" : pathdp[index+2][otherArray]);
             pathdp[index][currArray] = path2;
         }
         return dp[index][currArray];
@@ -1356,7 +1354,6 @@ public class GooglePrevious2 {
     }
 
     static Set<Integer> dfs(int node, List<List<Integer>> adj, int[] salary, int[] emp){
-        emp[node] = 0;
         Set<Integer> employeesList = new HashSet<>();
         employeesList.add(node);
         for(int adjNode : adj.get(node)){
@@ -1410,14 +1407,16 @@ public class GooglePrevious2 {
 
         if(mp.containsKey(currVal)){
             String dir = mp.get(currVal);
-            if(dir.equals( "U"))
-                return solve(mat, row-1, col, n, mp, vis);
-            else if(dir.equals("D"))
-                return solve(mat, row+1, col, n, mp, vis);
-            else if(dir.equals("L"))
-                return solve(mat, row, col-1, n, mp, vis);
-            else if(dir.equals("R"))
-                return solve(mat, row, col+1, n, mp, vis);
+            switch (dir) {
+                case "U":
+                    return solve(mat, row - 1, col, n, mp, vis);
+                case "D":
+                    return solve(mat, row + 1, col, n, mp, vis);
+                case "L":
+                    return solve(mat, row, col - 1, n, mp, vis);
+                case "R":
+                    return solve(mat, row, col + 1, n, mp, vis);
+            }
             throw new Exception("Invalid");
         }else{
 
@@ -1442,7 +1441,7 @@ public class GooglePrevious2 {
             mp.remove(currVal);
 
         }
-        vis[row][col] = 1;
+        vis[row][col] = 0;
         return false;
     }
 
@@ -1528,7 +1527,7 @@ public class GooglePrevious2 {
         }
 
         double findMean() {
-            if(stream.size() < k)
+            if(stream.size() <= k)
                 return -1;
             return 1D*leftSum/(leftCount);
         }
@@ -1665,23 +1664,23 @@ public class GooglePrevious2 {
 
     static int[] findFirstIdTimeOut(List<Log> logs, int timeout){
 
-        Queue<Log> currQueue = new LinkedList<>();
+        Queue<Log> inProcess = new LinkedList<>();
         Set<Integer> processed = new HashSet<>();
         int i = 0;
         while(i < logs.size()){
             Log log = logs.get(i);
-            while(!currQueue.isEmpty() && currQueue.peek().timestamp + timeout < log.timestamp){
+            while(!inProcess.isEmpty() && inProcess.peek().timestamp + timeout < log.timestamp){
 
-                if(!processed.contains(currQueue.peek().id))
-                    return new int[]{currQueue.peek().id, log.timestamp};
+                if(!processed.contains(inProcess.peek().id))
+                    return new int[]{inProcess.peek().id, log.timestamp};
 
-                currQueue.remove();
+                inProcess.remove();
             }
 
             if(log.type.equals( "end"))
                 processed.add(log.id);
             else
-                currQueue.add(log);
+                inProcess.add(log);
             i++;
         }
 
@@ -1724,6 +1723,8 @@ public class GooglePrevious2 {
         }
 
         boolean isCost(int row , int col){
+            if(row == 0 || row == rows-1 || col == 0 || col == cols-1)// if X is at the edge of matrix
+                return true;
             for(int i=0;i<4;i++){
                 int r = delRow[i] + row;
                 int c = delCol[i] + col;
@@ -1947,7 +1948,7 @@ public class GooglePrevious2 {
                 cpuNeeded -= inprocess.remove()[2];
 
             }
-            curr[1] = curr[0] + curr[1];
+            curr[1] = curr[0] + curr[1];//endTime
             inprocess.add(curr);
             cpuNeeded += curr[2];
             if (cpuNeeded > totalCpu)
@@ -2023,9 +2024,9 @@ public class GooglePrevious2 {
     //You have to make sure, that at each call, all the eligible
     // (not played during last k turns) songs have equal probability of being played next.
 //    public static void main(String[] args) {
-//        MusicPlayer player = new MusicPlayer(List.of(1,2,3,4,5), 1);
+//        MusicPlayer player = new MusicPlayer(List.of(1,2,3,4,5), 4);
 //        for(int i=0;i<10;i++){
-//            System.out.print(player.findRandom()+", ");
+//            System.out.print(player.findRandom1()+", ");
 //        }
 //    }
 
@@ -2033,11 +2034,13 @@ public class GooglePrevious2 {
         List<Integer> songs;
         Queue<Integer> q;
         int k;
+        int start;
 
         MusicPlayer(List<Integer> songs, int k){
             this. k = k;
             this.songs = new ArrayList<>(songs);
             this.q = new LinkedList<>();
+            start = 0;
         }
 
         int findRandom(){
@@ -2051,6 +2054,15 @@ public class GooglePrevious2 {
             if(q.size() > k){
                 songs.add(q.remove());
             }
+            return currSong;
+        }
+        int findRandom1(){
+            int n = songs.size();
+            int random = k + (int) (Math.random() * (n-k));
+            int currSong = songs.get(random);
+            Collections.swap(songs, random, start++);
+            if(start == k)
+                start = 0;
             return currSong;
         }
     }
@@ -2142,7 +2154,7 @@ public class GooglePrevious2 {
                 if(bufCount == 0)
                     break;
 
-                while(idx < n && bufIndex< bufCount){
+                while(idx < n && bufIndex < bufCount){
                     buf[idx++] = myBuf[bufIndex++];
                 }
 
@@ -2360,6 +2372,26 @@ public class GooglePrevious2 {
 //        }
 //
 //    }
+    static List<Integer> findSolu(List<int[]> ranges){
+        int max = ranges.stream().map(ele -> ele[1]).reduce(0, Integer::max);
+        int[] painted = new int[max+1];
+
+        List<Integer> res = new ArrayList<>();
+        for(int i=0;i<ranges.size();i++){
+            int start = ranges.get(i)[0];
+            int end = ranges.get(i)[1];
+
+            int cnt = 0;
+            for(int k = start;k<end;k++){
+                if(painted[k] == 0){
+                    cnt ++;
+                    painted[k]=1;
+                }
+            }
+            res.add(cnt);
+        }
+        return res;
+    }
     static List<Integer> findSolu1(List<int[]> ranges){
        Map<Integer, Integer> mp = new HashMap<>();
        List<Integer> res = new ArrayList<>();
@@ -2381,26 +2413,7 @@ public class GooglePrevious2 {
        }
        return res;
     }
-    static List<Integer> findSolu(List<int[]> ranges){
-        int max = ranges.stream().map(ele -> ele[1]).reduce(0, Integer::max);
-        int[] painted = new int[max+1];
 
-        List<Integer> res = new ArrayList<>();
-        for(int i=0;i<ranges.size();i++){
-            int start = ranges.get(i)[0];
-            int end = ranges.get(i)[1];
-
-            int cnt = 0;
-            for(int k = start;k<end;k++){
-                if(painted[k] == 0){
-                    cnt ++;
-                    painted[k]=1;
-                }
-            }
-            res.add(cnt);
-        }
-        return res;
-    }
     //44. A good arithmetic sequence is an arithmetic sequence with a common
     // difference of either 1 or -1. For example, [4, 5, 6] is a good arithmetic
     // sequence. So is [6, 5, 4], [10, 9], or [-3, -2, -1]. But, [1, 2, 1]
@@ -2417,17 +2430,23 @@ public class GooglePrevious2 {
     //    Thus, the answer is the sum of all the sums above, which is:
     //            7 + 4 + 5 + 6 + 5 + 9 + 11 + 11 + 15 = 73.
 //    public static void main(String[] args) {
-//        int[] arr = new int[]{1,2,3};
+//        int[] arr = new int[]{7, 4, 5,1,2,1};
 //        System.out.println(sumOfGoodSequences(arr));
+//        System.out.println(sumOfGoodSequencesReadable(arr));
+//
 //    }
+
     public static int sumOfGoodSequences(int[] nums) {
         int n = nums.length;
         int ans = 0;
         for (int i = 0; i < n; i++) {
             ans += nums[i]; // single element is always good
             int diff = 0;
-            if (i + 1 < n) diff = nums[i + 1] - nums[i];
-            if (diff != 1 && diff != -1) continue; // if no valid common difference, continue
+            if (i + 1 < n)
+                diff = nums[i + 1] - nums[i];
+
+            if (diff != 1 && diff != -1)
+                continue; // if no valid common difference, continue
 
             int sum = nums[i];
             for (int j = i + 1; j < n; j++) {
@@ -2436,6 +2455,83 @@ public class GooglePrevious2 {
                 ans += sum;
             }
         }
+        return ans;
+    }
+
+    public static int sumOfGoodSequencesReadable(int[] nums) {
+        int n = nums.length;
+        if (n == 0) {
+            return 0;
+        }
+
+        long totalSum = 0;
+        // Stores the sum of good sequences ending at the current index, keyed by their common difference.
+        Map<Integer, Long> goodSequenceSumsEndingHere = new HashMap<>();
+
+        for (int i = 0; i < n; i++) {
+            int currentNum = nums[i];
+
+            // 1. Every single element is a good sequence.
+            totalSum += currentNum;
+
+            // 2. Initialize a map for the good sequences ending at the current index.
+            Map<Integer, Long> nextSequenceSums = new HashMap<>();
+            nextSequenceSums.put(0, (long) currentNum); // For the single element sequence.
+
+            // 3. Extend good sequences ending at the previous index.
+            if (i > 0) {
+                int previousNum = nums[i - 1];
+                int currentDifference = currentNum - previousNum;
+
+                if (currentDifference == 1 || currentDifference == -1) {
+                    // a) Form a new good sequence of length 2.
+                    totalSum += (long) previousNum + currentNum;
+                    nextSequenceSums.put(currentDifference, nextSequenceSums.getOrDefault(currentDifference, 0L) + previousNum + currentNum);
+
+                    // b) Extend existing good sequences with the same common difference.
+                    for (Map.Entry<Integer, Long> entry : goodSequenceSumsEndingHere.entrySet()) {
+                        if (entry.getKey() == currentDifference) {
+                            long previousSequenceSum = entry.getValue();
+                            totalSum += previousSequenceSum + currentNum;
+                            nextSequenceSums.put(currentDifference, nextSequenceSums.getOrDefault(currentDifference, 0L) + previousSequenceSum + currentNum);
+                        }
+                    }
+                }
+            }
+
+            // Update the map for the next iteration.
+            goodSequenceSumsEndingHere = nextSequenceSums;
+        }
+
+        return (int) totalSum;
+    }
+    public static int sumOfGoodSequences1(int[] nums) {
+        int n = nums.length;
+        int ans = 0;
+
+        // Add all single elements (each is a valid sequence)
+        for (int num : nums) ans += num;
+
+        int i = 0;
+        while (i < n - 1) {
+            int diff = nums[i + 1] - nums[i];
+            if (diff != 1 && diff != -1) {
+                i++;
+                continue;
+            }
+
+            int sum = nums[i];
+            int j = i + 1;
+
+            while (j < n && nums[j] - nums[j - 1] == diff) {
+                sum += nums[j];
+                ans += sum;
+                j++;
+            }
+
+            i = j - 1; // move to last matched element
+        }
+
         return ans;
     }
     //45. same as ramp but opposite , here we need to check previous element
@@ -2523,7 +2619,7 @@ public class GooglePrevious2 {
 
     //47. Number of ways to partition an array into segments s.t each segment has atleast 2 negative numbers
 //    public static void main(String[] args) {
-//        int[] arr ={-1, -3, -1,-4};
+//        int[] arr ={-1, -3, 1,2,3};
 //        System.out.println(countWays(arr));
 //    }
     static private int[] nums1;
@@ -2546,6 +2642,26 @@ public class GooglePrevious2 {
             if (nums1[j] < 0) neg++;
             if (neg >= 2) {
                 count += helper(j + 1);
+            }
+        }
+
+        dp1[i] = count;
+        return count;
+    }
+    static private int helperOptimized(int i) {
+        if (i == nums1.length) return 1;
+        if (dp1[i] != null) return dp1[i];
+
+        int count = 0;
+        int negativeCount = 0;
+
+        for (int j = i; j < nums1.length; j++) {
+            if (nums1[j] < 0) {
+                negativeCount++;
+            }
+            if (negativeCount >= 2) {
+                count += (nums1.length - j);
+                break; // Once we have 2 negatives, all subsequent subarrays will also have >= 2
             }
         }
 
@@ -2865,28 +2981,7 @@ public class GooglePrevious2 {
 //        System.out.println(minFlips("00010111", 3, "10101010101")); // Expected output: 3
 //    }
 
-    static public int minFlips(String s, int k, String tar) {
-        int n = s.length();
-        int flips = 0;
-        int[] flipped = new int[n];
-        int totalFlips = 0;
 
-        for (int i = 0; i <= n - k; i++) {
-            if(s.charAt(i) != tar.charAt(i)  && flipped[i] %2 == 0){
-                if(i + k > n)
-                    return (int) 1e9;
-                for(int j=i;j<i+k;j++){
-                    flipped[j] += 1;
-                }
-            }
-
-            totalFlips += flipped[i] % 2;
-        }
-
-
-        return totalFlips;
-    }
-    //------------------------------------------------oR
     public static int minFlips(String s, int k) {
         int n = s.length();
         String target1 = generateTarget(n, "0");
@@ -2906,13 +3001,13 @@ public class GooglePrevious2 {
             flip += diff[i]; // update current flip status
             int expected = target.charAt(i) - '0';
             int current = s.charAt(i) - '0';
-            int actual = (flip % 2 == 0) ? current : 1 - current;
+            int actual = (flip % 2 == 0) ? current : 1 - current;//(1-current) we will flip from 0 to 1 or from 1 to 0
 
             // If after applying flip, current does not match expected, we must flip here
             if (actual != expected) {
                 if (i + k > n) return (int)1e9; // can't flip outside
-                res++;
 
+                res++;
                 flip ++; // adding here
                 diff[i + k] --; // removing here
             }
@@ -2954,13 +3049,32 @@ public class GooglePrevious2 {
     //(All numbers between 1200 and 1250 that are lucky.)
     public static void main(String[] args) {
         List<String> res = new ArrayList<>();
-        dfs("", "1200", "1255", res);
+        generateRange("", "2200", "2230", res);
         for(String s : res){
             System.out.print(s +", ");
         }
+        StringBuilder ans = new StringBuilder();
+        generateNext("", "99", ans);
+        System.out.println();
+        System.out.println(ans);
+    }
+    static boolean generateNext(String curr, String num, StringBuilder sb){
+        if(!curr.isEmpty()){
+            if((curr.length() > num.length()) || (curr.length() == num.length() && curr.compareTo(num) >0)) {
+                sb.append(curr);
+                return true;
+            }
+        }
+
+        char startDigit = curr.isEmpty() ? '1': curr.charAt(curr.length()-1);
+        for(char d = startDigit;d<='9';d++){
+            if(generateNext(curr + d, num, sb))
+                return true;
+        }
+        return false;
     }
 
-    static void dfs(String curr, String low, String high, List<String> res) {
+    static void generateRange(String curr, String low, String high, List<String> res) {
         if (!curr.isEmpty()) {
             if (curr.length() > high.length() ||
                     (curr.length() == high.length() && curr.compareTo(high) > 0)) return;
@@ -2971,7 +3085,7 @@ public class GooglePrevious2 {
 
         char startDigit = curr.isEmpty() ? '1' : curr.charAt(curr.length() - 1);
         for (char d = startDigit; d <= '9'; d++) {
-            dfs(curr + d, low, high, res);
+            generateRange(curr + d, low, high, res);
         }
     }
 
@@ -2979,34 +3093,62 @@ public class GooglePrevious2 {
     //59.//Write a class that does the following:
     //    //insert range
     //    //query for a point
-    //    //Example:
-    //    //insert(2,3)
-    //    //insert(9,15)
-    //    //query(0) -> false
-    //    //query(3) -> true
-    //    //Note: ranges can be overlapping
 //    public static void main(String[] args) {
-//        int[][] arr = {{2, 5}, {9, 15}};
-//        int[] query = {1, 7, 10, 3};
-//        findRanges(arr, query);
+//        RangeModule rm = new RangeModule();
+//        rm.addRange(5, 10);
+//        rm.addRange(15, 20);
+//        rm.addRange(8, 18); // Merges overlapping ranges
+//
+//        rm.printRanges(); // Should show [5, 20)
+//
+//        System.out.println(rm.query(7));  // true
+//        System.out.println(rm.query(21)); // false
 //    }
-    static void findRanges(int[][] ranges, int[] query){
-        int max = Arrays.stream(ranges).map(e -> e[0]).reduce(0, Integer::max);
-        FenwickTree tree = new FenwickTree(max+2);
-        for(int[] curr : ranges){
-            int x = curr[0];
-            int y= curr[1];
-            tree.update(x, 1);
-            tree.update(y+1, -1);
+
+    static public class RangeModule {
+        private final TreeMap<Integer, Integer> rangeMap;
+
+        public RangeModule() {
+            rangeMap = new TreeMap<>();
         }
 
-        for(int q : query){
-            if(tree.query(q) > 0){
-                System.out.println(q +" -> range available");
-            }else
-                System.out.println(q +" -> not available");
+        // Add a range [left, right)
+        public void addRange(int left, int right) {
+            if (left >= right) return;
+
+            // Find overlapping or adjacent ranges
+            Integer start = rangeMap.floorKey(left);
+            Integer end = rangeMap.floorKey(right);
+
+            if (start != null && rangeMap.get(start) >= left) {
+                left = Math.min(left, start);
+                right = Math.max(right, rangeMap.get(start));
+                rangeMap.remove(start);
+            }
+
+            while (end != null && end >= left) {
+                right = Math.max(right, rangeMap.get(end));
+                rangeMap.remove(end);
+                end = rangeMap.lowerKey(end);
+            }
+
+            rangeMap.put(left, right);
+        }
+
+        // Query if x is present in any range
+        public boolean query(int x) {
+            Integer start = rangeMap.floorKey(x);
+            return start != null && rangeMap.get(start) >= x;
+        }
+
+        // Optional: print current ranges (for debugging)
+        public void printRanges() {
+            for (Map.Entry<Integer, Integer> entry : rangeMap.entrySet()) {
+                System.out.println("[" + entry.getKey() + ", " + entry.getValue() + ")");
+            }
         }
     }
+
     //60. Consider an infinite binary tree with the following structure:
     //At each odd level, each node has two children.
     //At each even level, each node has only one child.
