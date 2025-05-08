@@ -149,50 +149,41 @@ public class GooglePrevious2 {
 //    }
     class TripletFinder{
         float distance;
-        TreeMap<Float, Integer> stream;
+        TreeSet<Float> stream;
         TripletFinder(float distance){
             this.distance = distance;
-            this.stream = new TreeMap<>();
+            this.stream = new TreeSet<>();
         }
 
         void addNumber(float num){
-            stream.put(num, stream.getOrDefault(num, 0)+1);
-            checkTripletWithDistance(num);
+            if(checkTripletWithDistance(num)==false)
+                stream.add(num);
         }
 
-        private void checkTripletWithDistance(Float num) {
-            float from = num - 2 * distance;
-            float to = num + 2 * distance;
-            var list = stream.subMap(from, true, to, true);
-            if(list.size() >=3){
-                Iterator<Float> it = list.keySet().iterator();
+        private boolean checkTripletWithDistance(Float num) {
+            float from = num - distance;
+            float to = num +  distance;
+            NavigableSet<Float> list = stream.subSet(from, true, to, true);
+            if(list.size() >=2){
+                Iterator<Float> it = list.iterator();
                 float first = it.next();
-                float middle = it.next();
-                float last = 0;
 
                 while(it.hasNext()){
 
-                    last = it.next();
+                    float last = it.next();
 
-                    if(middle - distance <= first && last <= middle + distance) {
+                    if(num - distance <= first && last <= num + distance) {
 
-                        System.out.println(first + ", " + middle + ", " + last);
-                        stream.put(first, stream.getOrDefault(first, 1) - 1);
-                        stream.put(middle, stream.getOrDefault(middle, 1) - 1);
-                        stream.put(last, stream.getOrDefault(last, 1) - 1);
+                        System.out.println(first + ", " + num + ", " + last);
 
-                        if (stream.get(first) == 0)
-                            stream.remove(first);
-                        if (stream.get(middle) == 0)
-                            stream.remove(middle);
-                        if (stream.get(last) == 0)
-                            stream.remove(last);
+                        stream.remove(first);
+                        stream.remove(last);
                     } else {
-                        first = middle;
-                        middle = last;
+                        first = last;
                     }
                 }
             }
+            return false;
         }
     }
     //3. In a matrix of 0s and 1s you need to find the largest right-angled triangle
@@ -226,7 +217,7 @@ public class GooglePrevious2 {
     //A steps forward and B steps backward will the turtle ever be able to reach a target T.
     //I might be missing some parameters here I don’t remember it clearly.
 //    public static void main(String[] args) {
-//        System.out.println(turtleJump2(4, 1, -8));
+//        System.out.println(turtleJump1(4, 1, -8));
 //    }
     static boolean turtleJump1(int A, int B, int T){
         Set<Integer> seen = new HashSet<>();
@@ -300,10 +291,9 @@ public class GooglePrevious2 {
             min = Math.min(min, arr[i]);
         }
 
-//        int[] nums = arr.clone();
         int cnt = 1;
         int prev = -1;
-        for(int k=l;k<=r;k++){
+        for(int k = l;k <= r;k ++){
             if(arr[k] != 0)
                 arr[k] -= min;
 
@@ -601,12 +591,12 @@ public class GooglePrevious2 {
     //Customer transactions : [1, -3, 5, -2, 1]
     //answer = 3
     //Bank starts with customer with deposit of 5
-    //1+ 5 = 6
+    //1 + 5 = 6
     //6 - 2 = 4
     //4 + 1 = 5
     //If bank starts at in index 0 can only serve 1 customer
-    //1+1 = 2
-    //2-3 = -1 not possible
+    //1 + 1 = 2
+    //2 - 3 = -1 not possible
 //    public static void main(String[] args) {
 //        int[] arr = new int[]{1, -3, 5, -2, 1};
 //        System.out.println(solve(arr, 1));
@@ -1565,10 +1555,10 @@ public class GooglePrevious2 {
         int[] dp = new int[n];
         int[] lastDiff = new int[n];
         Arrays.fill(lastDiff, -1);
+        Arrays.fill(dp, 1);
         int res = 1;
 
         for (int i = 0; i < n; i++) {
-            dp[i] = 1;
             for (int j = 0; j < i; j++) {
                 int diff = arr[i] - arr[j];
                 if (arr[i] > arr[j] && (lastDiff[j] == -1 || diff > lastDiff[j])) {
@@ -1923,10 +1913,10 @@ public class GooglePrevious2 {
     // given max cpus else return false even if one job can't be executed?
 //    public static void main(String[] args) {
 //        List<int[]> process = new ArrayList<>();
-//        process.add(new int[]{1,2,2});
+//        process.add(new int[]{1,5,2});
 //        process.add(new int[]{2,1,1});
-//        process.add(new int[]{5,1,2});
-//        System.out.println(isPossibleToProcess(process, 3));
+//        process.add(new int[]{4,1,2});
+//        System.out.println(isPossibleToProcess(process, 4));
 //    }
     static boolean isPossibleToProcess(List<int[]> processs, int totalCpu){
         //startTime, duration, cpu Needed
@@ -1939,7 +1929,7 @@ public class GooglePrevious2 {
 
 
         int cpuNeeded = 0;
-        Queue<int[]> inprocess = new LinkedList<>();
+        Queue<int[]> inprocess = new PriorityQueue<>((a, b) -> a[1] - b[1]);
 
         for (int[] curr : processs) {
             int currStartTime = curr[0];
@@ -2505,35 +2495,7 @@ public class GooglePrevious2 {
 
         return (int) totalSum;
     }
-    public static int sumOfGoodSequences1(int[] nums) {
-        int n = nums.length;
-        int ans = 0;
 
-        // Add all single elements (each is a valid sequence)
-        for (int num : nums) ans += num;
-
-        int i = 0;
-        while (i < n - 1) {
-            int diff = nums[i + 1] - nums[i];
-            if (diff != 1 && diff != -1) {
-                i++;
-                continue;
-            }
-
-            int sum = nums[i];
-            int j = i + 1;
-
-            while (j < n && nums[j] - nums[j - 1] == diff) {
-                sum += nums[j];
-                ans += sum;
-                j++;
-            }
-
-            i = j - 1; // move to last matched element
-        }
-
-        return ans;
-    }
     //45. same as ramp but opposite , here we need to check previous element
     // which is larger and return max distance between them
     //Given an array of stock prices, find the size of
@@ -2618,10 +2580,10 @@ public class GooglePrevious2 {
     //        }
 
     //47. Number of ways to partition an array into segments s.t each segment has atleast 2 negative numbers
-    public static void main(String[] args) {
-        int[] arr ={1,2,3,-1, -3, 1,2,3, -1, -2};
-        System.out.println(countValidPartitions(arr));
-    }
+//    public static void main(String[] args) {
+//        int[] arr ={1,2,3,-1, -3, 1,2,3, -1, -2};
+//        System.out.println(countValidPartitions(arr));
+//    }
 
     public static int countValidPartitions(int[] arr) {
         int n = arr.length;
@@ -2650,20 +2612,25 @@ public class GooglePrevious2 {
     }
     //48. https://leetcode.com/problems/my-calendar-i/description/
     class MyCalendar {
-        List<int[]> book;
+        TreeMap<Integer, Integer> book;
         public MyCalendar() {
-            book = new ArrayList<>();
+            book = new TreeMap<>();
         }
 
         public boolean book(int startTime, int endTime) {
-            for(int[] curr : book){
-                if(Math.max(startTime, curr[0]) < Math.min(curr[1], endTime))
-                    return false;
-            }
-            book.add(new int[]{startTime, endTime});
+            Integer left = book.floorKey(startTime);
+            Integer right = book.ceilingKey(startTime);
+
+            if(left != null && book.get(left) > startTime)
+                return false;
+            if(right != null && right < endTime)
+                return false;
+
+            book.put(startTime, endTime);
             return true;
         }
     }
+
     //49. Minimum Area Rectangle -> https://leetcode.com/problems/minimum-area-rectangle/description/
     public int minAreaRect(int[][] points) {
         int n = points.length;
