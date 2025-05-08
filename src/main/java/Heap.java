@@ -220,10 +220,12 @@ public class Heap {
 
         public double findMedian() {
             int n = left.size() + right.size();
+            if( n== 0)
+                return -1;
 
-            if( n % 2 == 0){
+            if( n % 2 == 0) {
                 return 1D * (left.peek() + right.peek())/2.0;
-            }else
+            } else
                 return left.peek();
         }
     }

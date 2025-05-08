@@ -1143,7 +1143,7 @@ public class DynamicProgramming1 {
                 prev[i] = (int) 1e9;
         }
 
-        for(int i=1;i<n;i++){
+        for(int i=1;i<n;i++) {
             int[] curr = new int[amount+1];
             for(int j=0;j<=amount;j++){
                 int notTake = prev[j];

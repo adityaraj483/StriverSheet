@@ -618,16 +618,16 @@ public class Graphs {
 
         int v = adj.size();
         int[] vis = new int[v];
-        int[] inOrder = new int[v];
+        int[] indegree = new int[v];
         Queue<Integer> q = new LinkedList<>();
         ArrayList<Integer> res = new ArrayList<>();
 
         for(int i=0;i<v;i++){
             for(int child : adj.get(i))
-                inOrder[child]++;
+                indegree[child]++;
         }
         for(int i=0;i<v;i++){
-            if(inOrder[i] == 0){
+            if(indegree[i] == 0){
                 q.add(i);
             }
         }
@@ -639,8 +639,8 @@ public class Graphs {
             vis[node] = 1;
             for(int curr : adj.get(node)){
                 if(vis[curr] == 0){
-                    inOrder[curr]--;
-                    if(inOrder[curr] == 0)
+                    indegree[curr]--;
+                    if(indegree[curr] == 0)
                         q.add(curr);
                 }
             }
@@ -781,18 +781,18 @@ public class Graphs {
     //---------------OR (BFS) here we have to first reverse the edges between nodes-----------------------------
     public List<Integer> eventualSafeNodes1(int[][] graph) {
         int v = graph.length;
-        List<List<Integer>> adj = new ArrayList<>();
+        List<List<Integer>> revAdj = new ArrayList<>();
         for(int i=0;i<v;i++)
-            adj.add(new ArrayList<>());
+            revAdj.add(new ArrayList<>());
 
         for(int i=0;i<v;i++){
             for(int node : graph[i])
-                adj.get(node).add(i);
+                revAdj.get(node).add(i);
         }
 
         int[] inDegree = new int[v];
         for(int i=0;i<v;i++){
-            for(int node : adj.get(i)){
+            for(int node : revAdj.get(i)){
                 inDegree[node]++;
             }
         }
@@ -805,7 +805,7 @@ public class Graphs {
         while(!q.isEmpty()){
             int node = q.remove();
             res.add(node);
-            for(int curr : adj.get(node)){
+            for(int curr : revAdj.get(node)){
                 inDegree[curr] --;
                 if(inDegree[curr] == 0){
                     q.add(curr);
@@ -1242,11 +1242,12 @@ public class Graphs {
         List<List<Pair>> adj = new ArrayList<>();
         for(int i=0;i<n;i++)
             adj.add(new ArrayList<>());
-        for(int node =0;node<n;node++){
-            for(int curr =0;curr<n;curr++){
-                if(node == curr || mat[node][curr] == -1)
+
+        for(int curr =0;curr<n;curr++){
+            for(int next =0;next<n;next++){
+                if(curr == next || mat[curr][next] == -1)
                     continue;
-                adj.get(node).add(new Pair<>(curr, mat[node][curr]));
+                adj.get(curr).add(new Pair<>(next, mat[curr][next]));
             }
         }
 
@@ -1705,7 +1706,7 @@ public class Graphs {
 
         }
     }
-    //47. Articulation Points 1 -> https://www.geeksforg    eeks.org/problems/articulation-point2616/1
+    //47. Articulation Points 1 -> https://www.geeksforgeeks.org/problems/articulation-point2616/1
     public ArrayList<Integer> articulationPoints(int V,ArrayList<ArrayList<Integer>> adj){
         int[] vis = new int[V];
         int[] min = new int[V];
@@ -1752,13 +1753,13 @@ public class Graphs {
                 dfs(i, adj, st, vis);
         }
         //Reversing the adj
-        ArrayList<ArrayList<Integer>> newAdj = new ArrayList<>();
+        ArrayList<ArrayList<Integer>> revAdj = new ArrayList<>();
         for(int i=0;i<n;i++)
-            newAdj.add(new ArrayList<>());
+            revAdj.add(new ArrayList<>());
 
         for(int i=0;i<n;i++){
             for(int child : adj.get(i)){
-                newAdj.get(child).add(i);
+                revAdj.get(child).add(i);
             }
         }
         // count total scc
@@ -1767,7 +1768,7 @@ public class Graphs {
         while(!st.isEmpty()){
             int node = st.pop();
             if(vis[node] == 1) continue;
-            dfs(node, newAdj, vis);
+            dfs(node, revAdj, vis);
             res++;
         }
         return res;

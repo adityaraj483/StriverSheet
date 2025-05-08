@@ -2618,54 +2618,34 @@ public class GooglePrevious2 {
     //        }
 
     //47. Number of ways to partition an array into segments s.t each segment has atleast 2 negative numbers
-//    public static void main(String[] args) {
-//        int[] arr ={-1, -3, 1,2,3};
-//        System.out.println(countWays(arr));
-//    }
-    static private int[] nums1;
-    static private Integer[] dp1;
-
-    static public int countWays(int[] nums) {
-        nums1 = nums;
-        dp1 = new Integer[nums.length + 1];
-        return helper(0);
+    public static void main(String[] args) {
+        int[] arr ={1,2,3,-1, -3, 1,2,3, -1, -2};
+        System.out.println(countValidPartitions(arr));
     }
 
-    static private int helper(int i) {
-        if (i == nums1.length) return 1;
-        if (dp1[i] != null) return dp1[i];
+    public static int countValidPartitions(int[] arr) {
+        int n = arr.length;
+        int[] prefixNeg = new int[n + 1]; // prefixNeg[i] = #negatives in arr[0...i-1]
 
-        int count = 0;
-        int neg = 0;
+        for (int i = 0; i < n; i++) {
+            prefixNeg[i + 1] = prefixNeg[i] + (arr[i] < 0 ? 1 : 0);
+        }
 
-        for (int j = i; j < nums1.length; j++) {
-            if (nums1[j] < 0) neg++;
-            if (neg >= 2) {
-                count += helper(j + 1);
+        int totalNeg = prefixNeg[n];
+        if(totalNeg < 2)
+            return 0;
+        if (totalNeg < 4) return 1; // need at least 2 negatives in both parts
+
+        int count = 1;
+        for (int cut = 1; cut < n; cut++) {
+            int leftNeg = prefixNeg[cut];
+            int rightNeg = totalNeg - leftNeg;
+
+            if (leftNeg >= 2 && rightNeg >= 2) {
+                count++;
             }
         }
 
-        dp1[i] = count;
-        return count;
-    }
-    static private int helperOptimized(int i) {
-        if (i == nums1.length) return 1;
-        if (dp1[i] != null) return dp1[i];
-
-        int count = 0;
-        int negativeCount = 0;
-
-        for (int j = i; j < nums1.length; j++) {
-            if (nums1[j] < 0) {
-                negativeCount++;
-            }
-            if (negativeCount >= 2) {
-                count += (nums1.length - j);
-                break; // Once we have 2 negatives, all subsequent subarrays will also have >= 2
-            }
-        }
-
-        dp1[i] = count;
         return count;
     }
     //48. https://leetcode.com/problems/my-calendar-i/description/
@@ -3047,17 +3027,17 @@ public class GooglePrevious2 {
     //Input: low = 1200, high = 1250
     //Output: [1222, 1223, 1224, 1225, ..., 1233, 1234, ...]
     //(All numbers between 1200 and 1250 that are lucky.)
-    public static void main(String[] args) {
-        List<String> res = new ArrayList<>();
-        generateRange("", "2200", "2230", res);
-        for(String s : res){
-            System.out.print(s +", ");
-        }
-        StringBuilder ans = new StringBuilder();
-        generateNext("", "99", ans);
-        System.out.println();
-        System.out.println(ans);
-    }
+//    public static void main(String[] args) {
+//        List<String> res = new ArrayList<>();
+//        generateRange("", "2200", "2230", res);
+//        for(String s : res){
+//            System.out.print(s +", ");
+//        }
+//        StringBuilder ans = new StringBuilder();
+//        generateNext("", "99", ans);
+//        System.out.println();
+//        System.out.println(ans);
+//    }
     static boolean generateNext(String curr, String num, StringBuilder sb){
         if(!curr.isEmpty()){
             if((curr.length() > num.length()) || (curr.length() == num.length() && curr.compareTo(num) >0)) {
