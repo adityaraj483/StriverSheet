@@ -342,7 +342,7 @@ public class Greedy {
             sum += bt[i];
             res += sum;
         }
-        res = (int) Math.floor(1D*res/n);
+        res = res/n;
         return res;
     }
     //13. LRU Cache
@@ -415,6 +415,7 @@ public class Greedy {
             }
         }
     }
+
     //14. Insert Interval
     public int[][] insert(int[][] intervals, int[] newInterval) {
         int n = intervals.length;

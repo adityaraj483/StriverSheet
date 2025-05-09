@@ -1246,7 +1246,6 @@ public class GooglePrevious2 {
             }
         }
         return false;
-
     }
     static void removeFromSeen(Set<Character> seen, String s){
         for(char ch : s.toCharArray()){
@@ -1849,7 +1848,7 @@ public class GooglePrevious2 {
         return res;
     }
     //31.
-    // You are given a struct Block in C++ that represents the time during which a \
+    // You are given a struct Block in C++ that represents the time during which a
     // person is busy, with attributes: personId, startTime, and endTime. You are also
     // given an integer totalTime which represents the total duration. The task is to
     // find the time intervals during which all the persons are free.
@@ -1883,7 +1882,6 @@ public class GooglePrevious2 {
             if(endTime+1 <= totalTime){
                 pq.add(new int[]{endTime+1, -1});
             }
-
         }
 
         List<int[]> res = new ArrayList<>();
@@ -1907,7 +1905,7 @@ public class GooglePrevious2 {
         }
         return res;
     }
-    //32. Given a set of jobs array and max number of cpus, where each
+    // 32. Given a set of jobs array and max number of cpus, where each
     // job object contains 3 props {starttime,duration,numberofCpusNeeded},
     // write a function which returns true if the jobs can be executed with the
     // given max cpus else return false even if one job can't be executed?
@@ -1926,7 +1924,6 @@ public class GooglePrevious2 {
             else
                 return a[1] - b[1];
         });
-
 
         int cpuNeeded = 0;
         Queue<int[]> inprocess = new PriorityQueue<>((a, b) -> a[1] - b[1]);
@@ -2027,7 +2024,7 @@ public class GooglePrevious2 {
         int start;
 
         MusicPlayer(List<Integer> songs, int k){
-            this. k = k;
+            this.k = k;
             this.songs = new ArrayList<>(songs);
             this.q = new LinkedList<>();
             start = 0;
@@ -2051,7 +2048,7 @@ public class GooglePrevious2 {
             int random = k + (int) (Math.random() * (n-k));
             int currSong = songs.get(random);
             Collections.swap(songs, random, start++);
-            if(start == k)
+            if(start >= k)
                 start = 0;
             return currSong;
         }
@@ -2292,7 +2289,7 @@ public class GooglePrevious2 {
     //For e.g
     //Meeting : [[1, 4], [3, 5], [9, 12], [7, 10]]
     //DND: [3, 8]
-    //Ans. [[1, 3], [7, 12]]
+    //Ans. [[1, 3], [8, 12]]
 //    public static void main(String[] args) {
 //        List<int[]> meetings = new ArrayList<>();
 //        meetings.add(new int[]{1,2});
@@ -2931,8 +2928,8 @@ public class GooglePrevious2 {
 
     public static int minFlips(String s, int k) {
         int n = s.length();
-        String target1 = generateTarget(n, "0");
-        String target2 = generateTarget(n, "1");
+        String target1 = generateTarget(n, "0");//01010101
+        String target2 = generateTarget(n, "1");//10101010
         int res = Math.min(helper(s, k, target1), helper(s, k, target2));
         if(res == 1e9)
             return -1;
@@ -3124,7 +3121,7 @@ public class GooglePrevious2 {
         int totalNodes = 0;
         int level = 0;
 
-        //we will first find the elevel of the node
+        //we will first find the level of the node
         while (totalNodes < n) {
             level++;
             totalNodes += Math.pow(2, level/2);
@@ -3336,6 +3333,7 @@ public class GooglePrevious2 {
         return true;
     }
     //78. How many employee working at a time
+
 //    public static void main(String[] args) {
 //        Abby 1 10
 //        Ben 5 7

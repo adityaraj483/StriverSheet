@@ -6,24 +6,30 @@ import java.util.List;
 
 public class test {
     public static void main(String[] args) {
-       int[] arr = {1,2,3,4};
-       int n = arr.length;
-       for(int i=0;i<n;i++){
-           List<Integer> curr = new ArrayList<>();
-           for(int j=i;j<n;j++){
-               curr.add(arr[j]);
-               print(curr);
-           }
-       }
-    }
-    static void print(List<Integer> curr){
-        for(int val : curr)
-            System.out.print(val);
-        System.out.println();
-    }
 
+    }
 
 }
 
+class readBuffer{
+    int read(char[] buff, int n, Reader4 obj){
+        int index = 0;
 
+        while(index < n){
+            char[] localBuf = new char[4];
+            int bufCount = obj.read(localBuf);
+
+            if(bufCount == 0)
+                return index;
+
+            int i = 0;
+            while(index < n && i < bufCount) {
+                buff[index] = localBuf[i];
+                index++;
+                i++;
+            }
+        }
+        return index+1;
+    }
+}
 

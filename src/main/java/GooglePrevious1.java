@@ -2558,7 +2558,7 @@ public class GooglePrevious1 {
         DisjointSet set = new DisjointSet(n);
         Map<String , Integer> propertyIndexMap = new HashMap<>();
 
-        for(int i=0;i<n;i++){
+        for(int i=0;i<n;i++) {
 
             String[] arr = input.get(i).split(",");
 
@@ -3374,8 +3374,7 @@ public class GooglePrevious1 {
     }
     private static final char[] LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
 
-    public static String getNthID(long n, int maxLength) {
-        long index = n;
+    public static String getNthID(long index, int maxLength) {
 
         for (int letterCount = 0; letterCount <= maxLength; letterCount++) {
             int digitCount = maxLength - letterCount;
